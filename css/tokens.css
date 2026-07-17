@@ -1,0 +1,21 @@
+/* Variables de color y tipografía compartidas por todo el arcade */
+:root{
+    --sky-top:#1b1340;
+    --sky-mid:#3a2166;
+    --sky-bottom:#5c2f7d;
+    --horizon-glow:#ff6fae;
+    --ground-1:#3a2a5e;
+    --ground-2:#2a1d47;
+    --path:#4d3878;
+    --ink:#fbf7ff;
+    --ink-soft:#c9b8e8;
+    --coral:#ff7a45;
+    --coral-dark:#d85a2c;
+    --cyan:#3fddc4;
+    --magenta:#ff4fa3;
+    --gold:#ffd23f;
+    --panel:rgba(20,12,42,0.55);
+    --panel-border:rgba(255,255,255,0.14);
+    --danger:#ff5464;
+  }
+

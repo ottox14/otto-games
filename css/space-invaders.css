@@ -1,0 +1,38 @@
+/* Tema y componentes propios de Invasión Alienígena: HUD, marco del campo
+   de batalla y el D-pad de dos botones (izquierda/derecha) */
+#invadersView{
+  --panel: rgba(20,10,35,0.6);
+  --panel-border: rgba(255,90,200,0.2);
+  --ink: #f3e8ff;
+  --ink-soft: #c9a8e0;
+  --coral: #ff3ea5;
+  --cyan: #4ad9ff;
+  --magenta: #ff3ea5;
+  --sky-top: #0a0612;
+}
+.invaders-hud{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.invaders-frame{
+  width:100%;
+  max-width:440px;
+  margin:0 auto;
+}
+#invadersCanvas{
+  display:block;
+  width:100%;
+  height:auto;
+  touch-action:none;
+  image-rendering:pixelated;
+}
+.dpad-lr{
+  display:flex;
+  gap:6px;
+}
+.dpad-lr .dpad-btn{
+  width:44px;
+  height:44px;
+  font-size:16px;
+}

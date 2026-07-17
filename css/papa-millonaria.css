@@ -1,0 +1,237 @@
+/* Tema y componentes propios de Papa Millonaria: la papa que se agrieta al
+   tocarla, las burbujas de "+pesos" y las listas de mejoras de click,
+   producción automática y la mejora especial Patatas Celestiales */
+#papaView{
+  --panel: rgba(40,24,10,0.6);
+  --panel-border: rgba(255,200,120,0.2);
+  --ink: #fff3e0;
+  --ink-soft: #d9b98f;
+  --coral: #ffb347;
+  --cyan: #7ed957;
+  --magenta: #ffb347;
+  --sky-top: #1a0f05;
+}
+.papa-hud{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.papa-goal{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+.papa-goal-track{
+  width:120px;
+  height:8px;
+  background:rgba(255,255,255,0.14);
+  border-radius:999px;
+  overflow:hidden;
+}
+.papa-goal-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,var(--cyan),var(--gold));
+  border-radius:999px;
+  transition:width 0.2s ease;
+}
+.papa-frame{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  padding:20px;
+}
+.papa-main{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding:10px 0 18px;
+}
+.potato-wrap{
+  position:relative;
+  width:140px;
+  height:140px;
+}
+.potato-btn{
+  appearance:none;
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  border:4px solid rgba(255,255,255,0.2);
+  background:radial-gradient(circle at 35% 30%, #e8c185, #c9963f 55%, #8a5e22 100%);
+  font-size:64px;
+  line-height:132px;
+  cursor:pointer;
+  box-shadow:0 0 30px rgba(201,150,63,0.45), inset 0 0 24px rgba(255,255,255,0.15);
+  transition:transform 0.06s ease;
+}
+.potato-btn:active{ transform:scale(0.9); }
+.potato-btn:focus-visible{ outline:3px solid var(--cyan); outline-offset:4px; }
+.potato-btn.breaking{ animation:potatoShake 0.35s ease; }
+@keyframes potatoShake{
+  0%,100%{ transform:translate(0,0) scale(1); }
+  25%{ transform:translate(-4px,2px) scale(0.96); }
+  50%{ transform:translate(4px,-2px) scale(1.04); }
+  75%{ transform:translate(-3px,-1px) scale(0.97); }
+}
+.potato-cracks{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.potato-cracks .crack{
+  fill:none;
+  stroke:#3a2410;
+  stroke-width:2.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  opacity:0;
+  transition:opacity 0.2s ease;
+}
+.potato-cracks.stage-1 .c1{ opacity:0.9; }
+.potato-cracks.stage-2 .c1,
+.potato-cracks.stage-2 .c2{ opacity:0.9; }
+.potato-cracks.stage-3 .c1,
+.potato-cracks.stage-3 .c2,
+.potato-cracks.stage-3 .c3{ opacity:0.9; }
+.potato-cracks.stage-4 .c1,
+.potato-cracks.stage-4 .c2,
+.potato-cracks.stage-4 .c3,
+.potato-cracks.stage-4 .c4{ opacity:0.95; }
+
+.chicken{
+  position:absolute;
+  right:-8px;
+  bottom:-4px;
+  font-size:32px;
+  opacity:0;
+  pointer-events:none;
+  transform-origin:70% 90%;
+  transition:opacity 0.3s ease;
+}
+.chicken.active{
+  opacity:1;
+  animation:chickenPeck 1.8s ease-in-out infinite;
+}
+@keyframes chickenPeck{
+  0%, 78%, 100%{ transform:rotate(0deg) translate(0,0); }
+  85%{ transform:rotate(-18deg) translate(-5px,2px); }
+  92%{ transform:rotate(0deg) translate(0,0); }
+}
+
+.papa-hint{
+  margin:0;
+  color:var(--ink-soft);
+  font-size:13px;
+}
+.click-pop{
+  position:absolute;
+  left:50%;
+  top:6%;
+  transform:translateX(-50%);
+  font-weight:800;
+  font-size:17px;
+  color:var(--cyan);
+  pointer-events:none;
+  animation:clickPopUp 0.85s ease-out forwards;
+}
+.click-pop.bonus{
+  color:var(--gold);
+  font-size:20px;
+}
+@keyframes clickPopUp{
+  0%{ opacity:1; transform:translate(-50%,0); }
+  100%{ opacity:0; transform:translate(-50%,-42px); }
+}
+
+.multiplier-banner{
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--panel-border);
+  border-radius:999px;
+  padding:4px 14px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--gold);
+  font-variant-numeric:tabular-nums;
+}
+
+.upgrades-columns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+@media (max-width:640px){
+  .upgrades-columns{ grid-template-columns:1fr; }
+}
+.upgrade-col{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:0;
+}
+.upgrade-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:300px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+.upgrade-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+  padding:10px;
+}
+.upgrade-card.special{
+  border-color:var(--gold);
+  background:rgba(255,210,63,0.08);
+}
+.upgrade-icon{
+  font-size:26px;
+  width:32px;
+  text-align:center;
+  flex-shrink:0;
+}
+.upgrade-info{ flex:1; min-width:0; }
+.upgrade-info h3{ margin:0; font-size:13px; font-weight:800; }
+.upgrade-info p{ margin:0; font-size:11px; color:var(--ink-soft); }
+.upgrade-owned{ font-variant-numeric:tabular-nums; }
+.upgrade-buy-btn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:800;
+  font-size:12px;
+  color:#1b1340;
+  background:linear-gradient(180deg,var(--gold),#f5b400);
+  padding:8px 12px;
+  border-radius:10px;
+  box-shadow:0 3px 0 #b9860a;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.upgrade-buy-btn:disabled{
+  background:rgba(255,255,255,0.08);
+  color:var(--ink-soft);
+  box-shadow:none;
+  cursor:not-allowed;
+}
+.upgrade-buy-btn:not(:disabled):active{
+  transform:translateY(2px);
+  box-shadow:0 1px 0 #b9860a;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .potato-btn.breaking{ animation:none; }
+  .click-pop{ animation:none; opacity:0; }
+  .chicken.active{ animation:none; }
+}

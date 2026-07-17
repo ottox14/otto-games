@@ -1,0 +1,45 @@
+/* Tema y componentes propios de Guerra de Tanques: HUD, marco del campo de
+   batalla y controles táctiles (D-pad y botón de disparo) */
+  #tanksView{
+    --panel: rgba(20,26,14,0.6);
+    --panel-border: rgba(180,200,140,0.2);
+    --ink: #eaf2d8;
+    --ink-soft: #a9b98f;
+    --coral: #ffb347;
+    --cyan: #5cff9d;
+    --magenta: #ff5a3c;
+    --sky-top: #0d0f0a;
+  }
+  .tanks-hud{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .tanks-frame{
+    width:100%;
+    max-width:416px;
+    margin:0 auto;
+  }
+  #tanksCanvas{
+    display:block;
+    width:100%;
+    height:auto;
+    touch-action:none;
+    image-rendering:pixelated;
+  }
+  .dpad{
+    display:grid;
+    grid-template-columns:repeat(3,34px);
+    grid-template-rows:repeat(2,34px);
+    gap:4px;
+  }
+  .dpad-up{ grid-column:2; grid-row:1; }
+  .dpad-left{ grid-column:1; grid-row:2; }
+  .dpad-right{ grid-column:3; grid-row:2; }
+  .dpad-down{ grid-column:2; grid-row:2; }
+  .bomb-btn{
+    background:linear-gradient(180deg,#7a5cff,#4a2fb0);
+    box-shadow:0 4px 0 #331f7a;
+  }
+  .bomb-btn:active{ box-shadow:0 1px 0 #331f7a; }
+

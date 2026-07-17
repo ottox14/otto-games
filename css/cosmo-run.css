@@ -1,0 +1,28 @@
+/* Estilos propios de Cosmo Run: el botón del gato volador */
+  .cat-btn{
+    position:absolute;
+    right:14px;
+    bottom:14px;
+    z-index:5;
+    appearance:none;
+    border:1px solid rgba(255,255,255,0.3);
+    background:linear-gradient(180deg,var(--magenta),#c22f7a);
+    color:#fff7fb;
+    font-family:inherit;
+    font-weight:700;
+    font-size:13px;
+    border-radius:999px;
+    padding:9px 16px;
+    cursor:pointer;
+    box-shadow:0 4px 0 #8f2160, 0 8px 16px rgba(0,0,0,0.35);
+  }
+  .cat-btn:active{
+    transform:translateY(3px);
+    box-shadow:0 1px 0 #8f2160, 0 3px 8px rgba(0,0,0,0.3);
+  }
+  .cat-btn:focus-visible{
+    outline:3px solid var(--cyan);
+    outline-offset:2px;
+  }
+
+

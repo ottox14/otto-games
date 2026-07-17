@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cosmo Arcade</title>
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/shared.css">
+<link rel="stylesheet" href="css/cosmo-run.css">
+<link rel="stylesheet" href="css/miau-bistro.css">
+<link rel="stylesheet" href="css/guerra-tanques.css">
+<link rel="stylesheet" href="css/space-invaders.css">
+<link rel="stylesheet" href="css/papa-millonaria.css">
+</head>
+<body>
+
+<div class="portal-bg" aria-hidden="true">
+  <div class="stars" id="stars"></div>
+  <div class="portal-moon"></div>
+</div>
+
+<div class="wrap">
+
+  <div class="view" id="portalView">
+    <div class="hero">
+      <p class="eyebrow">🕹️ Bienvenido a</p>
+      <h1 class="brand">COSMO ARCADE</h1>
+      <p class="tagline">Elegí un juego y a jugar</p>
+    </div>
+
+    <div class="game-grid">
+      <article class="game-card">
+        <div class="card-art">🚀</div>
+        <h2>Cosmo Run</h2>
+        <p>Cosmo el astronauta corre por la Luna. Saltá los cristales y agachate bajo los drones antes de que choquen contigo.</p>
+        <div class="tags"><span class="tag">Arcade</span><span class="tag">1 jugador</span></div>
+        <button class="play-btn" id="playCosmoRunBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">🍣</div>
+        <h2>Miau Bistró</h2>
+        <p>Cociná distintos platos y entregalos a los clientes gatunos antes de que se les acabe la paciencia. ¡Sumá puntos con cada entrega perfecta!</p>
+        <div class="tags"><span class="tag">Cocina</span><span class="tag">Contrarreloj</span></div>
+        <button class="play-btn" id="playBistroBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">💥</div>
+        <h2>Guerra de Tanques</h2>
+        <p>Manejá tu tanque, destruí a los tanques enemigos y defendé tu base de ladrillos y acero. ¡Cada nivel trae más enemigos!</p>
+        <div class="tags"><span class="tag">Acción</span><span class="tag">Retro</span></div>
+        <button class="play-btn" id="playTanksBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">👾</div>
+        <h2>Invasión Alienígena</h2>
+        <p>Defendé la Tierra de las hileras de alienígenas que avanzan. ¡Cuidado, mientras menos queden, más rápido se mueven!</p>
+        <div class="tags"><span class="tag">Acción</span><span class="tag">Retro</span></div>
+        <button class="play-btn" id="playInvadersBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">🥔</div>
+        <h2>Papa Millonaria</h2>
+        <p>Tocá la papa para ganar pesos, comprá mejoras y hacete millonario. ¡Cuidado, la papa se va agrietando con cada golpe!</p>
+        <div class="tags"><span class="tag">Clicker</span><span class="tag">Meta: $1.000.000</span></div>
+        <button class="play-btn" id="playPapaBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card coming-soon">
+        <div class="card-art">✨</div>
+        <h2>Próximo juego</h2>
+        <p>Estamos construyendo la próxima aventura de Cosmo Arcade. ¡Vuelve pronto para descubrirla!</p>
+        <div class="tags"><span class="tag">Muy pronto</span></div>
+        <button class="play-btn" disabled>🔒 Próximamente</button>
+      </article>
+    </div>
+  </div>
+
+  <div class="view is-hidden" id="cosmoView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromCosmoBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">COSMO RUN</h1>
+          <p class="subtitle">Salta los cristales, agáchate bajo los drones</p>
+        </div>
+        <button class="mute-btn" id="muteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="frame">
+        <canvas id="game" width="920" height="440"></canvas>
+
+        <div class="hud">
+          <div class="hud-chip">Distancia: <b id="scoreVal">0</b> m</div>
+          <div class="lives" id="livesBox"></div>
+          <div class="hud-chip">Mejor: <b id="bestVal">0</b> m</div>
+        </div>
+
+        <div class="overlay" id="startOverlay">
+          <h2>¿Listo para correr, Cosmo?</h2>
+          <p>Usa las flechas o los botones para saltar los cristales lunares y agacharte bajo los drones. ¡Cada segundo la carrera va más rápido!</p>
+          <button class="big-btn" id="startBtn">▶ Empezar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="overOverlay">
+          <h2 id="overTitle">¡Choque!</h2>
+          <div class="score-line">
+            <span>Distancia<b id="finalScore">0 m</b></span>
+            <span>Mejor marca<b id="finalBest">0 m</b></span>
+          </div>
+          <button class="big-btn" id="retryBtn">↻ Otra vez</button>
+        </div>
+
+        <button class="cat-btn" id="catBtn">🐱 Gatetes voladores</button>
+      </div>
+
+      <div class="controls-row">
+        <p class="hint">Salta con <kbd>&uarr;</kbd> o <kbd>Espacio</kbd> · Agáchate con <kbd>&darr;</kbd></p>
+        <div class="touch-btns">
+          <button class="touch-btn" id="btnDuck">⬇ Agacharse</button>
+          <button class="touch-btn" id="btnJump">⬆ Saltar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view is-hidden" id="bistroView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromBistroBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">MIAU BISTRÓ</h1>
+          <p class="subtitle">Cociná y entregá pedidos a los clientes gatunos</p>
+        </div>
+        <button class="mute-btn" id="bistroMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="frame">
+        <div class="hud hud-wrap">
+          <div class="hud-chip">⏱ <b id="bistroTime">00:50</b></div>
+          <div class="hud-chip">🎯 <b id="bistroScoreVal">0</b>/<span id="bistroGoalVal">0</span></div>
+          <div class="hud-chip">🪙 <b id="bistroCoinsVal">0</b></div>
+          <div class="hud-chip">🏅 Nivel <b id="bistroLevelVal">1</b></div>
+          <div class="hud-chip powerup-chip" id="powerupChip"></div>
+        </div>
+
+        <div class="bistro-board">
+          <section class="kitchen-panel">
+            <h2 class="panel-title">🍳 Cocina</h2>
+            <div class="recipe-grid" id="recipeGrid"></div>
+            <p class="kitchen-hint" id="kitchenHint"></p>
+            <div class="stove" id="stove">
+              <p class="stove-idle" id="stoveIdleMsg">Elegí un plato para cocinar</p>
+
+              <div class="stove-gathering is-hidden" id="stoveGathering">
+                <div class="gather-header">
+                  <button class="mini-back-btn" id="cancelGatherBtn" aria-label="Cancelar">←</button>
+                  <span class="gather-title"><span id="gatherIcon">🍣</span> <span id="gatherName">Receta</span></span>
+                </div>
+                <div class="need-list" id="needList"></div>
+                <div class="ingredient-bank" id="ingredientBank"></div>
+                <button class="serve-btn" id="cookNowBtn" disabled>🔥 ¡A cocinar!</button>
+              </div>
+
+              <div class="stove-cooking is-hidden" id="stoveCooking">
+                <div class="cooking-dish"><span id="cookingIcon">🍣</span></div>
+                <div class="progress-track">
+                  <div class="progress-zone"></div>
+                  <div class="progress-fill" id="cookProgress"></div>
+                </div>
+                <button class="serve-btn" id="sacarBtn">¡Sacar!</button>
+              </div>
+            </div>
+          </section>
+
+          <div class="pass-strip">
+            <h3 class="pass-title">🛎️ Ventanilla</h3>
+            <div class="tray" id="trayBox"></div>
+          </div>
+
+          <section class="delivery-panel">
+            <h2 class="panel-title">🍽️ Entregas</h2>
+            <div class="customer-row" id="customerRow"></div>
+          </section>
+        </div>
+
+        <div class="overlay" id="bistroStartOverlay">
+          <h2 id="bistroStartTitle">¿Listo para el Nivel 1?</h2>
+          <p id="bistroStartDesc">Elegí un plato, juntá los ingredientes, cocinalo en su punto y entregalo antes de que el gato se impaciente.</p>
+          <button class="big-btn" id="bistroStartBtn">▶ Empezar nivel</button>
+          <button class="text-btn" id="resetLevelBtn">🔁 Volver al Nivel 1</button>
+        </div>
+
+        <div class="overlay is-hidden" id="bistroOverOverlay">
+          <h2 id="bistroOverTitle">¡Se acabó el tiempo!</h2>
+          <div class="score-line">
+            <span>Meta<b id="bistroFinalScore">0/0</b></span>
+            <span>Monedas ganadas<b id="bistroFinalCoins">0</b></span>
+          </div>
+          <button class="big-btn" id="bistroRetryBtn">↻ Reintentar nivel</button>
+        </div>
+
+        <div class="overlay is-hidden" id="bistroShopOverlay">
+          <h2 id="shopTitle">¡Nivel superado!</h2>
+          <p class="shop-coins">🪙 Monedas: <b id="shopCoinsVal">0</b></p>
+          <div class="shop-grid" id="shopGrid"></div>
+          <button class="big-btn" id="nextLevelBtn">▶ Nivel siguiente</button>
+          <button class="text-btn" id="shopResetLevelBtn">🔁 Volver al Nivel 1</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view is-hidden" id="tanksView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromTanksBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">GUERRA DE TANQUES</h1>
+          <p class="subtitle">Destruí a los enemigos y defendé tu base</p>
+        </div>
+        <button class="mute-btn" id="tanksMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="tanks-hud">
+        <div class="hud-chip">🛡️ Vidas: <b id="tanksLivesVal">3</b></div>
+        <div class="hud-chip">🎯 Enemigos: <b id="tanksEnemiesVal">0</b></div>
+        <div class="hud-chip">🏅 Nivel: <b id="tanksLevelVal">1</b></div>
+      </div>
+
+      <div class="frame tanks-frame">
+        <canvas id="tanksCanvas" width="416" height="416"></canvas>
+
+        <div class="overlay" id="tanksStartOverlay">
+          <h2 id="tanksStartTitle">¿Listo para el Nivel 1?</h2>
+          <p id="tanksStartDesc">Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.</p>
+          <button class="big-btn" id="tanksStartBtn">▶ Empezar nivel</button>
+        </div>
+
+        <div class="overlay is-hidden" id="tanksClearOverlay">
+          <h2 id="tanksClearTitle">¡Nivel superado!</h2>
+          <button class="big-btn" id="tanksNextBtn">▶ Nivel siguiente</button>
+        </div>
+
+        <div class="overlay is-hidden" id="tanksOverOverlay">
+          <h2 id="tanksOverTitle">¡Base destruida!</h2>
+          <p>Llegaste al nivel <b id="tanksOverLevel">1</b>.</p>
+          <button class="big-btn" id="tanksRetryBtn">↻ Reintentar nivel</button>
+          <button class="text-btn" id="tanksResetBtn">🔁 Volver al Nivel 1</button>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <p class="hint">Movete con <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd> · Bomba con <kbd>B</kbd> (desde el Nivel 4)</p>
+        <div class="action-touch-controls">
+          <div class="dpad">
+            <button class="dpad-btn dpad-up" id="tUp" aria-label="Arriba">▲</button>
+            <button class="dpad-btn dpad-left" id="tLeft" aria-label="Izquierda">◀</button>
+            <button class="dpad-btn dpad-right" id="tRight" aria-label="Derecha">▶</button>
+            <button class="dpad-btn dpad-down" id="tDown" aria-label="Abajo">▼</button>
+          </div>
+          <button class="fire-btn" id="tFire" aria-label="Disparar">🔥</button>
+          <button class="fire-btn bomb-btn" id="tBomb" aria-label="Tirar bomba">💣</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view is-hidden" id="invadersView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromInvadersBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">INVASIÓN ALIENÍGENA</h1>
+          <p class="subtitle">Defendé la Tierra de la invasión</p>
+        </div>
+        <button class="mute-btn" id="invadersMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="invaders-hud">
+        <div class="hud-chip">🛡️ Vidas: <b id="invadersLivesVal">3</b></div>
+        <div class="hud-chip">⭐ Puntos: <b id="invadersScoreVal">0</b></div>
+        <div class="hud-chip">🏅 Nivel: <b id="invadersLevelVal">1</b></div>
+      </div>
+
+      <div class="frame invaders-frame">
+        <canvas id="invadersCanvas" width="440" height="560"></canvas>
+
+        <div class="overlay" id="invadersStartOverlay">
+          <h2 id="invadersStartTitle">¿Listo para el Nivel 1?</h2>
+          <p>Movete con las flechas y disparás con Espacio. Destruí a todos los alienígenas antes de que lleguen abajo.</p>
+          <button class="big-btn" id="invadersStartBtn">▶ Empezar nivel</button>
+        </div>
+
+        <div class="overlay is-hidden" id="invadersClearOverlay">
+          <h2 id="invadersClearTitle">¡Nivel superado!</h2>
+          <button class="big-btn" id="invadersNextBtn">▶ Nivel siguiente</button>
+        </div>
+
+        <div class="overlay is-hidden" id="invadersOverOverlay">
+          <h2 id="invadersOverTitle">¡Invasión completada!</h2>
+          <p>Llegaste al nivel <b id="invadersOverLevel">1</b> con <b id="invadersOverScore">0</b> puntos.</p>
+          <button class="big-btn" id="invadersRetryBtn">↻ Reintentar nivel</button>
+          <button class="text-btn" id="invadersResetBtn">🔁 Volver al Nivel 1</button>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd></p>
+        <div class="action-touch-controls">
+          <div class="dpad-lr">
+            <button class="dpad-btn" id="iLeft" aria-label="Izquierda">◀</button>
+            <button class="dpad-btn" id="iRight" aria-label="Derecha">▶</button>
+          </div>
+          <button class="fire-btn" id="iFire" aria-label="Disparar">🔥</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view is-hidden" id="papaView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromPapaBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">PAPA MILLONARIA</h1>
+          <p class="subtitle">Tocá la papa, juntá pesos y hacete millonario</p>
+        </div>
+        <button class="mute-btn" id="papaMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="papa-hud">
+        <div class="hud-chip">💰 <b id="papaMoneyVal">0</b></div>
+        <div class="hud-chip">👆 <b id="papaPerClickVal">1</b>/click</div>
+        <div class="hud-chip">⚙️ <b id="papaPerSecVal">0</b>/seg</div>
+        <div class="multiplier-banner">✨ x<span id="papaMultiplierVal">1.0</span></div>
+        <div class="papa-goal">
+          <span>Meta $1.000.000</span>
+          <div class="papa-goal-track"><div class="papa-goal-fill" id="papaGoalFill"></div></div>
+        </div>
+      </div>
+
+      <div class="frame papa-frame">
+        <div class="papa-main">
+          <div class="potato-wrap">
+            <button class="potato-btn" id="potatoBtn" aria-label="Golpear la papa">🥔</button>
+            <svg class="potato-cracks" id="potatoCracks" viewBox="0 0 140 140" aria-hidden="true">
+              <path class="crack c1" d="M70 32 L63 56 L79 70" />
+              <path class="crack c2" d="M38 62 L56 76 L44 98" />
+              <path class="crack c3" d="M98 58 L86 80 L102 100" />
+              <path class="crack c4" d="M54 102 L72 90 L88 112" />
+            </svg>
+            <div class="chicken" id="chickenIcon" aria-hidden="true">🐔</div>
+          </div>
+          <p class="papa-hint">¡Tocá la papa para ganar pesos!</p>
+        </div>
+
+        <div class="upgrades-columns">
+          <section class="upgrade-col">
+            <h2 class="panel-title">👆 Mejoras de click</h2>
+            <div class="upgrade-list" id="clickUpgradeList"></div>
+            <div class="upgrade-card special" id="celestialCard">
+              <div class="upgrade-icon">🌟🥔</div>
+              <div class="upgrade-info">
+                <h3>Patatas Celestiales</h3>
+                <p id="celestialDesc">Suma +0.1 al multiplicador de TODO lo que ganás.</p>
+                <p class="upgrade-owned">Nivel: <b id="celestialLevel">0</b></p>
+              </div>
+              <button class="upgrade-buy-btn" id="celestialBuyBtn">$0</button>
+            </div>
+          </section>
+          <section class="upgrade-col">
+            <h2 class="panel-title">⚙️ Producción automática</h2>
+            <div class="upgrade-list" id="autoUpgradeList"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/portal.js"></script>
+<script src="js/cosmo-run.js"></script>
+<script src="js/miau-bistro.js"></script>
+<script src="js/guerra-tanques.js"></script>
+<script src="js/space-invaders.js"></script>
+<script src="js/papa-millonaria.js"></script>
+</body>
+</html>

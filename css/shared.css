@@ -1,0 +1,493 @@
+/* Estilos compartidos por los tres juegos: layout base, tarjetas del portal,
+   marco del juego, HUD, overlays y botones genéricos */
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:radial-gradient(ellipse at 50% -10%, var(--sky-mid), var(--sky-top) 60%);
+    font-family:ui-rounded,"Segoe UI Rounded","Segoe UI",Verdana,sans-serif;
+    color:var(--ink);
+    position:relative;
+  }
+
+  .portal-bg{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .stars span{
+    position:absolute;
+    display:block;
+    border-radius:50%;
+    background:#fff;
+    opacity:0.7;
+    animation:twinkle 3.4s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{ opacity:0.15; }
+    50%{ opacity:1; }
+  }
+  .portal-moon{
+    position:absolute;
+    top:9%;
+    right:9%;
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #ffffff, #f0e6ff 55%, #c9b3e6 100%);
+    box-shadow:0 0 46px rgba(255,255,255,0.22);
+  }
+
+  .wrap{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:920px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .view.is-hidden{ display:none; }
+
+  .hero{
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    padding:10px 0 6px;
+  }
+  .eyebrow{
+    margin:0;
+    text-transform:uppercase;
+    letter-spacing:3px;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink-soft);
+  }
+  .brand{
+    margin:0;
+    font-size:clamp(34px,7vw,54px);
+    font-weight:800;
+    letter-spacing:0.5px;
+    text-wrap:balance;
+    background:linear-gradient(90deg,var(--coral),var(--gold),var(--magenta),var(--coral));
+    background-size:250% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:hueShift 7s ease-in-out infinite;
+  }
+  @keyframes hueShift{
+    0%,100%{ background-position:0% 50%; }
+    50%{ background-position:100% 50%; }
+  }
+  .tagline{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:15px;
+  }
+
+  .game-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:18px;
+    padding:10px 0 22px;
+  }
+  .game-card{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:20px;
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    backdrop-filter:blur(6px);
+    box-shadow:0 14px 34px rgba(0,0,0,0.35);
+  }
+  .card-art{
+    font-size:44px;
+    line-height:1;
+  }
+  .game-card h2{
+    margin:0;
+    font-size:20px;
+    font-weight:800;
+  }
+  .game-card p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:14px;
+    line-height:1.5;
+    flex:1;
+  }
+  .tags{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .tag{
+    background:rgba(255,255,255,0.08);
+    border:1px solid var(--panel-border);
+    border-radius:999px;
+    padding:3px 10px;
+    font-size:11px;
+    letter-spacing:0.3px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .game-card.coming-soon{
+    border-style:dashed;
+    opacity:0.75;
+  }
+  .play-btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:800;
+    font-size:15px;
+    letter-spacing:0.3px;
+    color:#1b1340;
+    background:linear-gradient(180deg,var(--gold),#f5b400);
+    padding:11px 20px;
+    border-radius:12px;
+    box-shadow:0 6px 0 #b9860a, 0 10px 16px rgba(0,0,0,0.3);
+    transition:transform 0.08s ease;
+    width:100%;
+  }
+  .play-btn:active{
+    transform:translateY(4px);
+    box-shadow:0 2px 0 #b9860a, 0 4px 8px rgba(0,0,0,0.28);
+  }
+  .play-btn:focus-visible{
+    outline:3px solid var(--cyan);
+    outline-offset:3px;
+  }
+  .play-btn:disabled{
+    background:rgba(255,255,255,0.08);
+    color:var(--ink-soft);
+    box-shadow:none;
+    cursor:not-allowed;
+  }
+
+  .game-header{
+    display:flex;
+  }
+  .back-btn{
+    appearance:none;
+    border:1px solid var(--panel-border);
+    background:var(--panel);
+    color:var(--ink);
+    font-family:inherit;
+    font-weight:700;
+    font-size:13px;
+    border-radius:999px;
+    padding:8px 16px;
+    cursor:pointer;
+    align-self:flex-start;
+  }
+  .back-btn:active{
+    background:rgba(255,255,255,0.18);
+  }
+  .back-btn:focus-visible{
+    outline:3px solid var(--cyan);
+    outline-offset:2px;
+  }
+  .text-btn{
+    appearance:none;
+    border:none;
+    background:none;
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:4px;
+  }
+  .text-btn:hover{ color:var(--ink); }
+  .text-btn:focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:2px;
+  }
+
+  .stage{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .title-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .game-title{
+    margin:0;
+    font-size:clamp(28px,5vw,40px);
+    font-weight:800;
+    letter-spacing:0.5px;
+    text-wrap:balance;
+    background:linear-gradient(90deg,var(--coral),var(--gold));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .subtitle{
+    margin:0;
+    font-size:14px;
+    color:var(--ink-soft);
+    letter-spacing:0.3px;
+  }
+  .frame{
+    position:relative;
+    border-radius:20px;
+    overflow:hidden;
+    border:1px solid var(--panel-border);
+    box-shadow:0 20px 60px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03);
+    background:var(--sky-top);
+  }
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    touch-action:none;
+  }
+  .hud{
+    position:absolute;
+    top:0; left:0; right:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 16px;
+    gap:12px;
+    pointer-events:none;
+  }
+  .hud-chip{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    backdrop-filter:blur(6px);
+    border-radius:999px;
+    padding:6px 14px;
+    font-size:14px;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+  }
+  .hud-chip b{color:var(--gold);}
+  .powerup-chip{ position:relative; display:flex; gap:4px; padding:5px 8px; pointer-events:auto; }
+  .powerup-badge{
+    appearance:none;
+    border:none;
+    background:rgba(255,255,255,0.06);
+    border-radius:8px;
+    padding:3px 5px;
+    font-size:15px;
+    line-height:1;
+    filter:grayscale(1);
+    opacity:0.4;
+    cursor:pointer;
+  }
+  .powerup-badge:active{ transform:translateY(1px); }
+  .powerup-badge:focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:2px;
+  }
+  .powerup-badge.active{
+    background:rgba(255,210,63,0.16);
+    filter:drop-shadow(0 0 4px rgba(255,210,63,0.85));
+    opacity:1;
+  }
+  .powerup-info{
+    position:absolute;
+    top:100%;
+    left:0;
+    margin-top:6px;
+    background:rgba(10,8,20,0.95);
+    color:var(--ink);
+    border:1px solid var(--panel-border);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:11px;
+    max-width:220px;
+    white-space:normal;
+    z-index:20;
+    box-shadow:0 6px 16px rgba(0,0,0,0.4);
+  }
+  .lives{
+    display:flex;
+    gap:6px;
+  }
+  .life-icon{
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  }
+  .overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    text-align:center;
+    padding:24px;
+    background:linear-gradient(180deg, rgba(15,9,32,0.55), rgba(15,9,32,0.85));
+    backdrop-filter:blur(3px);
+  }
+  .overlay.is-hidden{
+    display:none;
+  }
+  .overlay h2{
+    margin:0;
+    font-size:clamp(24px,4vw,32px);
+    font-weight:800;
+  }
+  .overlay p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:15px;
+    max-width:38ch;
+  }
+  .big-btn{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:800;
+    font-size:17px;
+    letter-spacing:0.3px;
+    color:#1b1340;
+    background:linear-gradient(180deg,var(--gold),#f5b400);
+    padding:14px 30px;
+    border-radius:14px;
+    box-shadow:0 8px 0 #b9860a, 0 12px 20px rgba(0,0,0,0.35);
+    transition:transform 0.08s ease;
+  }
+  .big-btn:active{
+    transform:translateY(6px);
+    box-shadow:0 2px 0 #b9860a, 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .big-btn:focus-visible{
+    outline:3px solid var(--cyan);
+    outline-offset:3px;
+  }
+  .score-line{
+    display:flex;
+    gap:18px;
+    font-variant-numeric:tabular-nums;
+    font-size:15px;
+  }
+  .score-line b{
+    font-size:22px;
+    color:var(--gold);
+    display:block;
+  }
+  .controls-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .hint{
+    margin:0;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .hint kbd{
+    background:rgba(255,255,255,0.1);
+    border:1px solid var(--panel-border);
+    border-radius:6px;
+    padding:1px 7px;
+    font-family:inherit;
+    font-size:12px;
+  }
+  .touch-btns{
+    display:flex;
+    gap:10px;
+  }
+  .touch-btn{
+    appearance:none;
+    border:1px solid var(--panel-border);
+    background:var(--panel);
+    color:var(--ink);
+    font-family:inherit;
+    font-weight:700;
+    font-size:14px;
+    border-radius:12px;
+    padding:10px 16px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .touch-btn:active{
+    background:rgba(255,255,255,0.18);
+  }
+  .mute-btn{
+    appearance:none;
+    border:1px solid var(--panel-border);
+    background:var(--panel);
+    color:var(--ink);
+    border-radius:10px;
+    width:38px;height:38px;
+    font-size:16px;
+    cursor:pointer;
+    line-height:1;
+  }
+
+  /* Controles táctiles genéricos (D-pad + botón de disparo), usados por
+     cualquier juego de acción con movimiento direccional */
+  .action-touch-controls{
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .dpad-btn{
+    appearance:none;
+    border:1px solid var(--panel-border);
+    background:var(--panel);
+    color:var(--ink);
+    border-radius:8px;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .dpad-btn:active{ background:rgba(255,255,255,0.18); }
+  .dpad-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+  .fire-btn{
+    appearance:none;
+    border:1px solid rgba(255,255,255,0.25);
+    background:linear-gradient(180deg,var(--magenta),#a83820);
+    color:#fff7fb;
+    font-weight:800;
+    font-size:20px;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    cursor:pointer;
+    box-shadow:0 4px 0 #7a2814;
+  }
+  .fire-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #7a2814; }
+  .fire-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+@media (hover:hover) and (pointer:fine){
+  .touch-btns{ display:none; }
+  .action-touch-controls{ display:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  .big-btn, .play-btn{ transition:none; }
+  .brand{ animation:none; }
+}
+

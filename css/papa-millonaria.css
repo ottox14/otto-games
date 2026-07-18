@@ -43,6 +43,9 @@
   gap:18px;
   padding:20px;
 }
+.papa-footer{
+  justify-content:center;
+}
 .papa-main{
   position:relative;
   display:flex;

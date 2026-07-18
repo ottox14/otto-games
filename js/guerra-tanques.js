@@ -14,7 +14,7 @@
 
   var ENEMY_TYPES = {
     normal: { color:'#9c8a6e', speedMult:1,    fireMin:1.2, fireMax:2.5, maxBullets:1, bulletType:'normal' },
-    rapid:  { color:'#ff8a4a', speedMult:1.1,  fireMin:0.5, fireMax:0.6, maxBullets:2, bulletType:'normal' },
+    rapid:  { color:'#4caf50', speedMult:1.1,  fireMin:0.5, fireMax:0.6, maxBullets:2, bulletType:'normal' },
     bomber: { color:'#7a5cff', speedMult:0.85, fireMin:2.6, fireMax:4.0, maxBullets:1, bulletType:'bomb'   }
   };
 
@@ -421,9 +421,24 @@
 
     boss.laserTimer -= dt;
     if (boss.laserTimer <= 0){
-      fireBullet(boss, 'laser');
+      fireLaserAtPlayer(boss);
       boss.laserTimer = 3.5+Math.random()*2;
     }
+  }
+
+  function fireLaserAtPlayer(boss){
+    if (boss.bulletCount >= boss.maxBullets) return;
+    if (!player || !player.alive || player.respawning) return;
+    var cx = boss.x+boss.w/2, cy = boss.y+boss.h/2;
+    var px = player.x+player.w/2, py = player.y+player.h/2;
+    var dx = px-cx, dy = py-cy;
+    var dist = Math.sqrt(dx*dx+dy*dy) || 1;
+    var vx = dx/dist, vy = dy/dist;
+    var size = 8;
+    var b = {x:cx-size/2, y:cy-size/2, w:size, h:size, vx:vx, vy:vy, speed:LASER_SPEED, owner:boss, dead:false, type:'laser'};
+    boss.bulletCount += 1;
+    bullets.push(b);
+    beep(900, 0.05, 'square');
   }
 
   function updateBullets(dt){
@@ -431,7 +446,10 @@
       var b = bullets[i];
       if (b.dead) continue;
       var dx=0, dy=0;
-      if (b.dir==='up') dy=-b.speed*dt;
+      if (b.vx!==undefined){
+        dx = b.vx*b.speed*dt;
+        dy = b.vy*b.speed*dt;
+      } else if (b.dir==='up') dy=-b.speed*dt;
       else if (b.dir==='down') dy=b.speed*dt;
       else if (b.dir==='left') dx=-b.speed*dt;
       else dx=b.speed*dt;
@@ -634,8 +652,13 @@
       ctx.arc(b.x+b.w/2, b.y+b.h/2, b.w/2, 0, Math.PI*2);
       ctx.fill();
     } else if (b.type==='laser'){
+      ctx.save();
+      ctx.translate(b.x+b.w/2, b.y+b.h/2);
+      var angle = Math.atan2(b.vy||1, b.vx||0);
+      ctx.rotate(angle - Math.PI/2);
       ctx.fillStyle = '#ff3ea5';
-      ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.fillRect(-3, -9, 6, 18);
+      ctx.restore();
     } else {
       ctx.fillStyle = '#fff7d6';
       ctx.fillRect(b.x, b.y, b.w, b.h);
@@ -760,7 +783,7 @@
       hint = '¡Apareció un tanque JEFE! Aguanta varios disparos, invoca refuerzos rápidos y dispara láseres. Usá tus bombas (tecla B o el botón 💣) para hacerle más daño.';
     } else {
       startTitleEl.textContent = '¿Listo para el Nivel '+currentLevel+'?';
-      if (currentLevel===2) hint += ' ¡Cuidado, aparecen tanques naranjas que disparan más rápido!';
+      if (currentLevel===2) hint += ' ¡Cuidado, aparecen tanques verdes que disparan el doble de rápido!';
       else if (currentLevel===3) hint += ' Ahora tu tanque también dispara más rápido, ¡pero cuidado con los tanques morados que tiran bombas!';
       else if (currentLevel===4) hint += ' ¡Ya podés tirar una bomba con la tecla B (o el botón 💣) para destruir varios enemigos a la vez!';
     }

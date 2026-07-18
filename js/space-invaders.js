@@ -113,7 +113,8 @@
   var totalAliens = ALIEN_ROWS*ALIEN_COLS;
   var formation = {x:0, y:0, dir:1};
   var bunkers = [];
-  var player = {x:(CANVAS_W-PLAYER_W)/2, y:PLAYER_Y, w:PLAYER_W, h:PLAYER_H, bullet:null, alive:true, respawning:false, invuln:0};
+  var MAX_PLAYER_BULLETS = 3;
+  var player = {x:(CANVAS_W-PLAYER_W)/2, y:PLAYER_Y, w:PLAYER_W, h:PLAYER_H, bullets:[], alive:true, respawning:false, invuln:0};
   var alienBullets = [];
   var particles = [];
   var ufo = null;
@@ -246,9 +247,9 @@
   });
 
   function firePlayerBullet(){
-    if (player.bullet) return;
+    if (player.bullets.length >= MAX_PLAYER_BULLETS) return;
     var b = {x:player.x+player.w/2-1.5, y:player.y-12, w:3, h:12, dead:false};
-    player.bullet = b;
+    player.bullets.push(b);
     beep(880, 0.06, 'square');
   }
 
@@ -261,7 +262,7 @@
   function respawnPlayer(){
     player.x = (CANVAS_W-PLAYER_W)/2;
     player.alive = true; player.respawning = false;
-    player.invuln = INVULN_TIME; player.bullet = null;
+    player.invuln = INVULN_TIME; player.bullets = [];
   }
 
   function killPlayer(){
@@ -370,30 +371,30 @@
   }
 
   function updateBullets(dt){
-    if (player.bullet){
-      var b = player.bullet;
+    for (var pi=player.bullets.length-1; pi>=0; pi--){
+      var b = player.bullets[pi];
       b.y -= PLAYER_BULLET_SPEED*dt;
-      if (b.y+b.h<0){ player.bullet=null; }
-      else if (hitBunker(b.x,b.y,b.w,b.h)){ player.bullet=null; }
-      else if (ufo && rectsOverlap(b, ufo)){
+      if (b.y+b.h<0){ player.bullets.splice(pi,1); continue; }
+      if (hitBunker(b.x,b.y,b.w,b.h)){ player.bullets.splice(pi,1); continue; }
+      if (ufo && rectsOverlap(b, ufo)){
         score += ufo.value;
         updateHUD();
         spawnExplosion(ufo.x+ufo.w/2, ufo.y+ufo.h/2, '#ffd23f');
         beep(1200,0.15,'triangle');
         ufo = null;
-        player.bullet = null;
-      } else {
-        var hit = false;
-        for (var r=0;r<ALIEN_ROWS && !hit;r++){
-          for (var c=0;c<ALIEN_COLS && !hit;c++){
-            var al = aliens[r][c];
-            if (!al.alive) continue;
-            var abox = {x:alienScreenX(c), y:alienScreenY(r), w:ALIEN_W, h:ALIEN_H};
-            if (rectsOverlap(b, abox)){
-              killAlien(r,c);
-              player.bullet = null;
-              hit = true;
-            }
+        player.bullets.splice(pi,1);
+        continue;
+      }
+      var hit = false;
+      for (var r=0;r<ALIEN_ROWS && !hit;r++){
+        for (var c=0;c<ALIEN_COLS && !hit;c++){
+          var al = aliens[r][c];
+          if (!al.alive) continue;
+          var abox = {x:alienScreenX(c), y:alienScreenY(r), w:ALIEN_W, h:ALIEN_H};
+          if (rectsOverlap(b, abox)){
+            killAlien(r,c);
+            player.bullets.splice(pi,1);
+            hit = true;
           }
         }
       }
@@ -473,7 +474,7 @@
 
   function drawBullets(){
     ctx.fillStyle = '#fff7d6';
-    if (player.bullet) ctx.fillRect(player.bullet.x, player.bullet.y, player.bullet.w, player.bullet.h);
+    player.bullets.forEach(function(b){ ctx.fillRect(b.x, b.y, b.w, b.h); });
     ctx.fillStyle = '#ff8a4a';
     alienBullets.forEach(function(b){ ctx.fillRect(b.x,b.y,b.w,b.h); });
   }
@@ -534,7 +535,7 @@
     buildAliens();
     buildBunkers();
     player.x = (CANVAS_W-PLAYER_W)/2;
-    player.alive = true; player.respawning = false; player.invuln = INVULN_TIME; player.bullet = null;
+    player.alive = true; player.respawning = false; player.invuln = INVULN_TIME; player.bullets = [];
     alienBullets = []; particles = [];
     ufo = null; ufoTimer = 10+Math.random()*8;
     lives = LIVES_START;

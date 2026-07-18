@@ -31,6 +31,7 @@
   var papaView = document.getElementById('papaView');
   var playPapaBtn = document.getElementById('playPapaBtn');
   var backFromPapaBtn = document.getElementById('backFromPapaBtn');
+  var resetBtn = document.getElementById('papaResetBtn');
   var muteBtn = document.getElementById('papaMuteBtn');
   var moneyEl = document.getElementById('papaMoneyVal');
   var perClickEl = document.getElementById('papaPerClickVal');
@@ -102,9 +103,13 @@
     totalEarned += amount;
     if (!goalReached && totalEarned >= GOAL){
       goalReached = true;
-      showPop('¡Sos millonario! 🎉', true);
+      showPop('¡Extorsionista tontito! 🥔💥', true);
       beep(1046, 0.15, 'triangle');
       setTimeout(function(){ beep(1318, 0.2, 'triangle'); }, 140);
+      clickStreak = 0;
+      updateCrackStage();
+      potatoBtn.classList.add('breaking');
+      setTimeout(function(){ potatoBtn.classList.remove('breaking'); }, 350);
     }
   }
 
@@ -316,6 +321,24 @@
     portalView.classList.remove('is-hidden');
     pausePapaLoop();
     lastActive = Date.now();
+    saveProgress();
+  });
+
+  resetBtn.addEventListener('click', function(){
+    var ok = window.confirm('¿Seguro que querés reiniciar? Vas a perder toda tu plata, tus mejoras y el multiplicador.');
+    if (!ok) return;
+    money = 0;
+    totalEarned = 0;
+    clickOwned = CLICK_UPGRADES.map(function(){ return 0; });
+    autoOwned = AUTO_UPGRADES.map(function(){ return 0; });
+    celestialLevel = 0;
+    goalReached = false;
+    clickStreak = 0;
+    lastActive = Date.now();
+    recomputeRates();
+    updateHUD();
+    renderAll();
+    updateCrackStage();
     saveProgress();
   });
 

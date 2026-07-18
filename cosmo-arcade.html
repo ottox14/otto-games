@@ -899,6 +899,11 @@
   .dpad-left{ grid-column:1; grid-row:2; }
   .dpad-right{ grid-column:3; grid-row:2; }
   .dpad-down{ grid-column:2; grid-row:2; }
+  .bomb-btn{
+    background:linear-gradient(180deg,#7a5cff,#4a2fb0);
+    box-shadow:0 4px 0 #331f7a;
+  }
+  .bomb-btn:active{ box-shadow:0 1px 0 #331f7a; }
 
 /* Tema y componentes propios de Invasión Alienígena: HUD, marco del campo
    de batalla y el D-pad de dos botones (izquierda/derecha) */
@@ -984,6 +989,9 @@
   gap:18px;
   padding:20px;
 }
+.papa-footer{
+  justify-content:center;
+}
 .papa-main{
   position:relative;
   display:flex;
@@ -1043,6 +1051,26 @@
 .potato-cracks.stage-4 .c2,
 .potato-cracks.stage-4 .c3,
 .potato-cracks.stage-4 .c4{ opacity:0.95; }
+
+.chicken{
+  position:absolute;
+  right:-8px;
+  bottom:-4px;
+  font-size:32px;
+  opacity:0;
+  pointer-events:none;
+  transform-origin:70% 90%;
+  transition:opacity 0.3s ease;
+}
+.chicken.active{
+  opacity:1;
+  animation:chickenPeck 1.8s ease-in-out infinite;
+}
+@keyframes chickenPeck{
+  0%, 78%, 100%{ transform:rotate(0deg) translate(0,0); }
+  85%{ transform:rotate(-18deg) translate(-5px,2px); }
+  92%{ transform:rotate(0deg) translate(0,0); }
+}
 
 .papa-hint{
   margin:0;
@@ -1154,6 +1182,272 @@
 @media (prefers-reduced-motion: reduce){
   .potato-btn.breaking{ animation:none; }
   .click-pop{ animation:none; opacity:0; }
+  .chicken.active{ animation:none; }
+}
+
+/* Tema y componentes propios de Mi Gatito: pantalla de adopcion, barras de
+   estado, salas de cuidado y el mini-juego de deportes compartido */
+#gatoView{
+  --panel: rgba(60,30,45,0.55);
+  --panel-border: rgba(255,180,210,0.22);
+  --ink: #ffe8f0;
+  --ink-soft: #d9a8c0;
+  --coral: #ff7fa8;
+  --cyan: #6fe0d9;
+  --magenta: #ff7fa8;
+  --sky-top: #2b1622;
+}
+.gato-frame{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:20px;
+  min-height:520px;
+}
+.gato-sub-view.is-hidden{ display:none; }
+
+.gato-adopt-title{
+  margin:0 0 4px;
+  font-size:16px;
+  font-weight:800;
+  text-align:center;
+}
+.adopt-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:12px;
+}
+.adopt-card{
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  text-align:center;
+}
+.adopt-card canvas{ display:block; }
+.adopt-card h3{ margin:0; font-size:13px; font-weight:800; }
+.adopt-card button{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:800;
+  font-size:12px;
+  color:#1b1340;
+  background:linear-gradient(180deg,var(--gold),#f5b400);
+  padding:7px 14px;
+  border-radius:10px;
+  box-shadow:0 3px 0 #b9860a;
+  width:100%;
+}
+.adopt-card button:active{ transform:translateY(2px); box-shadow:0 1px 0 #b9860a; }
+
+.gato-stats{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.stat-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:15px;
+}
+.stat-track{
+  flex:1;
+  height:10px;
+  background:rgba(255,255,255,0.14);
+  border-radius:999px;
+  overflow:hidden;
+}
+.stat-fill{
+  height:100%;
+  width:100%;
+  border-radius:999px;
+  transition:width 0.3s ease, background 0.3s ease;
+}
+.stat-fill.hunger{ background:#ffa552; }
+.stat-fill.hygiene{ background:#6fc7d9; }
+.stat-fill.energy{ background:#ffd23f; }
+.stat-fill.happy{ background:#ff7fa8; }
+.stat-fill.low{ background:#ff5464; }
+
+#gatoCanvas{
+  display:block;
+  margin:0 auto;
+  width:220px;
+  height:220px;
+}
+
+.room-row{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+}
+.room-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.06);
+  color:var(--ink);
+  border-radius:12px;
+  padding:8px 4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+  font-family:inherit;
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+.room-btn span{ font-size:10px; }
+.room-btn{ font-size:20px; }
+.room-btn:active{ transform:translateY(2px); }
+.room-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+.gato-footer{ text-align:center; }
+
+.food-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  width:100%;
+  max-width:280px;
+}
+.food-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.08);
+  color:var(--ink);
+  border-radius:12px;
+  padding:12px 6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.food-btn .food-icon{ font-size:28px; }
+.food-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+.food-btn:not(:disabled):active{ transform:translateY(2px); }
+
+.scrub-area{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(111,199,217,0.35), rgba(111,199,217,0.12));
+  border:3px dashed var(--panel-border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:64px;
+  cursor:pointer;
+  user-select:none;
+}
+.scrub-area:active{ transform:scale(0.97); }
+.bubble-pop{
+  position:absolute;
+  font-size:20px;
+  pointer-events:none;
+  animation:bubbleFloat 0.7s ease-out forwards;
+}
+@keyframes bubbleFloat{
+  0%{ opacity:1; transform:translate(-50%,0) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-36px) scale(1.2); }
+}
+
+.sleep-zzz{
+  font-size:40px;
+  opacity:0;
+}
+.sleep-zzz.active{
+  opacity:1;
+  animation:zzzFloat 1.6s ease-in-out infinite;
+}
+@keyframes zzzFloat{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-8px); }
+}
+
+.game-select-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.game-select-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.08);
+  color:var(--ink);
+  border-radius:14px;
+  padding:16px 20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+}
+.game-select-btn .game-icon{ font-size:36px; }
+.game-select-btn:active{ transform:translateY(2px); }
+
+.timing-track{
+  position:relative;
+  width:100%;
+  max-width:280px;
+  height:20px;
+  background:rgba(255,255,255,0.14);
+  border-radius:999px;
+  overflow:hidden;
+}
+.timing-zone{
+  position:absolute;
+  top:0; bottom:0;
+  background:rgba(126,217,87,0.55);
+}
+.timing-marker{
+  position:absolute;
+  top:-3px;
+  width:6px;
+  height:26px;
+  background:var(--ink);
+  border-radius:3px;
+  box-shadow:0 0 6px rgba(0,0,0,0.4);
+}
+
+.mimos-area{
+  font-size:100px;
+  cursor:pointer;
+  user-select:none;
+  background:none;
+  border:none;
+  padding:0;
+}
+.mimos-area:active{ transform:scale(0.95); }
+.heart-pop{
+  position:absolute;
+  font-size:22px;
+  pointer-events:none;
+  animation:heartFloat 0.8s ease-out forwards;
+}
+@keyframes heartFloat{
+  0%{ opacity:1; transform:translate(-50%,0) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-44px) scale(1.3); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .sleep-zzz.active{ animation:none; }
+  .bubble-pop, .heart-pop{ animation:none; opacity:0; }
 }
 </style>
 <div class="portal-bg" aria-hidden="true">
@@ -1209,6 +1503,14 @@
         <p>Tocá la papa para ganar pesos, comprá mejoras y hacete millonario. ¡Cuidado, la papa se va agrietando con cada golpe!</p>
         <div class="tags"><span class="tag">Clicker</span><span class="tag">Meta: $1.000.000</span></div>
         <button class="play-btn" id="playPapaBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">🐱</div>
+        <h2>Mi Gatito</h2>
+        <p>Adoptá un gatito y cuidalo: dale de comer, bañalo, dejalo dormir y jugá con él a la pelota. ¡Que no le falte nada!</p>
+        <div class="tags"><span class="tag">Mascotas</span><span class="tag">Cuidado</span></div>
+        <button class="play-btn" id="playGatoBtn">▶ Jugar</button>
       </article>
 
       <article class="game-card coming-soon">
@@ -1384,7 +1686,7 @@
 
         <div class="overlay" id="tanksStartOverlay">
           <h2 id="tanksStartTitle">¿Listo para el Nivel 1?</h2>
-          <p>Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.</p>
+          <p id="tanksStartDesc">Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.</p>
           <button class="big-btn" id="tanksStartBtn">▶ Empezar nivel</button>
         </div>
 
@@ -1402,7 +1704,7 @@
       </div>
 
       <div class="controls-row">
-        <p class="hint">Movete con <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd></p>
+        <p class="hint">Movete con <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd> · Bomba con <kbd>B</kbd> (desde el Nivel 4)</p>
         <div class="action-touch-controls">
           <div class="dpad">
             <button class="dpad-btn dpad-up" id="tUp" aria-label="Arriba">▲</button>
@@ -1411,6 +1713,7 @@
             <button class="dpad-btn dpad-down" id="tDown" aria-label="Abajo">▼</button>
           </div>
           <button class="fire-btn" id="tFire" aria-label="Disparar">🔥</button>
+          <button class="fire-btn bomb-btn" id="tBomb" aria-label="Tirar bomba">💣</button>
         </div>
       </div>
     </div>
@@ -1504,6 +1807,7 @@
               <path class="crack c3" d="M98 58 L86 80 L102 100" />
               <path class="crack c4" d="M54 102 L72 90 L88 112" />
             </svg>
+            <div class="chicken" id="chickenIcon" aria-hidden="true">🐔</div>
           </div>
           <p class="papa-hint">¡Tocá la papa para ganar pesos!</p>
         </div>
@@ -1527,6 +1831,106 @@
             <div class="upgrade-list" id="autoUpgradeList"></div>
           </section>
         </div>
+      </div>
+
+      <div class="controls-row papa-footer">
+        <button class="text-btn" id="papaResetBtn">🔁 Reiniciar partida</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="view is-hidden" id="gatoView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromGatoBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">MI GATITO</h1>
+          <p class="subtitle">Adoptá un gatito y cuidalo</p>
+        </div>
+        <button class="mute-btn" id="gatoMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="frame gato-frame">
+
+        <div class="gato-sub-view" id="gatoAdoptView">
+          <h2 class="gato-adopt-title">Elegí a tu gatito</h2>
+          <div class="adopt-grid" id="adoptGrid"></div>
+        </div>
+
+        <div class="gato-sub-view is-hidden" id="gatoHomeView">
+          <div class="gato-stats">
+            <div class="stat-row">🍖<div class="stat-track"><div class="stat-fill hunger" id="statHambre"></div></div></div>
+            <div class="stat-row">🛁<div class="stat-track"><div class="stat-fill hygiene" id="statHigiene"></div></div></div>
+            <div class="stat-row">⚡<div class="stat-track"><div class="stat-fill energy" id="statEnergia"></div></div></div>
+            <div class="stat-row">💛<div class="stat-track"><div class="stat-fill happy" id="statFelicidad"></div></div></div>
+          </div>
+          <canvas id="gatoCanvas" width="220" height="220"></canvas>
+          <div class="room-row">
+            <button class="room-btn" id="roomComerBtn">🍽️<span>Comer</span></button>
+            <button class="room-btn" id="roomBanarBtn">🛁<span>Bañar</span></button>
+            <button class="room-btn" id="roomDormirBtn">😴<span>Dormir</span></button>
+            <button class="room-btn" id="roomJugarBtn">🎮<span>Jugar</span></button>
+            <button class="room-btn" id="roomMimosBtn">💕<span>Mimos</span></button>
+          </div>
+          <div class="gato-footer">
+            <button class="text-btn" id="gatoChangeBtn">🔁 Adoptar otro gatito</button>
+          </div>
+        </div>
+
+        <div class="overlay is-hidden" id="comerOverlay">
+          <h2>🍽️ Comer</h2>
+          <p>Elegí qué le das de comer a tu gatito.</p>
+          <div class="food-grid" id="foodGrid"></div>
+          <button class="text-btn" id="comerCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="banarOverlay">
+          <h2>🛁 Bañar</h2>
+          <p>Tocá al gatito para frotarlo con la esponja.</p>
+          <button class="scrub-area" id="scrubArea" aria-label="Frotar">🧽</button>
+          <button class="text-btn" id="banarCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="dormirOverlay">
+          <h2>😴 Dormir</h2>
+          <p>Dejalo descansar para que recupere energía.</p>
+          <div class="sleep-zzz" id="sleepZzz">💤</div>
+          <button class="big-btn" id="sleepToggleBtn">Dormir</button>
+          <button class="text-btn" id="dormirCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="jugarMenuOverlay">
+          <h2>🎮 Jugar</h2>
+          <p>Elegí un deporte para jugar con tu gatito.</p>
+          <div class="game-select-row">
+            <button class="game-select-btn" id="selectFutbolBtn"><span class="game-icon">⚽</span>Fútbol</button>
+            <button class="game-select-btn" id="selectBasquetBtn"><span class="game-icon">🏀</span>Básquet</button>
+            <button class="game-select-btn" id="selectVoleyBtn"><span class="game-icon">🏐</span>Vóley</button>
+          </div>
+          <button class="text-btn" id="jugarMenuCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="miniGameOverlay">
+          <h2 id="miniGameTitle">⚽ Fútbol</h2>
+          <p id="miniGameHint">¡Tocá "¡Ya!" cuando la barra esté en la zona verde!</p>
+          <div class="timing-track" id="timingTrack">
+            <div class="timing-zone" id="timingZone"></div>
+            <div class="timing-marker" id="timingMarker"></div>
+          </div>
+          <button class="big-btn" id="timingActionBtn">¡Ya!</button>
+          <p id="miniGameScore">Aciertos: 0/5</p>
+          <button class="text-btn" id="miniGameCloseBtn">Volver</button>
+        </div>
+
+        <div class="overlay is-hidden" id="mimosOverlay">
+          <h2>💕 Mimos</h2>
+          <p>Tocá al gatito para hacerle mimos.</p>
+          <button class="mimos-area" id="mimosArea" aria-label="Acariciar">🐱</button>
+          <button class="text-btn" id="mimosCloseBtn">Cerrar</button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -2950,6 +3354,18 @@
   var MAX_CONCURRENT_ENEMIES = 4;
   var SPAWN_COLS = [1, 6, 11];
 
+  var BOMB_SPEED = 150, BOMB_RADIUS = 50;
+  var LASER_SPEED = 480;
+  var PLAYER_BOMB_COOLDOWN = 4;
+
+  var ENEMY_TYPES = {
+    normal: { color:'#9c8a6e', speedMult:1,    fireMin:1.2, fireMax:2.5, maxBullets:1, bulletType:'normal' },
+    rapid:  { color:'#4caf50', speedMult:1.1,  fireMin:0.5, fireMax:0.6, maxBullets:2, bulletType:'normal' },
+    bomber: { color:'#7a5cff', speedMult:0.85, fireMin:2.6, fireMax:4.0, maxBullets:1, bulletType:'bomb'   }
+  };
+
+  function isBossLevel(n){ return n % 5 === 0; }
+
   var canvas = document.getElementById('tanksCanvas');
   var ctx = canvas.getContext('2d');
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2973,6 +3389,7 @@
   var levelEl = document.getElementById('tanksLevelVal');
   var startOverlay = document.getElementById('tanksStartOverlay');
   var startTitleEl = document.getElementById('tanksStartTitle');
+  var startDescEl = document.getElementById('tanksStartDesc');
   var startBtn = document.getElementById('tanksStartBtn');
   var clearOverlay = document.getElementById('tanksClearOverlay');
   var clearTitleEl = document.getElementById('tanksClearTitle');
@@ -2987,6 +3404,7 @@
   var tLeft = document.getElementById('tLeft');
   var tRight = document.getElementById('tRight');
   var tFire = document.getElementById('tFire');
+  var tBomb = document.getElementById('tBomb');
 
   function tanksActive(){ return !tanksView.classList.contains('is-hidden'); }
 
@@ -3029,12 +3447,20 @@
   });
 
   function getLevelConfig(n){
+    var mix = ['normal'];
+    if (n>=2) mix.push('normal','rapid');
+    if (n>=3) mix.push('rapid','bomber');
     return {
       totalEnemies: Math.min(24, 6 + n*2),
       enemySpeed: Math.min(150, 90 + n*6),
       spawnInterval: Math.max(1.2, 2.4 - n*0.12),
       bricks: 10 + n*2,
-      steels: 4 + Math.floor(n/2)
+      steels: 4 + Math.floor(n/2),
+      enemyMix: mix,
+      playerMaxBullets: n>=3 ? 2 : 1,
+      bombUnlocked: n>=4,
+      isBoss: isBossLevel(n),
+      bossHp: 5 + Math.floor(n/5)*2
     };
   }
 
@@ -3100,12 +3526,29 @@
     return false;
   }
 
-  function makeTank(x,y,isPlayer){
+  function makeTank(x,y,isPlayer,type){
+    var t = type || 'normal';
+    var stats = ENEMY_TYPES[t] || ENEMY_TYPES.normal;
     return {
       x:x, y:y, w:isPlayer?PLAYER_SIZE:ENEMY_SIZE, h:isPlayer?PLAYER_SIZE:ENEMY_SIZE,
       dir:'up', speed: isPlayer?PLAYER_SPEED:90,
-      isPlayer:isPlayer, alive:true, respawning:false, bullet:null, invuln:0,
-      moveTimer:0, fireTimer: 1+Math.random()*1.5
+      isPlayer:isPlayer, type:t, alive:true, respawning:false,
+      bulletCount:0, maxBullets: isPlayer?1:stats.maxBullets,
+      invuln:0, bombCooldown:0,
+      moveTimer:0, fireTimer: isPlayer?0:(stats.fireMin+Math.random()*(stats.fireMax-stats.fireMin))
+    };
+  }
+
+  function makeBoss(x,y,hp){
+    return {
+      x:x, y:y, w:ENEMY_SIZE*1.8, h:ENEMY_SIZE*1.8,
+      dir:'left', speed:40,
+      isPlayer:false, type:'boss', alive:true, respawning:false,
+      bulletCount:0, maxBullets:1, invuln:0,
+      hp:hp, maxHp:hp,
+      moveTimer:1, fireTimer:0,
+      summonTimer: 4+Math.random()*2,
+      laserTimer: 3+Math.random()*2
     };
   }
 
@@ -3128,19 +3571,23 @@
     return dirs[Math.floor(Math.random()*dirs.length)];
   }
 
-  function fireBullet(tank){
-    if (tank.bullet) return;
-    var speed = tank.isPlayer ? PLAYER_BULLET_SPEED : ENEMY_BULLET_SPEED;
+  function fireBullet(tank, bulletType){
+    if (tank.bulletCount >= tank.maxBullets) return;
+    var type = bulletType || 'normal';
+    var speed = tank.isPlayer ? PLAYER_BULLET_SPEED : (type==='bomb' ? BOMB_SPEED : (type==='laser' ? LASER_SPEED : ENEMY_BULLET_SPEED));
+    var w = type==='bomb' ? 10 : (type==='laser' ? 7 : BULLET_SIZE);
+    var h = type==='bomb' ? 10 : (type==='laser' ? 14 : BULLET_SIZE);
     var cx = tank.x+tank.w/2, cy = tank.y+tank.h/2;
-    var b = {x:cx-BULLET_SIZE/2, y:cy-BULLET_SIZE/2, dir:tank.dir, speed:speed, owner:tank, dead:false};
-    tank.bullet = b;
+    var b = {x:cx-w/2, y:cy-h/2, w:w, h:h, dir:tank.dir, speed:speed, owner:tank, dead:false, type:type};
+    tank.bulletCount += 1;
     bullets.push(b);
-    beep(tank.isPlayer?720:420, 0.05, 'square');
+    beep(tank.isPlayer?720:(type==='bomb'?300:(type==='laser'?900:420)), 0.05, 'square');
   }
 
   function killBullet(b){
+    if (b.dead) return;
     b.dead = true;
-    if (b.owner.bullet === b) b.owner.bullet = null;
+    b.owner.bulletCount = Math.max(0, b.owner.bulletCount-1);
   }
 
   function spawnExplosion(cx,cy){
@@ -3189,8 +3636,57 @@
     var spawnY = (ROWS-1)*TILE + (TILE-PLAYER_SIZE)/2;
     player.x = spawnX; player.y = spawnY;
     player.alive = true; player.respawning = false;
-    player.dir = 'up'; player.bullet = null;
+    player.dir = 'up'; player.bulletCount = 0;
     player.invuln = INVULN_TIME;
+  }
+
+  function damageTank(tank){
+    if (tank.type === 'boss'){
+      tank.hp -= 1;
+      spawnExplosion(tank.x+tank.w/2, tank.y+tank.h/2);
+      beep(300, 0.1, 'square');
+      if (tank.hp <= 0) killBoss(tank);
+    } else {
+      killTank(tank);
+    }
+  }
+
+  function killBoss(boss){
+    boss.alive = false;
+    spawnExplosion(boss.x+boss.w/2, boss.y+boss.h/2);
+    beep(120, 0.4, 'sawtooth');
+    var idx = enemies.indexOf(boss);
+    if (idx !== -1) enemies.splice(idx,1);
+    enemies.forEach(function(e){ spawnExplosion(e.x+e.w/2, e.y+e.h/2); });
+    enemies = [];
+    killedCount = totalEnemies;
+    updateHUD();
+    triggerLevelClear();
+  }
+
+  function explodeBomb(cx, cy, fromPlayer, excludeTank){
+    beep(150, 0.3, 'sawtooth');
+    spawnExplosion(cx, cy);
+    spawnExplosion(cx, cy);
+    var col0 = Math.floor(cx/TILE), row0 = Math.floor(cy/TILE);
+    for (var r=row0-1; r<=row0+1; r++){
+      for (var c=col0-1; c<=col0+1; c++){
+        if (r<0 || r>=ROWS || c<0 || c>=COLS) continue;
+        if (grid[r][c]===BRICK) grid[r][c]=EMPTY;
+      }
+    }
+    function inRadius(t){
+      var dx = (t.x+t.w/2)-cx, dy = (t.y+t.h/2)-cy;
+      return Math.sqrt(dx*dx+dy*dy) <= BOMB_RADIUS;
+    }
+    if (fromPlayer){
+      for (var i=enemies.length-1;i>=0;i--){
+        var e = enemies[i];
+        if (e && e!==excludeTank && e.alive && inRadius(e)) damageTank(e);
+      }
+    } else if (player!==excludeTank && player && player.alive && !player.respawning && player.invuln<=0 && inRadius(player)){
+      killTank(player);
+    }
   }
 
   function checkLevelClear(){
@@ -3236,9 +3732,59 @@
     }
     e.fireTimer -= dt;
     if (e.fireTimer <= 0){
-      if (!e.bullet) fireBullet(e);
-      e.fireTimer = 1.2+Math.random()*1.3;
+      var stats = ENEMY_TYPES[e.type] || ENEMY_TYPES.normal;
+      fireBullet(e, stats.bulletType);
+      e.fireTimer = stats.fireMin + Math.random()*(stats.fireMax-stats.fireMin);
     }
+  }
+
+  function updateBoss(boss, dt){
+    if (!boss.alive) return;
+    boss.moveTimer -= dt;
+    if (boss.moveTimer <= 0){
+      boss.dir = Math.random()<0.5 ? 'left' : 'right';
+      boss.moveTimer = 1.5+Math.random()*1.5;
+    }
+    var beforeX = boss.x;
+    moveTank(boss, boss.dir, dt);
+    if (boss.x === beforeX) boss.moveTimer = 0;
+
+    boss.summonTimer -= dt;
+    if (boss.summonTimer <= 0){
+      if (enemies.length < MAX_CONCURRENT_ENEMIES){
+        var col = SPAWN_COLS[Math.floor(Math.random()*SPAWN_COLS.length)];
+        var sx = col*TILE + (TILE-ENEMY_SIZE)/2;
+        var sy = (TILE-ENEMY_SIZE)/2;
+        if (!isBlockedForTank(sx, sy, ENEMY_SIZE, ENEMY_SIZE, null)){
+          var reinforcement = makeTank(sx, sy, false, 'rapid');
+          reinforcement.speed = currentCfg.enemySpeed * ENEMY_TYPES.rapid.speedMult;
+          reinforcement.dir = 'down';
+          enemies.push(reinforcement);
+        }
+      }
+      boss.summonTimer = 5+Math.random()*2;
+    }
+
+    boss.laserTimer -= dt;
+    if (boss.laserTimer <= 0){
+      fireLaserAtPlayer(boss);
+      boss.laserTimer = 3.5+Math.random()*2;
+    }
+  }
+
+  function fireLaserAtPlayer(boss){
+    if (boss.bulletCount >= boss.maxBullets) return;
+    if (!player || !player.alive || player.respawning) return;
+    var cx = boss.x+boss.w/2, cy = boss.y+boss.h/2;
+    var px = player.x+player.w/2, py = player.y+player.h/2;
+    var dx = px-cx, dy = py-cy;
+    var dist = Math.sqrt(dx*dx+dy*dy) || 1;
+    var vx = dx/dist, vy = dy/dist;
+    var size = 8;
+    var b = {x:cx-size/2, y:cy-size/2, w:size, h:size, vx:vx, vy:vy, speed:LASER_SPEED, owner:boss, dead:false, type:'laser'};
+    boss.bulletCount += 1;
+    bullets.push(b);
+    beep(900, 0.05, 'square');
   }
 
   function updateBullets(dt){
@@ -3246,48 +3792,59 @@
       var b = bullets[i];
       if (b.dead) continue;
       var dx=0, dy=0;
-      if (b.dir==='up') dy=-b.speed*dt;
+      if (b.vx!==undefined){
+        dx = b.vx*b.speed*dt;
+        dy = b.vy*b.speed*dt;
+      } else if (b.dir==='up') dy=-b.speed*dt;
       else if (b.dir==='down') dy=b.speed*dt;
       else if (b.dir==='left') dx=-b.speed*dt;
       else dx=b.speed*dt;
       b.x += dx; b.y += dy;
-      if (b.x<0 || b.y<0 || b.x>COLS*TILE || b.y>ROWS*TILE){ killBullet(b); continue; }
+      if (b.x<0 || b.y<0 || b.x>COLS*TILE || b.y>ROWS*TILE){
+        if (b.type==='bomb') explodeBomb(b.x+b.w/2, b.y+b.h/2, b.owner.isPlayer);
+        killBullet(b); continue;
+      }
 
-      var col = Math.floor((b.x+BULLET_SIZE/2)/TILE), row = Math.floor((b.y+BULLET_SIZE/2)/TILE);
+      var col = Math.floor((b.x+b.w/2)/TILE), row = Math.floor((b.y+b.h/2)/TILE);
       var cell = grid[row] && grid[row][col];
-      if (cell===BRICK){
-        grid[row][col]=EMPTY;
-        spawnExplosion(col*TILE+TILE/2, row*TILE+TILE/2);
+      if (cell===BRICK || cell===STEEL || cell===BASE){
+        if (b.type==='bomb') explodeBomb(col*TILE+TILE/2, row*TILE+TILE/2, b.owner.isPlayer);
+        if (cell===BRICK){
+          grid[row][col]=EMPTY;
+          spawnExplosion(col*TILE+TILE/2, row*TILE+TILE/2);
+          beep(300, 0.08, 'square');
+        } else if (cell===STEEL){
+          beep(500, 0.06, 'square');
+        } else if (cell===BASE){
+          triggerBaseDestroyed();
+        }
         killBullet(b);
-        beep(300, 0.08, 'square');
-        continue;
-      }
-      if (cell===STEEL){
-        killBullet(b);
-        beep(500, 0.06, 'square');
-        continue;
-      }
-      if (cell===BASE){
-        killBullet(b);
-        triggerBaseDestroyed();
         continue;
       }
 
-      var bbox = {x:b.x, y:b.y, w:BULLET_SIZE, h:BULLET_SIZE};
+      var bbox = {x:b.x, y:b.y, w:b.w, h:b.h};
+      var hit = false;
       if (b.owner.isPlayer){
         for (var j=0;j<enemies.length;j++){
           var e = enemies[j];
-          if (e.alive && rectsOverlap(bbox, e)){ killTank(e); killBullet(b); break; }
+          if (e.alive && rectsOverlap(bbox, e)){
+            damageTank(e);
+            if (b.type==='bomb') explodeBomb(e.x+e.w/2, e.y+e.h/2, true, e);
+            hit = true;
+            break;
+          }
         }
       } else if (player && player.alive && !player.respawning && player.invuln<=0 && rectsOverlap(bbox, player)){
-        killTank(player); killBullet(b);
+        killTank(player);
+        if (b.type==='bomb') explodeBomb(player.x+player.w/2, player.y+player.h/2, false, player);
+        hit = true;
       }
-      if (b.dead) continue;
+      if (hit){ killBullet(b); continue; }
 
       for (var k=0;k<bullets.length;k++){
         var ob = bullets[k];
         if (ob===b || ob.dead) continue;
-        if (ob.owner.isPlayer !== b.owner.isPlayer && rectsOverlap(bbox, {x:ob.x,y:ob.y,w:BULLET_SIZE,h:BULLET_SIZE})){
+        if (ob.owner.isPlayer !== b.owner.isPlayer && rectsOverlap(bbox, {x:ob.x,y:ob.y,w:ob.w,h:ob.h})){
           killBullet(b); killBullet(ob); break;
         }
       }
@@ -3300,6 +3857,17 @@
   function releaseDir(dir){ var i=dirStack.indexOf(dir); if (i!==-1) dirStack.splice(i,1); }
   function currentDir(){ return dirStack.length ? dirStack[dirStack.length-1] : null; }
 
+  function throwPlayerBomb(){
+    if (!player || !player.alive || player.respawning) return;
+    if (!currentCfg.bombUnlocked) return;
+    if (player.bombCooldown > 0) return;
+    var w=10, h=10;
+    var cx = player.x+player.w/2, cy = player.y+player.h/2;
+    bullets.push({x:cx-w/2, y:cy-h/2, w:w, h:h, dir:player.dir, speed:BOMB_SPEED, owner:player, dead:false, type:'bomb'});
+    player.bombCooldown = PLAYER_BOMB_COOLDOWN;
+    beep(200, 0.15, 'sawtooth');
+  }
+
   var KEY_DIR = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
   window.addEventListener('keydown', function(e){
     if (!tanksActive()) return;
@@ -3309,6 +3877,9 @@
     } else if (e.code==='Space'){
       e.preventDefault();
       if (gameState==='play' && player && player.alive && !player.respawning) fireBullet(player);
+    } else if (e.code==='KeyB'){
+      e.preventDefault();
+      if (gameState==='play') throwPlayerBomb();
     }
   });
   window.addEventListener('keyup', function(e){
@@ -3326,6 +3897,10 @@
     e.preventDefault();
     if (gameState==='play' && player && player.alive && !player.respawning) fireBullet(player);
   });
+  tBomb.addEventListener('pointerdown', function(e){
+    e.preventDefault();
+    if (gameState==='play') throwPlayerBomb();
+  });
 
   function updateHUD(){
     livesEl.textContent = Math.max(0, lives);
@@ -3334,14 +3909,16 @@
   }
 
   function spawnEnemies(dt){
+    if (currentCfg.isBoss) return;
     spawnTimer -= dt;
     if (spawnTimer<=0 && spawnedEnemies<totalEnemies && enemies.length<MAX_CONCURRENT_ENEMIES){
       var col = SPAWN_COLS[Math.floor(Math.random()*SPAWN_COLS.length)];
       var sx = col*TILE + (TILE-ENEMY_SIZE)/2;
       var sy = (TILE-ENEMY_SIZE)/2;
       if (!isBlockedForTank(sx, sy, ENEMY_SIZE, ENEMY_SIZE, null)){
-        var e = makeTank(sx, sy, false);
-        e.speed = currentCfg.enemySpeed;
+        var type = currentCfg.enemyMix[Math.floor(Math.random()*currentCfg.enemyMix.length)];
+        var e = makeTank(sx, sy, false, type);
+        e.speed = currentCfg.enemySpeed * (ENEMY_TYPES[type].speedMult || 1);
         e.dir = 'down';
         enemies.push(e);
         spawnedEnemies += 1;
@@ -3358,8 +3935,12 @@
     } else if (player.alive){
       moveTank(player, currentDir(), dt);
       if (player.invuln>0) player.invuln -= dt;
+      if (player.bombCooldown>0) player.bombCooldown -= dt;
     }
-    enemies.forEach(function(e){ updateEnemy(e, dt); });
+    enemies.forEach(function(e){
+      if (e.type==='boss') updateBoss(e, dt);
+      else updateEnemy(e, dt);
+    });
     updateBullets(dt);
     spawnEnemies(dt);
   }
@@ -3411,8 +3992,31 @@
     ctx.restore();
   }
   function drawBullet(b){
-    ctx.fillStyle = '#fff7d6';
-    ctx.fillRect(b.x,b.y,BULLET_SIZE,BULLET_SIZE);
+    if (b.type==='bomb'){
+      ctx.fillStyle = '#ff8a4a';
+      ctx.beginPath();
+      ctx.arc(b.x+b.w/2, b.y+b.h/2, b.w/2, 0, Math.PI*2);
+      ctx.fill();
+    } else if (b.type==='laser'){
+      ctx.save();
+      ctx.translate(b.x+b.w/2, b.y+b.h/2);
+      var angle = Math.atan2(b.vy||1, b.vx||0);
+      ctx.rotate(angle - Math.PI/2);
+      ctx.fillStyle = '#ff3ea5';
+      ctx.fillRect(-3, -9, 6, 18);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#fff7d6';
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+    }
+  }
+  function drawBossHpBar(boss){
+    var w = boss.w;
+    var x = boss.x, y = boss.y-10;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(x, y, w, 5);
+    ctx.fillStyle = '#ff3e3e';
+    ctx.fillRect(x, y, w*Math.max(0,boss.hp/boss.maxHp), 5);
   }
   function drawParticles(){
     particles.forEach(function(p){
@@ -3443,7 +4047,15 @@
       var blink = player.invuln>0 && !reducedMotion && Math.floor(t*10)%2===0;
       if (!blink) drawTank(player, '#f4d03f');
     }
-    enemies.forEach(function(e){ if (e.alive) drawTank(e, '#9c8a6e'); });
+    enemies.forEach(function(e){
+      if (!e.alive) return;
+      if (e.type==='boss'){
+        drawTank(e, '#ff3e3e');
+        drawBossHpBar(e);
+      } else {
+        drawTank(e, (ENEMY_TYPES[e.type]||ENEMY_TYPES.normal).color);
+      }
+    });
     drawParticles();
   }
 
@@ -3476,28 +4088,52 @@
     currentCfg = getLevelConfig(currentLevel);
     var mapData = generateMap(currentCfg);
     grid = mapData.grid; baseRow = mapData.baseRow; baseCol = mapData.baseCol;
-    totalEnemies = currentCfg.totalEnemies;
-    spawnedEnemies = 0; killedCount = 0;
     enemies = []; bullets = []; particles = [];
     lives = LIVES_START;
-    spawnTimer = 0.6;
     dirStack.length = 0;
 
     var spawnX = (baseCol-3)*TILE + (TILE-PLAYER_SIZE)/2;
     var spawnY = (ROWS-1)*TILE + (TILE-PLAYER_SIZE)/2;
     player = makeTank(spawnX, spawnY, true);
+    player.maxBullets = currentCfg.playerMaxBullets;
     player.invuln = INVULN_TIME;
+    player.bombCooldown = 0;
+
+    if (currentCfg.isBoss){
+      totalEnemies = 1;
+      spawnedEnemies = 1;
+      var bossW = ENEMY_SIZE*1.8;
+      var boss = makeBoss((COLS*TILE-bossW)/2, TILE*1.5, currentCfg.bossHp);
+      enemies.push(boss);
+    } else {
+      totalEnemies = currentCfg.totalEnemies;
+      spawnedEnemies = 0;
+      spawnTimer = 0.6;
+    }
+    killedCount = 0;
 
     updateHUD();
     startOverlay.classList.add('is-hidden');
     clearOverlay.classList.add('is-hidden');
     overOverlay.classList.add('is-hidden');
+    tBomb.style.display = currentCfg.bombUnlocked ? '' : 'none';
     ensureAudio();
     startTanksLoop();
   }
 
   function showTanksIntro(){
-    startTitleEl.textContent = '¿Listo para el Nivel '+currentLevel+'?';
+    var cfg = getLevelConfig(currentLevel);
+    var hint = 'Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.';
+    if (cfg.isBoss){
+      startTitleEl.textContent = '¿Listo para el Jefe del Nivel '+currentLevel+'?';
+      hint = '¡Apareció un tanque JEFE! Aguanta varios disparos, invoca refuerzos rápidos y dispara láseres. Usá tus bombas (tecla B o el botón 💣) para hacerle más daño.';
+    } else {
+      startTitleEl.textContent = '¿Listo para el Nivel '+currentLevel+'?';
+      if (currentLevel===2) hint += ' ¡Cuidado, aparecen tanques verdes que disparan el doble de rápido!';
+      else if (currentLevel===3) hint += ' Ahora tu tanque también dispara más rápido, ¡pero cuidado con los tanques morados que tiran bombas!';
+      else if (currentLevel===4) hint += ' ¡Ya podés tirar una bomba con la tecla B (o el botón 💣) para destruir varios enemigos a la vez!';
+    }
+    startDescEl.textContent = hint;
   }
   showTanksIntro();
 
@@ -3517,6 +4153,7 @@
   var initialCfg = getLevelConfig(1);
   var initialMap = generateMap(initialCfg);
   grid = initialMap.grid; baseRow = initialMap.baseRow; baseCol = initialMap.baseCol;
+  tBomb.style.display = initialCfg.bombUnlocked ? '' : 'none';
   render(0);
 })();
 </script>
@@ -3636,7 +4273,8 @@
   var totalAliens = ALIEN_ROWS*ALIEN_COLS;
   var formation = {x:0, y:0, dir:1};
   var bunkers = [];
-  var player = {x:(CANVAS_W-PLAYER_W)/2, y:PLAYER_Y, w:PLAYER_W, h:PLAYER_H, bullet:null, alive:true, respawning:false, invuln:0};
+  var MAX_PLAYER_BULLETS = 3;
+  var player = {x:(CANVAS_W-PLAYER_W)/2, y:PLAYER_Y, w:PLAYER_W, h:PLAYER_H, bullets:[], alive:true, respawning:false, invuln:0};
   var alienBullets = [];
   var particles = [];
   var ufo = null;
@@ -3769,9 +4407,9 @@
   });
 
   function firePlayerBullet(){
-    if (player.bullet) return;
+    if (player.bullets.length >= MAX_PLAYER_BULLETS) return;
     var b = {x:player.x+player.w/2-1.5, y:player.y-12, w:3, h:12, dead:false};
-    player.bullet = b;
+    player.bullets.push(b);
     beep(880, 0.06, 'square');
   }
 
@@ -3784,7 +4422,7 @@
   function respawnPlayer(){
     player.x = (CANVAS_W-PLAYER_W)/2;
     player.alive = true; player.respawning = false;
-    player.invuln = INVULN_TIME; player.bullet = null;
+    player.invuln = INVULN_TIME; player.bullets = [];
   }
 
   function killPlayer(){
@@ -3893,30 +4531,30 @@
   }
 
   function updateBullets(dt){
-    if (player.bullet){
-      var b = player.bullet;
+    for (var pi=player.bullets.length-1; pi>=0; pi--){
+      var b = player.bullets[pi];
       b.y -= PLAYER_BULLET_SPEED*dt;
-      if (b.y+b.h<0){ player.bullet=null; }
-      else if (hitBunker(b.x,b.y,b.w,b.h)){ player.bullet=null; }
-      else if (ufo && rectsOverlap(b, ufo)){
+      if (b.y+b.h<0){ player.bullets.splice(pi,1); continue; }
+      if (hitBunker(b.x,b.y,b.w,b.h)){ player.bullets.splice(pi,1); continue; }
+      if (ufo && rectsOverlap(b, ufo)){
         score += ufo.value;
         updateHUD();
         spawnExplosion(ufo.x+ufo.w/2, ufo.y+ufo.h/2, '#ffd23f');
         beep(1200,0.15,'triangle');
         ufo = null;
-        player.bullet = null;
-      } else {
-        var hit = false;
-        for (var r=0;r<ALIEN_ROWS && !hit;r++){
-          for (var c=0;c<ALIEN_COLS && !hit;c++){
-            var al = aliens[r][c];
-            if (!al.alive) continue;
-            var abox = {x:alienScreenX(c), y:alienScreenY(r), w:ALIEN_W, h:ALIEN_H};
-            if (rectsOverlap(b, abox)){
-              killAlien(r,c);
-              player.bullet = null;
-              hit = true;
-            }
+        player.bullets.splice(pi,1);
+        continue;
+      }
+      var hit = false;
+      for (var r=0;r<ALIEN_ROWS && !hit;r++){
+        for (var c=0;c<ALIEN_COLS && !hit;c++){
+          var al = aliens[r][c];
+          if (!al.alive) continue;
+          var abox = {x:alienScreenX(c), y:alienScreenY(r), w:ALIEN_W, h:ALIEN_H};
+          if (rectsOverlap(b, abox)){
+            killAlien(r,c);
+            player.bullets.splice(pi,1);
+            hit = true;
           }
         }
       }
@@ -3996,7 +4634,7 @@
 
   function drawBullets(){
     ctx.fillStyle = '#fff7d6';
-    if (player.bullet) ctx.fillRect(player.bullet.x, player.bullet.y, player.bullet.w, player.bullet.h);
+    player.bullets.forEach(function(b){ ctx.fillRect(b.x, b.y, b.w, b.h); });
     ctx.fillStyle = '#ff8a4a';
     alienBullets.forEach(function(b){ ctx.fillRect(b.x,b.y,b.w,b.h); });
   }
@@ -4057,7 +4695,7 @@
     buildAliens();
     buildBunkers();
     player.x = (CANVAS_W-PLAYER_W)/2;
-    player.alive = true; player.respawning = false; player.invuln = INVULN_TIME; player.bullet = null;
+    player.alive = true; player.respawning = false; player.invuln = INVULN_TIME; player.bullets = [];
     alienBullets = []; particles = [];
     ufo = null; ufoTimer = 10+Math.random()*8;
     lives = LIVES_START;
@@ -4136,6 +4774,7 @@
   var papaView = document.getElementById('papaView');
   var playPapaBtn = document.getElementById('playPapaBtn');
   var backFromPapaBtn = document.getElementById('backFromPapaBtn');
+  var resetBtn = document.getElementById('papaResetBtn');
   var muteBtn = document.getElementById('papaMuteBtn');
   var moneyEl = document.getElementById('papaMoneyVal');
   var perClickEl = document.getElementById('papaPerClickVal');
@@ -4144,6 +4783,7 @@
   var goalFillEl = document.getElementById('papaGoalFill');
   var potatoBtn = document.getElementById('potatoBtn');
   var potatoCracks = document.getElementById('potatoCracks');
+  var chickenIcon = document.getElementById('chickenIcon');
   var papaMain = document.querySelector('#papaView .papa-main');
   var clickUpgradeListEl = document.getElementById('clickUpgradeList');
   var autoUpgradeListEl = document.getElementById('autoUpgradeList');
@@ -4206,9 +4846,13 @@
     totalEarned += amount;
     if (!goalReached && totalEarned >= GOAL){
       goalReached = true;
-      showPop('¡Sos millonario! 🎉', true);
+      showPop('¡Extorsionista tontito! 🥔💥', true);
       beep(1046, 0.15, 'triangle');
       setTimeout(function(){ beep(1318, 0.2, 'triangle'); }, 140);
+      clickStreak = 0;
+      updateCrackStage();
+      potatoBtn.classList.add('breaking');
+      setTimeout(function(){ potatoBtn.classList.remove('breaking'); }, 350);
     }
   }
 
@@ -4302,6 +4946,11 @@
     renderClickUpgrades();
     renderAutoUpgrades();
     renderCelestial();
+    updateChicken();
+  }
+
+  function updateChicken(){
+    chickenIcon.classList.toggle('active', autoOwned[0] > 0);
   }
 
   function refreshBuyButtonStates(){
@@ -4418,6 +5067,24 @@
     saveProgress();
   });
 
+  resetBtn.addEventListener('click', function(){
+    var ok = window.confirm('¿Seguro que querés reiniciar? Vas a perder toda tu plata, tus mejoras y el multiplicador.');
+    if (!ok) return;
+    money = 0;
+    totalEarned = 0;
+    clickOwned = CLICK_UPGRADES.map(function(){ return 0; });
+    autoOwned = AUTO_UPGRADES.map(function(){ return 0; });
+    celestialLevel = 0;
+    goalReached = false;
+    clickStreak = 0;
+    lastActive = Date.now();
+    recomputeRates();
+    updateHUD();
+    renderAll();
+    updateCrackStage();
+    saveProgress();
+  });
+
   var lastTime = null;
   var papaLoopRunning = false;
   function startPapaLoop(){
@@ -4447,5 +5114,625 @@
   updateHUD();
   renderAll();
   updateCrackStage();
+})();
+</script>
+<script>
+(function(){
+  var SAVE_KEY = 'miGatitoSave';
+  var DECAY_RATE = 100/900; // se vacia del todo en 15 minutos activos
+  var SLEEP_RATE = 8; // recupera energia por segundo mientras duerme
+  var MAX_OFFLINE_SECONDS = 6*3600;
+
+  var VARIANTS = [
+    {id:'carey', name:'Carey', base:'#f0dcc0', patches:[
+      {x:-18,y:15,rx:14,ry:11,color:'#2b2320'},
+      {x:20,y:8,rx:12,ry:10,color:'#d9772e'},
+      {x:0,y:36,rx:11,ry:9,color:'#2b2320'},
+      {x:-16,y:-40,rx:11,ry:9,color:'#d9772e'},
+      {x:14,y:-46,rx:9,ry:8,color:'#2b2320'}
+    ]},
+    {id:'tuxedo', name:'Blanco y Negro', base:'#faf7f2', patches:[
+      {x:0,y:-46,rx:22,ry:16,color:'#252019'},
+      {x:0,y:28,rx:26,ry:22,color:'#252019'}
+    ]},
+    {id:'naranja', name:'Naranja', base:'#e8874a', stripes:true, stripeColor:'#c96a2e'},
+    {id:'negro', name:'Negro', base:'#2b2320'},
+    {id:'blanco', name:'Blanco', base:'#faf7f2'},
+    {id:'gris', name:'Gris', base:'#9098a0', stripes:true, stripeColor:'#767d85'}
+  ];
+  var VARIANTS_BY_ID = {};
+  VARIANTS.forEach(function(v){ VARIANTS_BY_ID[v.id] = v; });
+
+  var FOODS = [
+    {id:'pescado', name:'Pescado', icon:'🐟', value:25},
+    {id:'leche', name:'Leche', icon:'🥛', value:15},
+    {id:'pollo', name:'Pollo', icon:'🍗', value:30},
+    {id:'croquetas', name:'Croquetas', icon:'🍪', value:20}
+  ];
+
+  var SPORTS = {
+    futbol:  {title:'⚽ Fútbol',  hint:'¡Tocá "¡Ya!" cuando la barra esté en la zona verde!', zoneWidth:0.32, speed:0.55},
+    basquet: {title:'🏀 Básquet', hint:'¡La zona es más chica, apuntá bien!', zoneWidth:0.20, speed:0.65},
+    voley:   {title:'🏐 Vóley',   hint:'¡Devolvé la pelota en el momento justo!', zoneWidth:0.24, speed:0.8}
+  };
+
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var GATO_W = 220, GATO_H = 220;
+
+  var portalView = document.getElementById('portalView');
+  var gatoView = document.getElementById('gatoView');
+  var playGatoBtn = document.getElementById('playGatoBtn');
+  var backFromGatoBtn = document.getElementById('backFromGatoBtn');
+  var muteBtn = document.getElementById('gatoMuteBtn');
+
+  var adoptView = document.getElementById('gatoAdoptView');
+  var homeView = document.getElementById('gatoHomeView');
+  var adoptGrid = document.getElementById('adoptGrid');
+  var changeBtn = document.getElementById('gatoChangeBtn');
+
+  var statHambreEl = document.getElementById('statHambre');
+  var statHigieneEl = document.getElementById('statHigiene');
+  var statEnergiaEl = document.getElementById('statEnergia');
+  var statFelicidadEl = document.getElementById('statFelicidad');
+  var canvas = document.getElementById('gatoCanvas');
+  var ctx = canvas.getContext('2d');
+  function fitCanvas(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = GATO_W*dpr;
+    canvas.height = GATO_H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  fitCanvas();
+  window.addEventListener('resize', fitCanvas);
+
+  var roomComerBtn = document.getElementById('roomComerBtn');
+  var roomBanarBtn = document.getElementById('roomBanarBtn');
+  var roomDormirBtn = document.getElementById('roomDormirBtn');
+  var roomJugarBtn = document.getElementById('roomJugarBtn');
+  var roomMimosBtn = document.getElementById('roomMimosBtn');
+
+  var comerOverlay = document.getElementById('comerOverlay');
+  var foodGrid = document.getElementById('foodGrid');
+  var comerCloseBtn = document.getElementById('comerCloseBtn');
+
+  var banarOverlay = document.getElementById('banarOverlay');
+  var scrubArea = document.getElementById('scrubArea');
+  var banarCloseBtn = document.getElementById('banarCloseBtn');
+
+  var dormirOverlay = document.getElementById('dormirOverlay');
+  var sleepZzz = document.getElementById('sleepZzz');
+  var sleepToggleBtn = document.getElementById('sleepToggleBtn');
+  var dormirCloseBtn = document.getElementById('dormirCloseBtn');
+
+  var jugarMenuOverlay = document.getElementById('jugarMenuOverlay');
+  var selectFutbolBtn = document.getElementById('selectFutbolBtn');
+  var selectBasquetBtn = document.getElementById('selectBasquetBtn');
+  var selectVoleyBtn = document.getElementById('selectVoleyBtn');
+  var jugarMenuCloseBtn = document.getElementById('jugarMenuCloseBtn');
+
+  var miniGameOverlay = document.getElementById('miniGameOverlay');
+  var miniGameTitleEl = document.getElementById('miniGameTitle');
+  var miniGameHintEl = document.getElementById('miniGameHint');
+  var timingZoneEl = document.getElementById('timingZone');
+  var timingMarkerEl = document.getElementById('timingMarker');
+  var timingActionBtn = document.getElementById('timingActionBtn');
+  var miniGameScoreEl = document.getElementById('miniGameScore');
+  var miniGameCloseBtn = document.getElementById('miniGameCloseBtn');
+
+  var mimosOverlay = document.getElementById('mimosOverlay');
+  var mimosArea = document.getElementById('mimosArea');
+  var mimosCloseBtn = document.getElementById('mimosCloseBtn');
+
+  var muted = false;
+  var audioCtx = null;
+  function ensureAudio(){
+    if (!audioCtx){
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; }
+    }
+  }
+  function beep(freq, dur, type){
+    if (muted || !audioCtx) return;
+    var t0 = audioCtx.currentTime;
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.15, t0 + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+  muteBtn.addEventListener('click', function(){
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇' : '🔊';
+    muteBtn.setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar sonido');
+  });
+
+  var adopted = null;
+  var hambre = 80, higiene = 80, energia = 80, felicidad = 80;
+  var lastActive = Date.now();
+  var roomOpen = null;
+  var sleeping = false;
+
+  function clamp100(n){ return Math.max(0, Math.min(100, n)); }
+
+  function loadProgress(){
+    try {
+      var raw = localStorage.getItem(SAVE_KEY);
+      if (raw){
+        var data = JSON.parse(raw);
+        adopted = data.adopted || null;
+        hambre = data.hambre!==undefined ? data.hambre : 80;
+        higiene = data.higiene!==undefined ? data.higiene : 80;
+        energia = data.energia!==undefined ? data.energia : 80;
+        felicidad = data.felicidad!==undefined ? data.felicidad : 80;
+        lastActive = data.lastActive || Date.now();
+      }
+    } catch(e){}
+  }
+  function saveProgress(){
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        adopted: adopted, hambre: hambre, higiene: higiene,
+        energia: energia, felicidad: felicidad, lastActive: Date.now()
+      }));
+    } catch(e){}
+  }
+
+  function applyOfflineDecay(){
+    var now = Date.now();
+    var elapsed = Math.max(0, (now-lastActive)/1000);
+    elapsed = Math.min(elapsed, MAX_OFFLINE_SECONDS);
+    var loss = DECAY_RATE*elapsed;
+    hambre = clamp100(hambre-loss);
+    higiene = clamp100(higiene-loss);
+    energia = clamp100(energia-loss);
+    felicidad = clamp100(felicidad-loss);
+    lastActive = now;
+  }
+
+  // ---------- Dibujo del gato ----------
+  function drawCat(cx, cy, scale, variant, mood, bob, t){
+    ctx.save();
+    ctx.translate(cx, cy+(bob||0));
+    ctx.scale(scale, scale);
+
+    ctx.strokeStyle = variant.base;
+    ctx.lineWidth = 16;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(32, 15);
+    ctx.quadraticCurveTo(58, 0, 50, -35);
+    ctx.stroke();
+
+    ctx.fillStyle = variant.base;
+    ctx.beginPath();
+    ctx.ellipse(0, 22, 44, 36, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(0, -28, 36, 0, Math.PI*2);
+    ctx.fill();
+
+    if (variant.patches){
+      variant.patches.forEach(function(p){
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.ellipse(p.x, p.y, p.rx, p.ry, 0, 0, Math.PI*2);
+        ctx.fill();
+      });
+    }
+    if (variant.stripes){
+      ctx.strokeStyle = variant.stripeColor;
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      [[-22,4,-16,24],[-2,-2,4,20],[16,4,22,24]].forEach(function(s){
+        ctx.beginPath(); ctx.moveTo(s[0],s[1]); ctx.lineTo(s[2],s[3]); ctx.stroke();
+      });
+    }
+
+    ctx.fillStyle = variant.base;
+    ctx.beginPath();
+    ctx.moveTo(-28,-50); ctx.lineTo(-38,-78); ctx.lineTo(-10,-58); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(28,-50); ctx.lineTo(38,-78); ctx.lineTo(10,-58); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ff9fc0';
+    ctx.beginPath();
+    ctx.moveTo(-25,-53); ctx.lineTo(-31,-70); ctx.lineTo(-15,-59); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(25,-53); ctx.lineTo(31,-70); ctx.lineTo(15,-59); ctx.closePath(); ctx.fill();
+
+    drawFace(mood, t);
+
+    ctx.restore();
+  }
+
+  function drawFace(mood, t){
+    var blink = !reducedMotion && Math.sin((t||0)*0.7) > 0.985;
+    ctx.fillStyle = '#241a3d';
+    if (mood==='sleepy'){
+      ctx.strokeStyle='#241a3d'; ctx.lineWidth=3; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(-17,-30); ctx.quadraticCurveTo(-10,-25,-3,-30); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(3,-30); ctx.quadraticCurveTo(10,-25,17,-30); ctx.stroke();
+    } else if (mood==='happy'){
+      ctx.strokeStyle='#241a3d'; ctx.lineWidth=3.5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(-19,-28); ctx.lineTo(-11,-35); ctx.lineTo(-3,-28); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(3,-28); ctx.lineTo(11,-35); ctx.lineTo(19,-28); ctx.stroke();
+    } else if (!blink){
+      ctx.beginPath(); ctx.arc(-10,-30,3.6,0,Math.PI*2); ctx.arc(10,-30,3.6,0,Math.PI*2); ctx.fill();
+    } else {
+      ctx.strokeStyle='#241a3d'; ctx.lineWidth=2.5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(-13,-30); ctx.lineTo(-7,-30); ctx.moveTo(7,-30); ctx.lineTo(13,-30); ctx.stroke();
+    }
+
+    ctx.fillStyle = '#ff8fc0';
+    ctx.beginPath();
+    ctx.moveTo(-4,-22); ctx.lineTo(4,-22); ctx.lineTo(0,-18); ctx.closePath(); ctx.fill();
+
+    ctx.strokeStyle = '#241a3d';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    if (mood==='sad'){
+      ctx.beginPath(); ctx.moveTo(-9,-10); ctx.quadraticCurveTo(0,-15,9,-10); ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(0,-18); ctx.quadraticCurveTo(-6,-11,-11,-13);
+      ctx.moveTo(0,-18); ctx.quadraticCurveTo(6,-11,11,-13);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = 'rgba(40,30,20,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-15,-20); ctx.lineTo(-32,-24);
+    ctx.moveTo(-15,-16); ctx.lineTo(-32,-13);
+    ctx.moveTo(15,-20); ctx.lineTo(32,-24);
+    ctx.moveTo(15,-16); ctx.lineTo(32,-13);
+    ctx.stroke();
+  }
+
+  function computeMood(){
+    if (sleeping) return 'sleepy';
+    if (energia < 18) return 'sleepy';
+    var avg = (hambre+higiene+energia+felicidad)/4;
+    if (avg < 35) return 'sad';
+    if (avg > 75) return 'happy';
+    return 'neutral';
+  }
+
+  // ---------- Pantalla de adopcion ----------
+  function buildAdoptGrid(){
+    adoptGrid.innerHTML = '';
+    VARIANTS.forEach(function(v){
+      var card = document.createElement('div');
+      card.className = 'adopt-card';
+      var c = document.createElement('canvas');
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      c.width = 90*dpr; c.height = 90*dpr;
+      c.style.width = '90px'; c.style.height = '90px';
+      var cctx = c.getContext('2d');
+      cctx.setTransform(dpr,0,0,dpr,0,0);
+      cctx.save();
+      cctx.translate(45, 56);
+      cctx.scale(0.5, 0.5);
+      drawVariantPreview(cctx, v);
+      cctx.restore();
+      var h3 = document.createElement('h3');
+      h3.textContent = v.name;
+      var btn = document.createElement('button');
+      btn.textContent = 'Adoptar';
+      btn.addEventListener('click', function(){ adoptCat(v.id); });
+      card.appendChild(c);
+      card.appendChild(h3);
+      card.appendChild(btn);
+      adoptGrid.appendChild(card);
+    });
+  }
+
+  function drawVariantPreview(targetCtx, variant){
+    var prevCtx = ctx;
+    ctx = targetCtx;
+    drawCat(0, 0, 1, variant, 'happy', 0, 0);
+    ctx = prevCtx;
+  }
+
+  function adoptCat(id){
+    adopted = id;
+    hambre = 80; higiene = 80; energia = 80; felicidad = 80;
+    lastActive = Date.now();
+    saveProgress();
+    beep(1046, 0.15, 'triangle');
+    showHomeView();
+  }
+
+  changeBtn.addEventListener('click', function(){
+    var ok = window.confirm('¿Seguro que querés adoptar otro gatito? Vas a dejar ir al que tenés ahora.');
+    if (!ok) return;
+    adopted = null;
+    saveProgress();
+    showAdoptView();
+  });
+
+  function showAdoptView(){
+    adoptView.classList.remove('is-hidden');
+    homeView.classList.add('is-hidden');
+    pauseHomeLoop();
+  }
+  function showHomeView(){
+    adoptView.classList.add('is-hidden');
+    homeView.classList.remove('is-hidden');
+    updateStatBars();
+    startHomeLoop();
+  }
+
+  // ---------- Barras de estado ----------
+  function statClass(base, value){
+    return base + (value < 25 ? ' low' : '');
+  }
+  function updateStatBars(){
+    statHambreEl.style.width = hambre+'%';
+    statHambreEl.className = statClass('stat-fill hunger', hambre);
+    statHigieneEl.style.width = higiene+'%';
+    statHigieneEl.className = statClass('stat-fill hygiene', higiene);
+    statEnergiaEl.style.width = energia+'%';
+    statEnergiaEl.className = statClass('stat-fill energy', energia);
+    statFelicidadEl.style.width = felicidad+'%';
+    statFelicidadEl.className = statClass('stat-fill happy', felicidad);
+  }
+
+  // ---------- Bucle principal (decaimiento + dibujo) ----------
+  var homeLoopRunning = false;
+  var lastTime = null;
+  function startHomeLoop(){
+    if (homeLoopRunning) return;
+    homeLoopRunning = true;
+    lastTime = null;
+    requestAnimationFrame(homeLoop);
+  }
+  function pauseHomeLoop(){
+    homeLoopRunning = false;
+  }
+  function homeLoop(ts){
+    if (!homeLoopRunning) return;
+    if (lastTime===null) lastTime = ts;
+    var dt = Math.min(0.25, (ts-lastTime)/1000);
+    lastTime = ts;
+    var t = ts/1000;
+
+    if (!roomOpen){
+      hambre = clamp100(hambre - DECAY_RATE*dt);
+      higiene = clamp100(higiene - DECAY_RATE*dt);
+      energia = clamp100(energia - DECAY_RATE*dt);
+      felicidad = clamp100(felicidad - DECAY_RATE*dt);
+      updateStatBars();
+    } else if (sleeping){
+      energia = clamp100(energia + SLEEP_RATE*dt);
+      updateStatBars();
+      if (energia >= 100) stopSleeping();
+    }
+
+    var bob = reducedMotion ? 0 : Math.sin(t*2)*4;
+    ctx.clearRect(0,0,GATO_W,GATO_H);
+    if (adopted){
+      drawCat(GATO_W/2, GATO_H/2+40, 1.35, VARIANTS_BY_ID[adopted], computeMood(), bob, t);
+    }
+    requestAnimationFrame(homeLoop);
+  }
+
+  // ---------- Salas: gestion generica ----------
+  var allRoomOverlays = [comerOverlay, banarOverlay, dormirOverlay, jugarMenuOverlay, miniGameOverlay, mimosOverlay];
+  function closeAllRooms(){
+    allRoomOverlays.forEach(function(o){ o.classList.add('is-hidden'); });
+    roomOpen = null;
+    if (sleeping) stopSleeping();
+  }
+  function openRoom(overlayEl, name){
+    closeAllRooms();
+    overlayEl.classList.remove('is-hidden');
+    roomOpen = name;
+  }
+
+  roomComerBtn.addEventListener('click', function(){ ensureAudio(); openComer(); });
+  roomBanarBtn.addEventListener('click', function(){ ensureAudio(); openRoom(banarOverlay, 'banar'); });
+  roomDormirBtn.addEventListener('click', function(){ ensureAudio(); openRoom(dormirOverlay, 'dormir'); });
+  roomJugarBtn.addEventListener('click', function(){ ensureAudio(); openRoom(jugarMenuOverlay, 'jugar'); });
+  roomMimosBtn.addEventListener('click', function(){ ensureAudio(); openRoom(mimosOverlay, 'mimos'); });
+
+  comerCloseBtn.addEventListener('click', function(){ closeAllRooms(); saveProgress(); });
+  banarCloseBtn.addEventListener('click', function(){ closeAllRooms(); saveProgress(); });
+  dormirCloseBtn.addEventListener('click', function(){ closeAllRooms(); saveProgress(); });
+  jugarMenuCloseBtn.addEventListener('click', function(){ closeAllRooms(); saveProgress(); });
+  mimosCloseBtn.addEventListener('click', function(){ closeAllRooms(); saveProgress(); });
+
+  // ---------- Sala: Comer ----------
+  var feedCooldown = 0;
+  function openComer(){
+    openRoom(comerOverlay, 'comer');
+    renderFoodGrid();
+  }
+  function renderFoodGrid(){
+    foodGrid.innerHTML = '';
+    FOODS.forEach(function(food){
+      var btn = document.createElement('button');
+      btn.className = 'food-btn';
+      btn.innerHTML = '<span class="food-icon">'+food.icon+'</span><span>'+food.name+'</span>';
+      btn.disabled = feedCooldown > 0;
+      btn.addEventListener('click', function(){ feedCat(food); });
+      foodGrid.appendChild(btn);
+    });
+  }
+  function feedCat(food){
+    if (feedCooldown > 0) return;
+    hambre = clamp100(hambre + food.value);
+    updateStatBars();
+    beep(600, 0.08, 'sine');
+    feedCooldown = 0.8;
+    renderFoodGrid();
+    saveProgress();
+    var iv = setInterval(function(){
+      feedCooldown -= 0.1;
+      if (feedCooldown <= 0){
+        feedCooldown = 0;
+        clearInterval(iv);
+        renderFoodGrid();
+      }
+    }, 100);
+  }
+
+  // ---------- Sala: Bañar ----------
+  scrubArea.addEventListener('click', function(e){
+    higiene = clamp100(higiene + 8);
+    updateStatBars();
+    beep(700+Math.random()*200, 0.06, 'sine');
+    var bubble = document.createElement('div');
+    bubble.className = 'bubble-pop';
+    bubble.textContent = '🫧';
+    bubble.style.left = (50 + (Math.random()*40-20)) + '%';
+    bubble.style.top = '20%';
+    banarOverlay.appendChild(bubble);
+    setTimeout(function(){ if (bubble.parentNode) bubble.parentNode.removeChild(bubble); }, 720);
+    saveProgress();
+  });
+
+  // ---------- Sala: Dormir ----------
+  function stopSleeping(){
+    sleeping = false;
+    sleepZzz.classList.remove('active');
+    sleepToggleBtn.textContent = 'Dormir';
+    saveProgress();
+  }
+  sleepToggleBtn.addEventListener('click', function(){
+    sleeping = !sleeping;
+    if (sleeping){
+      sleepZzz.classList.add('active');
+      sleepToggleBtn.textContent = 'Despertar';
+      beep(300, 0.2, 'sine');
+    } else {
+      stopSleeping();
+    }
+  });
+
+  // ---------- Sala: Jugar (menu + mini-juego compartido) ----------
+  var currentSport = null;
+  var miniGameState = 'idle';
+  var markerPos = 0;
+  var attempts = 0, hits = 0;
+  var miniGameTime = 0;
+
+  function launchSport(id){
+    currentSport = SPORTS[id];
+    closeAllRooms();
+    miniGameOverlay.classList.remove('is-hidden');
+    roomOpen = 'minigame';
+    miniGameTitleEl.textContent = currentSport.title;
+    miniGameHintEl.textContent = currentSport.hint;
+    timingZoneEl.style.left = ((0.5-currentSport.zoneWidth/2)*100)+'%';
+    timingZoneEl.style.width = (currentSport.zoneWidth*100)+'%';
+    attempts = 0; hits = 0; miniGameTime = 0;
+    miniGameState = 'playing';
+    timingActionBtn.textContent = '¡Ya!';
+    miniGameScoreEl.textContent = 'Aciertos: 0/5';
+    requestAnimationFrame(miniGameLoop);
+  }
+  selectFutbolBtn.addEventListener('click', function(){ launchSport('futbol'); });
+  selectBasquetBtn.addEventListener('click', function(){ launchSport('basquet'); });
+  selectVoleyBtn.addEventListener('click', function(){ launchSport('voley'); });
+
+  var miniGameLastTs = null;
+  function miniGameLoop(ts){
+    if (roomOpen !== 'minigame' || miniGameState !== 'playing') return;
+    if (miniGameLastTs===null) miniGameLastTs = ts;
+    var dt = Math.min(0.05, (ts-miniGameLastTs)/1000);
+    miniGameLastTs = ts;
+    miniGameTime += dt;
+    markerPos = Math.abs(((miniGameTime*currentSport.speed) % 2) - 1);
+    timingMarkerEl.style.left = (markerPos*100)+'%';
+    requestAnimationFrame(miniGameLoop);
+  }
+
+  timingActionBtn.addEventListener('click', function(){
+    if (miniGameState !== 'playing') {
+      closeAllRooms();
+      openRoom(jugarMenuOverlay, 'jugar');
+      return;
+    }
+    var half = currentSport.zoneWidth/2;
+    var isHit = markerPos >= (0.5-half) && markerPos <= (0.5+half);
+    attempts += 1;
+    if (isHit){
+      hits += 1;
+      beep(900, 0.1, 'triangle');
+    } else {
+      beep(200, 0.12, 'sawtooth');
+    }
+    miniGameScoreEl.textContent = 'Aciertos: '+hits+'/5';
+    if (attempts >= 5){
+      finishMiniGame();
+    }
+  });
+
+  function finishMiniGame(){
+    miniGameState = 'done';
+    var gain = hits*8;
+    felicidad = clamp100(felicidad + gain);
+    energia = clamp100(energia - 8);
+    updateStatBars();
+    miniGameHintEl.textContent = '¡Convertiste '+hits+' de 5! +'+gain+' felicidad';
+    timingActionBtn.textContent = 'Volver';
+    saveProgress();
+    miniGameLastTs = null;
+  }
+
+  miniGameCloseBtn.addEventListener('click', function(){
+    miniGameState = 'idle';
+    closeAllRooms();
+    openRoom(jugarMenuOverlay, 'jugar');
+  });
+
+  // ---------- Sala: Mimos ----------
+  mimosArea.addEventListener('click', function(e){
+    felicidad = clamp100(felicidad + 5);
+    updateStatBars();
+    beep(1000+Math.random()*200, 0.06, 'sine');
+    var heart = document.createElement('div');
+    heart.className = 'heart-pop';
+    heart.textContent = '💗';
+    heart.style.left = (50 + (Math.random()*40-20)) + '%';
+    heart.style.top = '30%';
+    mimosOverlay.appendChild(heart);
+    setTimeout(function(){ if (heart.parentNode) heart.parentNode.removeChild(heart); }, 820);
+    saveProgress();
+  });
+
+  // ---------- Navegacion del portal ----------
+  playGatoBtn.addEventListener('click', function(){
+    portalView.classList.add('is-hidden');
+    gatoView.classList.remove('is-hidden');
+    applyOfflineDecay();
+    saveProgress();
+    if (adopted){
+      updateStatBars();
+      showHomeView();
+    } else {
+      showAdoptView();
+    }
+  });
+  backFromGatoBtn.addEventListener('click', function(){
+    gatoView.classList.add('is-hidden');
+    portalView.classList.remove('is-hidden');
+    pauseHomeLoop();
+    lastActive = Date.now();
+    saveProgress();
+  });
+
+  loadProgress();
+  buildAdoptGrid();
+  if (adopted){
+    adoptView.classList.add('is-hidden');
+    homeView.classList.remove('is-hidden');
+    updateStatBars();
+  }
 })();
 </script>

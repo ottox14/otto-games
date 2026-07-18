@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/guerra-tanques.css">
 <link rel="stylesheet" href="css/space-invaders.css">
 <link rel="stylesheet" href="css/papa-millonaria.css">
+<link rel="stylesheet" href="css/mi-gatito.css">
 </head>
 <body>
 
@@ -68,6 +69,14 @@
         <p>Tocá la papa para ganar pesos, comprá mejoras y hacete millonario. ¡Cuidado, la papa se va agrietando con cada golpe!</p>
         <div class="tags"><span class="tag">Clicker</span><span class="tag">Meta: $1.000.000</span></div>
         <button class="play-btn" id="playPapaBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">🐱</div>
+        <h2>Mi Gatito</h2>
+        <p>Adoptá un gatito y cuidalo: dale de comer, bañalo, dejalo dormir y jugá con él a la pelota. ¡Que no le falte nada!</p>
+        <div class="tags"><span class="tag">Mascotas</span><span class="tag">Cuidado</span></div>
+        <button class="play-btn" id="playGatoBtn">▶ Jugar</button>
       </article>
 
       <article class="game-card coming-soon">
@@ -389,6 +398,106 @@
           </section>
         </div>
       </div>
+
+      <div class="controls-row papa-footer">
+        <button class="text-btn" id="papaResetBtn">🔁 Reiniciar partida</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="view is-hidden" id="gatoView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromGatoBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">MI GATITO</h1>
+          <p class="subtitle">Adoptá un gatito y cuidalo</p>
+        </div>
+        <button class="mute-btn" id="gatoMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="frame gato-frame">
+
+        <div class="gato-sub-view" id="gatoAdoptView">
+          <h2 class="gato-adopt-title">Elegí a tu gatito</h2>
+          <div class="adopt-grid" id="adoptGrid"></div>
+        </div>
+
+        <div class="gato-sub-view is-hidden" id="gatoHomeView">
+          <div class="gato-stats">
+            <div class="stat-row">🍖<div class="stat-track"><div class="stat-fill hunger" id="statHambre"></div></div></div>
+            <div class="stat-row">🛁<div class="stat-track"><div class="stat-fill hygiene" id="statHigiene"></div></div></div>
+            <div class="stat-row">⚡<div class="stat-track"><div class="stat-fill energy" id="statEnergia"></div></div></div>
+            <div class="stat-row">💛<div class="stat-track"><div class="stat-fill happy" id="statFelicidad"></div></div></div>
+          </div>
+          <canvas id="gatoCanvas" width="220" height="220"></canvas>
+          <div class="room-row">
+            <button class="room-btn" id="roomComerBtn">🍽️<span>Comer</span></button>
+            <button class="room-btn" id="roomBanarBtn">🛁<span>Bañar</span></button>
+            <button class="room-btn" id="roomDormirBtn">😴<span>Dormir</span></button>
+            <button class="room-btn" id="roomJugarBtn">🎮<span>Jugar</span></button>
+            <button class="room-btn" id="roomMimosBtn">💕<span>Mimos</span></button>
+          </div>
+          <div class="gato-footer">
+            <button class="text-btn" id="gatoChangeBtn">🔁 Adoptar otro gatito</button>
+          </div>
+        </div>
+
+        <div class="overlay is-hidden" id="comerOverlay">
+          <h2>🍽️ Comer</h2>
+          <p>Elegí qué le das de comer a tu gatito.</p>
+          <div class="food-grid" id="foodGrid"></div>
+          <button class="text-btn" id="comerCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="banarOverlay">
+          <h2>🛁 Bañar</h2>
+          <p>Tocá al gatito para frotarlo con la esponja.</p>
+          <button class="scrub-area" id="scrubArea" aria-label="Frotar">🧽</button>
+          <button class="text-btn" id="banarCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="dormirOverlay">
+          <h2>😴 Dormir</h2>
+          <p>Dejalo descansar para que recupere energía.</p>
+          <div class="sleep-zzz" id="sleepZzz">💤</div>
+          <button class="big-btn" id="sleepToggleBtn">Dormir</button>
+          <button class="text-btn" id="dormirCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="jugarMenuOverlay">
+          <h2>🎮 Jugar</h2>
+          <p>Elegí un deporte para jugar con tu gatito.</p>
+          <div class="game-select-row">
+            <button class="game-select-btn" id="selectFutbolBtn"><span class="game-icon">⚽</span>Fútbol</button>
+            <button class="game-select-btn" id="selectBasquetBtn"><span class="game-icon">🏀</span>Básquet</button>
+            <button class="game-select-btn" id="selectVoleyBtn"><span class="game-icon">🏐</span>Vóley</button>
+          </div>
+          <button class="text-btn" id="jugarMenuCloseBtn">Cerrar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="miniGameOverlay">
+          <h2 id="miniGameTitle">⚽ Fútbol</h2>
+          <p id="miniGameHint">¡Tocá "¡Ya!" cuando la barra esté en la zona verde!</p>
+          <div class="timing-track" id="timingTrack">
+            <div class="timing-zone" id="timingZone"></div>
+            <div class="timing-marker" id="timingMarker"></div>
+          </div>
+          <button class="big-btn" id="timingActionBtn">¡Ya!</button>
+          <p id="miniGameScore">Aciertos: 0/5</p>
+          <button class="text-btn" id="miniGameCloseBtn">Volver</button>
+        </div>
+
+        <div class="overlay is-hidden" id="mimosOverlay">
+          <h2>💕 Mimos</h2>
+          <p>Tocá al gatito para hacerle mimos.</p>
+          <button class="mimos-area" id="mimosArea" aria-label="Acariciar">🐱</button>
+          <button class="text-btn" id="mimosCloseBtn">Cerrar</button>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -400,5 +509,6 @@
 <script src="js/guerra-tanques.js"></script>
 <script src="js/space-invaders.js"></script>
 <script src="js/papa-millonaria.js"></script>
+<script src="js/mi-gatito.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
-/* Tema y componentes propios de Invasión Alienígena: HUD, marco del campo
-   de batalla y el D-pad de dos botones (izquierda/derecha) */
+/* Tema y componentes propios de Invasión Alienígena: HUD y marco del
+   campo de batalla (el joystick de movimiento es un componente compartido) */
 #invadersView{
   --panel: rgba(20,10,35,0.6);
   --panel-border: rgba(255,90,200,0.2);
@@ -26,13 +26,4 @@
   height:auto;
   touch-action:none;
   image-rendering:pixelated;
-}
-.dpad-lr{
-  display:flex;
-  gap:6px;
-}
-.dpad-lr .dpad-btn{
-  width:44px;
-  height:44px;
-  font-size:16px;
 }

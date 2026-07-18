@@ -272,11 +272,8 @@
       <div class="controls-row">
         <p class="hint">Movete con <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd> · Bomba con <kbd>B</kbd> (desde el Nivel 4)</p>
         <div class="action-touch-controls">
-          <div class="dpad">
-            <button class="dpad-btn dpad-up" id="tUp" aria-label="Arriba">▲</button>
-            <button class="dpad-btn dpad-left" id="tLeft" aria-label="Izquierda">◀</button>
-            <button class="dpad-btn dpad-right" id="tRight" aria-label="Derecha">▶</button>
-            <button class="dpad-btn dpad-down" id="tDown" aria-label="Abajo">▼</button>
+          <div class="joystick" id="tJoystick" aria-label="Mover el tanque">
+            <div class="joystick-base"><div class="joystick-thumb"></div></div>
           </div>
           <button class="fire-btn" id="tFire" aria-label="Disparar">🔥</button>
           <button class="fire-btn bomb-btn" id="tBomb" aria-label="Tirar bomba">💣</button>
@@ -329,9 +326,8 @@
       <div class="controls-row">
         <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd></p>
         <div class="action-touch-controls">
-          <div class="dpad-lr">
-            <button class="dpad-btn" id="iLeft" aria-label="Izquierda">◀</button>
-            <button class="dpad-btn" id="iRight" aria-label="Derecha">▶</button>
+          <div class="joystick joystick-2way" id="iJoystick" aria-label="Mover la nave">
+            <div class="joystick-base"><div class="joystick-thumb"></div></div>
           </div>
           <button class="fire-btn" id="iFire" aria-label="Disparar">🔥</button>
         </div>

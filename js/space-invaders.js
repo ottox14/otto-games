@@ -53,8 +53,7 @@
   var overScoreEl = document.getElementById('invadersOverScore');
   var retryBtn = document.getElementById('invadersRetryBtn');
   var resetBtn = document.getElementById('invadersResetBtn');
-  var iLeft = document.getElementById('iLeft');
-  var iRight = document.getElementById('iRight');
+  var iJoystick = document.getElementById('iJoystick');
   var iFire = document.getElementById('iFire');
 
   function invadersActive(){ return !invadersView.classList.contains('is-hidden'); }
@@ -235,12 +234,57 @@
     if (KEY_DIR[e.code]) releaseDir(KEY_DIR[e.code]);
   });
 
-  function bindDpad(btn, dir){
-    btn.addEventListener('pointerdown', function(e){ e.preventDefault(); pressDir(dir); });
-    btn.addEventListener('pointerup', function(){ releaseDir(dir); });
-    btn.addEventListener('pointerleave', function(){ releaseDir(dir); });
+  function bindJoystick(joyEl, dirs){
+    var thumb = joyEl.querySelector('.joystick-thumb');
+    var maxDist = 26;
+    var pointerId = null;
+    var activeDir = null;
+    function setDir(dir){
+      if (dir === activeDir) return;
+      if (activeDir) releaseDir(activeDir);
+      activeDir = dir;
+      if (activeDir) pressDir(activeDir);
+    }
+    function dirFromAngle(dx, dy, dist){
+      if (dist < maxDist*0.32) return null;
+      if (dirs.length === 2) return dx < 0 ? dirs[0] : dirs[1];
+      var deg = Math.atan2(dy, dx) * 180/Math.PI;
+      if (deg > -45 && deg <= 45) return 'right';
+      if (deg > 45 && deg <= 135) return 'down';
+      if (deg > 135 || deg <= -135) return 'left';
+      return 'up';
+    }
+    function move(e){
+      var rect = joyEl.getBoundingClientRect();
+      var dx = e.clientX - (rect.left + rect.width/2);
+      var dy = e.clientY - (rect.top + rect.height/2);
+      var dist = Math.min(Math.sqrt(dx*dx+dy*dy), maxDist);
+      var ang = Math.atan2(dy, dx);
+      thumb.style.transform = 'translate('+(Math.cos(ang)*dist)+'px,'+(Math.sin(ang)*dist)+'px)';
+      setDir(dirFromAngle(dx, dy, Math.sqrt(dx*dx+dy*dy)));
+    }
+    function end(e){
+      if (pointerId===null || e.pointerId!==pointerId) return;
+      pointerId = null;
+      joyEl.classList.remove('dragging');
+      thumb.style.transform = '';
+      setDir(null);
+    }
+    joyEl.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      pointerId = e.pointerId;
+      joyEl.setPointerCapture(pointerId);
+      joyEl.classList.add('dragging');
+      move(e);
+    });
+    joyEl.addEventListener('pointermove', function(e){
+      if (pointerId===null || e.pointerId!==pointerId) return;
+      move(e);
+    });
+    joyEl.addEventListener('pointerup', end);
+    joyEl.addEventListener('pointercancel', end);
   }
-  bindDpad(iLeft,'left'); bindDpad(iRight,'right');
+  bindJoystick(iJoystick, ['left','right']);
   iFire.addEventListener('pointerdown', function(e){
     e.preventDefault();
     if (gameState==='play' && player.alive && !player.respawning) firePlayerBullet();

@@ -195,7 +195,7 @@
     flex-wrap:wrap;
   }
   .pass-title{ margin:0; font-size:13px; font-weight:800; white-space:nowrap; }
-  .tray{ display:flex; gap:10px; flex:1; }
+  .tray{ display:flex; gap:10px; flex:1; flex-wrap:wrap; }
   .tray-slot{
     width:64px; height:64px;
     border-radius:12px;

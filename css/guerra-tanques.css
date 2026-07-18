@@ -1,5 +1,6 @@
 /* Tema y componentes propios de Guerra de Tanques: HUD, marco del campo de
-   batalla y controles táctiles (D-pad y botón de disparo) */
+   batalla y el botón de bomba (el joystick de movimiento es un componente
+   compartido) */
   #tanksView{
     --panel: rgba(20,26,14,0.6);
     --panel-border: rgba(180,200,140,0.2);
@@ -27,16 +28,6 @@
     touch-action:none;
     image-rendering:pixelated;
   }
-  .dpad{
-    display:grid;
-    grid-template-columns:repeat(3,34px);
-    grid-template-rows:repeat(2,34px);
-    gap:4px;
-  }
-  .dpad-up{ grid-column:2; grid-row:1; }
-  .dpad-left{ grid-column:1; grid-row:2; }
-  .dpad-right{ grid-column:3; grid-row:2; }
-  .dpad-down{ grid-column:2; grid-row:2; }
   .bomb-btn{
     background:linear-gradient(180deg,#7a5cff,#4a2fb0);
     box-shadow:0 4px 0 #331f7a;

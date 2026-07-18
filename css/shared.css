@@ -2,12 +2,12 @@
    marco del juego, HUD, overlays y botones genéricos */
   *{box-sizing:border-box;}
   html,body{height:100%;}
+  html{ overflow-x:hidden; }
+  body{ overflow-x:hidden; }
   body{
     margin:0;
     min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    min-height:100dvh;
     padding:24px;
     background:radial-gradient(ellipse at 50% -10%, var(--sky-mid), var(--sky-top) 60%);
     font-family:ui-rounded,"Segoe UI Rounded","Segoe UI",Verdana,sans-serif;
@@ -50,6 +50,7 @@
     z-index:1;
     width:100%;
     max-width:920px;
+    margin:0 auto;
     display:flex;
     flex-direction:column;
     gap:14px;
@@ -261,6 +262,8 @@
     display:block;
     width:100%;
     height:auto;
+    max-height:68vh;
+    max-height:64dvh;
     touch-action:none;
   }
   .hud{
@@ -482,6 +485,38 @@
   .fire-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #7a2814; }
   .fire-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
+  /* Joystick virtual: base circular + thumb arrastrable, usado en los
+     juegos de acción en lugar de las antiguas flechas sueltas */
+  .joystick{
+    width:96px;
+    height:96px;
+    touch-action:none;
+    user-select:none;
+    flex-shrink:0;
+  }
+  .joystick-base{
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    backdrop-filter:blur(6px);
+  }
+  .joystick-thumb{
+    position:absolute;
+    top:50%; left:50%;
+    width:44px;
+    height:44px;
+    margin:-22px 0 0 -22px;
+    border-radius:50%;
+    background:linear-gradient(180deg,var(--coral),var(--magenta));
+    box-shadow:0 4px 0 rgba(0,0,0,0.3), 0 6px 14px rgba(0,0,0,0.35);
+    pointer-events:none;
+  }
+  .joystick.dragging .joystick-thumb{ transition:none; }
+  .joystick:not(.dragging) .joystick-thumb{ transition:transform 0.12s ease-out; }
+
 @media (hover:hover) and (pointer:fine){
   .touch-btns{ display:none; }
   .action-touch-controls{ display:none; }
@@ -489,5 +524,37 @@
 @media (prefers-reduced-motion: reduce){
   .big-btn, .play-btn{ transition:none; }
   .brand{ animation:none; }
+  .joystick:not(.dragging) .joystick-thumb{ transition:none; }
+}
+@media (max-width:480px){
+  body{ padding:10px; }
+  .frame{ border-radius:14px; }
+  .hero{ padding:6px 0 4px; }
+  .overlay{ padding:16px; gap:10px; }
+}
+
+/* Pantallas bajas (celulares chicos, apaisado): todo el juego debe entrar
+   sin tener que hacer scroll para ver el HUD o los controles */
+@media (max-height:760px){
+  body{ padding:14px; }
+  .wrap{ gap:10px; }
+  .stage{ gap:8px; }
+  .hero{ padding:4px 0 2px; gap:4px; }
+  .game-title{ font-size:clamp(20px,5vw,30px); }
+  canvas{ max-height:56dvh; }
+}
+@media (max-height:600px){
+  body{ padding:8px; }
+  .wrap{ gap:6px; }
+  .stage{ gap:6px; }
+  .hero{ display:none; }
+  .subtitle{ display:none; }
+  .game-title{ font-size:clamp(18px,4.5vw,26px); }
+  .game-header{ margin-bottom:-2px; }
+  canvas{ max-height:46dvh; }
+  .controls-row{ gap:6px; }
+}
+@media (max-height:600px) and (pointer:coarse){
+  .hint{ display:none; }
 }
 

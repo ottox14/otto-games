@@ -25,12 +25,12 @@
    marco del juego, HUD, overlays y botones genéricos */
   *{box-sizing:border-box;}
   html,body{height:100%;}
+  html{ overflow-x:hidden; }
+  body{ overflow-x:hidden; }
   body{
     margin:0;
     min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    min-height:100dvh;
     padding:24px;
     background:radial-gradient(ellipse at 50% -10%, var(--sky-mid), var(--sky-top) 60%);
     font-family:ui-rounded,"Segoe UI Rounded","Segoe UI",Verdana,sans-serif;
@@ -73,6 +73,7 @@
     z-index:1;
     width:100%;
     max-width:920px;
+    margin:0 auto;
     display:flex;
     flex-direction:column;
     gap:14px;
@@ -284,6 +285,8 @@
     display:block;
     width:100%;
     height:auto;
+    max-height:68vh;
+    max-height:64dvh;
     touch-action:none;
   }
   .hud{
@@ -505,6 +508,38 @@
   .fire-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #7a2814; }
   .fire-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
+  /* Joystick virtual: base circular + thumb arrastrable, usado en los
+     juegos de acción en lugar de las antiguas flechas sueltas */
+  .joystick{
+    width:96px;
+    height:96px;
+    touch-action:none;
+    user-select:none;
+    flex-shrink:0;
+  }
+  .joystick-base{
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    backdrop-filter:blur(6px);
+  }
+  .joystick-thumb{
+    position:absolute;
+    top:50%; left:50%;
+    width:44px;
+    height:44px;
+    margin:-22px 0 0 -22px;
+    border-radius:50%;
+    background:linear-gradient(180deg,var(--coral),var(--magenta));
+    box-shadow:0 4px 0 rgba(0,0,0,0.3), 0 6px 14px rgba(0,0,0,0.35);
+    pointer-events:none;
+  }
+  .joystick.dragging .joystick-thumb{ transition:none; }
+  .joystick:not(.dragging) .joystick-thumb{ transition:transform 0.12s ease-out; }
+
 @media (hover:hover) and (pointer:fine){
   .touch-btns{ display:none; }
   .action-touch-controls{ display:none; }
@@ -512,6 +547,38 @@
 @media (prefers-reduced-motion: reduce){
   .big-btn, .play-btn{ transition:none; }
   .brand{ animation:none; }
+  .joystick:not(.dragging) .joystick-thumb{ transition:none; }
+}
+@media (max-width:480px){
+  body{ padding:10px; }
+  .frame{ border-radius:14px; }
+  .hero{ padding:6px 0 4px; }
+  .overlay{ padding:16px; gap:10px; }
+}
+
+/* Pantallas bajas (celulares chicos, apaisado): todo el juego debe entrar
+   sin tener que hacer scroll para ver el HUD o los controles */
+@media (max-height:760px){
+  body{ padding:14px; }
+  .wrap{ gap:10px; }
+  .stage{ gap:8px; }
+  .hero{ padding:4px 0 2px; gap:4px; }
+  .game-title{ font-size:clamp(20px,5vw,30px); }
+  canvas{ max-height:56dvh; }
+}
+@media (max-height:600px){
+  body{ padding:8px; }
+  .wrap{ gap:6px; }
+  .stage{ gap:6px; }
+  .hero{ display:none; }
+  .subtitle{ display:none; }
+  .game-title{ font-size:clamp(18px,4.5vw,26px); }
+  .game-header{ margin-bottom:-2px; }
+  canvas{ max-height:46dvh; }
+  .controls-row{ gap:6px; }
+}
+@media (max-height:600px) and (pointer:coarse){
+  .hint{ display:none; }
 }
 
 /* Estilos propios de Cosmo Run: el botón del gato volador */
@@ -738,7 +805,7 @@
     flex-wrap:wrap;
   }
   .pass-title{ margin:0; font-size:13px; font-weight:800; white-space:nowrap; }
-  .tray{ display:flex; gap:10px; flex:1; }
+  .tray{ display:flex; gap:10px; flex:1; flex-wrap:wrap; }
   .tray-slot{
     width:64px; height:64px;
     border-radius:12px;
@@ -861,7 +928,8 @@
 }
 
 /* Tema y componentes propios de Guerra de Tanques: HUD, marco del campo de
-   batalla y controles táctiles (D-pad y botón de disparo) */
+   batalla y el botón de bomba (el joystick de movimiento es un componente
+   compartido) */
   #tanksView{
     --panel: rgba(20,26,14,0.6);
     --panel-border: rgba(180,200,140,0.2);
@@ -889,24 +957,14 @@
     touch-action:none;
     image-rendering:pixelated;
   }
-  .dpad{
-    display:grid;
-    grid-template-columns:repeat(3,34px);
-    grid-template-rows:repeat(2,34px);
-    gap:4px;
-  }
-  .dpad-up{ grid-column:2; grid-row:1; }
-  .dpad-left{ grid-column:1; grid-row:2; }
-  .dpad-right{ grid-column:3; grid-row:2; }
-  .dpad-down{ grid-column:2; grid-row:2; }
   .bomb-btn{
     background:linear-gradient(180deg,#7a5cff,#4a2fb0);
     box-shadow:0 4px 0 #331f7a;
   }
   .bomb-btn:active{ box-shadow:0 1px 0 #331f7a; }
 
-/* Tema y componentes propios de Invasión Alienígena: HUD, marco del campo
-   de batalla y el D-pad de dos botones (izquierda/derecha) */
+/* Tema y componentes propios de Invasión Alienígena: HUD y marco del
+   campo de batalla (el joystick de movimiento es un componente compartido) */
 #invadersView{
   --panel: rgba(20,10,35,0.6);
   --panel-border: rgba(255,90,200,0.2);
@@ -933,15 +991,6 @@
   height:auto;
   touch-action:none;
   image-rendering:pixelated;
-}
-.dpad-lr{
-  display:flex;
-  gap:6px;
-}
-.dpad-lr .dpad-btn{
-  width:44px;
-  height:44px;
-  font-size:16px;
 }
 
 /* Tema y componentes propios de Papa Millonaria: la papa que se agrieta al
@@ -1706,11 +1755,8 @@
       <div class="controls-row">
         <p class="hint">Movete con <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd> · Bomba con <kbd>B</kbd> (desde el Nivel 4)</p>
         <div class="action-touch-controls">
-          <div class="dpad">
-            <button class="dpad-btn dpad-up" id="tUp" aria-label="Arriba">▲</button>
-            <button class="dpad-btn dpad-left" id="tLeft" aria-label="Izquierda">◀</button>
-            <button class="dpad-btn dpad-right" id="tRight" aria-label="Derecha">▶</button>
-            <button class="dpad-btn dpad-down" id="tDown" aria-label="Abajo">▼</button>
+          <div class="joystick" id="tJoystick" aria-label="Mover el tanque">
+            <div class="joystick-base"><div class="joystick-thumb"></div></div>
           </div>
           <button class="fire-btn" id="tFire" aria-label="Disparar">🔥</button>
           <button class="fire-btn bomb-btn" id="tBomb" aria-label="Tirar bomba">💣</button>
@@ -1763,9 +1809,8 @@
       <div class="controls-row">
         <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Disparás con <kbd>Espacio</kbd></p>
         <div class="action-touch-controls">
-          <div class="dpad-lr">
-            <button class="dpad-btn" id="iLeft" aria-label="Izquierda">◀</button>
-            <button class="dpad-btn" id="iRight" aria-label="Derecha">▶</button>
+          <div class="joystick joystick-2way" id="iJoystick" aria-label="Mover la nave">
+            <div class="joystick-base"><div class="joystick-thumb"></div></div>
           </div>
           <button class="fire-btn" id="iFire" aria-label="Disparar">🔥</button>
         </div>
@@ -3399,10 +3444,7 @@
   var overLevelEl = document.getElementById('tanksOverLevel');
   var retryBtn = document.getElementById('tanksRetryBtn');
   var resetBtn = document.getElementById('tanksResetBtn');
-  var tUp = document.getElementById('tUp');
-  var tDown = document.getElementById('tDown');
-  var tLeft = document.getElementById('tLeft');
-  var tRight = document.getElementById('tRight');
+  var tJoystick = document.getElementById('tJoystick');
   var tFire = document.getElementById('tFire');
   var tBomb = document.getElementById('tBomb');
 
@@ -3887,12 +3929,57 @@
     if (KEY_DIR[e.code]) releaseDir(KEY_DIR[e.code]);
   });
 
-  function bindDpad(btn, dir){
-    btn.addEventListener('pointerdown', function(e){ e.preventDefault(); pressDir(dir); });
-    btn.addEventListener('pointerup', function(){ releaseDir(dir); });
-    btn.addEventListener('pointerleave', function(){ releaseDir(dir); });
+  function bindJoystick(joyEl, dirs){
+    var thumb = joyEl.querySelector('.joystick-thumb');
+    var maxDist = 26;
+    var pointerId = null;
+    var activeDir = null;
+    function setDir(dir){
+      if (dir === activeDir) return;
+      if (activeDir) releaseDir(activeDir);
+      activeDir = dir;
+      if (activeDir) pressDir(activeDir);
+    }
+    function dirFromAngle(dx, dy, dist){
+      if (dist < maxDist*0.32) return null;
+      if (dirs.length === 2) return dx < 0 ? dirs[0] : dirs[1];
+      var deg = Math.atan2(dy, dx) * 180/Math.PI;
+      if (deg > -45 && deg <= 45) return 'right';
+      if (deg > 45 && deg <= 135) return 'down';
+      if (deg > 135 || deg <= -135) return 'left';
+      return 'up';
+    }
+    function move(e){
+      var rect = joyEl.getBoundingClientRect();
+      var dx = e.clientX - (rect.left + rect.width/2);
+      var dy = e.clientY - (rect.top + rect.height/2);
+      var dist = Math.min(Math.sqrt(dx*dx+dy*dy), maxDist);
+      var ang = Math.atan2(dy, dx);
+      thumb.style.transform = 'translate('+(Math.cos(ang)*dist)+'px,'+(Math.sin(ang)*dist)+'px)';
+      setDir(dirFromAngle(dx, dy, Math.sqrt(dx*dx+dy*dy)));
+    }
+    function end(e){
+      if (pointerId===null || e.pointerId!==pointerId) return;
+      pointerId = null;
+      joyEl.classList.remove('dragging');
+      thumb.style.transform = '';
+      setDir(null);
+    }
+    joyEl.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      pointerId = e.pointerId;
+      joyEl.setPointerCapture(pointerId);
+      joyEl.classList.add('dragging');
+      move(e);
+    });
+    joyEl.addEventListener('pointermove', function(e){
+      if (pointerId===null || e.pointerId!==pointerId) return;
+      move(e);
+    });
+    joyEl.addEventListener('pointerup', end);
+    joyEl.addEventListener('pointercancel', end);
   }
-  bindDpad(tUp,'up'); bindDpad(tDown,'down'); bindDpad(tLeft,'left'); bindDpad(tRight,'right');
+  bindJoystick(tJoystick, ['up','down','left','right']);
   tFire.addEventListener('pointerdown', function(e){
     e.preventDefault();
     if (gameState==='play' && player && player.alive && !player.respawning) fireBullet(player);
@@ -4213,8 +4300,7 @@
   var overScoreEl = document.getElementById('invadersOverScore');
   var retryBtn = document.getElementById('invadersRetryBtn');
   var resetBtn = document.getElementById('invadersResetBtn');
-  var iLeft = document.getElementById('iLeft');
-  var iRight = document.getElementById('iRight');
+  var iJoystick = document.getElementById('iJoystick');
   var iFire = document.getElementById('iFire');
 
   function invadersActive(){ return !invadersView.classList.contains('is-hidden'); }
@@ -4395,12 +4481,57 @@
     if (KEY_DIR[e.code]) releaseDir(KEY_DIR[e.code]);
   });
 
-  function bindDpad(btn, dir){
-    btn.addEventListener('pointerdown', function(e){ e.preventDefault(); pressDir(dir); });
-    btn.addEventListener('pointerup', function(){ releaseDir(dir); });
-    btn.addEventListener('pointerleave', function(){ releaseDir(dir); });
+  function bindJoystick(joyEl, dirs){
+    var thumb = joyEl.querySelector('.joystick-thumb');
+    var maxDist = 26;
+    var pointerId = null;
+    var activeDir = null;
+    function setDir(dir){
+      if (dir === activeDir) return;
+      if (activeDir) releaseDir(activeDir);
+      activeDir = dir;
+      if (activeDir) pressDir(activeDir);
+    }
+    function dirFromAngle(dx, dy, dist){
+      if (dist < maxDist*0.32) return null;
+      if (dirs.length === 2) return dx < 0 ? dirs[0] : dirs[1];
+      var deg = Math.atan2(dy, dx) * 180/Math.PI;
+      if (deg > -45 && deg <= 45) return 'right';
+      if (deg > 45 && deg <= 135) return 'down';
+      if (deg > 135 || deg <= -135) return 'left';
+      return 'up';
+    }
+    function move(e){
+      var rect = joyEl.getBoundingClientRect();
+      var dx = e.clientX - (rect.left + rect.width/2);
+      var dy = e.clientY - (rect.top + rect.height/2);
+      var dist = Math.min(Math.sqrt(dx*dx+dy*dy), maxDist);
+      var ang = Math.atan2(dy, dx);
+      thumb.style.transform = 'translate('+(Math.cos(ang)*dist)+'px,'+(Math.sin(ang)*dist)+'px)';
+      setDir(dirFromAngle(dx, dy, Math.sqrt(dx*dx+dy*dy)));
+    }
+    function end(e){
+      if (pointerId===null || e.pointerId!==pointerId) return;
+      pointerId = null;
+      joyEl.classList.remove('dragging');
+      thumb.style.transform = '';
+      setDir(null);
+    }
+    joyEl.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      pointerId = e.pointerId;
+      joyEl.setPointerCapture(pointerId);
+      joyEl.classList.add('dragging');
+      move(e);
+    });
+    joyEl.addEventListener('pointermove', function(e){
+      if (pointerId===null || e.pointerId!==pointerId) return;
+      move(e);
+    });
+    joyEl.addEventListener('pointerup', end);
+    joyEl.addEventListener('pointercancel', end);
   }
-  bindDpad(iLeft,'left'); bindDpad(iRight,'right');
+  bindJoystick(iJoystick, ['left','right']);
   iFire.addEventListener('pointerdown', function(e){
     e.preventDefault();
     if (gameState==='play' && player.alive && !player.respawning) firePlayerBullet();

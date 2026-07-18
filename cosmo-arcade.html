@@ -248,6 +248,7 @@
     display:flex;
     flex-direction:column;
     gap:14px;
+    min-height:calc(100dvh - 48px);
   }
   .title-row{
     display:flex;
@@ -281,12 +282,27 @@
     box-shadow:0 20px 60px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03);
     background:var(--sky-top);
   }
+  /* Los tres juegos de canvas (Cosmo Run, Tanques, Invasores) crecen para
+     ocupar todo el alto disponible en la pantalla, y el canvas se acomoda
+     ahí adentro manteniendo su proporción, sin recortarse ni achicarse
+     más de lo necesario */
+  .cosmo-frame, .tanks-frame, .invaders-frame{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .cosmo-frame canvas, .tanks-frame canvas, .invaders-frame canvas{
+    width:auto;
+    height:auto;
+    max-width:100%;
+    max-height:100%;
+  }
   canvas{
     display:block;
     width:100%;
     height:auto;
-    max-height:68vh;
-    max-height:64dvh;
     touch-action:none;
   }
   .hud{
@@ -561,20 +577,18 @@
 @media (max-height:760px){
   body{ padding:14px; }
   .wrap{ gap:10px; }
-  .stage{ gap:8px; }
+  .stage{ gap:8px; min-height:calc(100dvh - 28px); }
   .hero{ padding:4px 0 2px; gap:4px; }
   .game-title{ font-size:clamp(20px,5vw,30px); }
-  canvas{ max-height:56dvh; }
 }
 @media (max-height:600px){
   body{ padding:8px; }
   .wrap{ gap:6px; }
-  .stage{ gap:6px; }
+  .stage{ gap:6px; min-height:calc(100dvh - 16px); }
   .hero{ display:none; }
   .subtitle{ display:none; }
   .game-title{ font-size:clamp(18px,4.5vw,26px); }
   .game-header{ margin-bottom:-2px; }
-  canvas{ max-height:46dvh; }
   .controls-row{ gap:6px; }
 }
 @media (max-height:600px) and (pointer:coarse){
@@ -1589,7 +1603,7 @@
         <button class="mute-btn" id="muteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
       </div>
 
-      <div class="frame">
+      <div class="frame cosmo-frame">
         <canvas id="game" width="920" height="440"></canvas>
 
         <div class="hud">

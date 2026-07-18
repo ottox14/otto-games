@@ -607,6 +607,10 @@
     outline:3px solid var(--cyan);
     outline-offset:2px;
   }
+  /* Cuando hay una pantalla de inicio/fin de partida visible, el botón del
+     gato queda escondido para no taparse con "Empezar"/"Otra vez" en
+     pantallas angostas donde el canvas (920x440) queda muy bajito */
+  .overlay:not(.is-hidden) ~ .cat-btn{ display:none; }
 
 /* Tema y componentes propios de Miau Bistró: cocina, ingredientes, ventanilla,
    clientes y la tienda de mejoras */

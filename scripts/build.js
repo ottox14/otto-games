@@ -1,4 +1,4 @@
-// Arma cosmo-arcade.html (el archivo unico para publicar en el enlace web)
+// Arma otto-games.html (el archivo unico para publicar en el enlace web)
 // a partir de index.html + css/*.css + js/*.js.
 //
 // Uso: node scripts/build.js
@@ -8,12 +8,12 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const INDEX_PATH = path.join(ROOT, 'index.html');
-const OUT_PATH = path.join(ROOT, 'cosmo-arcade.html');
+const OUT_PATH = path.join(ROOT, 'otto-games.html');
 
 const html = fs.readFileSync(INDEX_PATH, 'utf8');
 
 const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/);
-const title = titleMatch ? titleMatch[1].trim() : 'Cosmo Arcade';
+const title = titleMatch ? titleMatch[1].trim() : 'Otto-Games';
 
 const headMatch = html.match(/<head>([\s\S]*?)<\/head>/);
 const head = headMatch ? headMatch[1] : '';

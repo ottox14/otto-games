@@ -6903,6 +6903,8 @@
   var GOAL_H = 130;
   var GOAL_DEPTH = 26;
   var PLAYER_R = 34;
+  var LEG_LENGTH = 40;
+  var FOOT_R = 15;
   var BALL_R = 14;
   var GRAVITY = 1500;
   var JUMP_VY = -580;
@@ -7326,12 +7328,13 @@
   // ---------- Estado del partido ----------
   function makePlayer(team, x, isAI, attackDir){
     return {
-      team: team, x: x, y: GROUND_Y-PLAYER_R, vx: 0, vy: 0,
+      team: team, x: x, y: GROUND_Y-LEG_LENGTH, vx: 0, vy: 0,
       onGround: true, facing: attackDir, isAI: !!isAI, attackDir: attackDir,
       kickCooldown: 0, kicking: 0,
       aiDecisionT: 0, aiDir: 0, aiWantsJump: false
     };
   }
+  function footPos(p){ return {x:p.x, y:p.y+LEG_LENGTH}; }
   var home = makePlayer(TEAMS_BY_ID.river, CANVAS_W*0.28, false, 1);
   var away = makePlayer(TEAMS_BY_ID.boca, CANVAS_W*0.72, true, -1);
   var ball = {x:CANVAS_W/2, y:GROUND_Y-BALL_R, vx:0, vy:0};
@@ -7343,8 +7346,8 @@
   var lastGoalSide = null;
 
   function resetKickoff(){
-    home.x = CANVAS_W*0.28; home.y = GROUND_Y-PLAYER_R; home.vx=0; home.vy=0; home.onGround=true; home.kickCooldown=0;
-    away.x = CANVAS_W*0.72; away.y = GROUND_Y-PLAYER_R; away.vx=0; away.vy=0; away.onGround=true; away.kickCooldown=0;
+    home.x = CANVAS_W*0.28; home.y = GROUND_Y-LEG_LENGTH; home.vx=0; home.vy=0; home.onGround=true; home.kickCooldown=0;
+    away.x = CANVAS_W*0.72; away.y = GROUND_Y-LEG_LENGTH; away.vx=0; away.vy=0; away.onGround=true; away.kickCooldown=0;
     ball.x = CANVAS_W/2; ball.y = GROUND_Y-BALL_R; ball.vx=0; ball.vy=0;
   }
 
@@ -7478,8 +7481,8 @@
     p.x = clamp(p.x, PLAYER_R, CANVAS_W-PLAYER_R);
     p.vy += GRAVITY*dt;
     p.y += p.vy*dt;
-    if (p.y >= GROUND_Y-PLAYER_R){
-      p.y = GROUND_Y-PLAYER_R;
+    if (p.y >= GROUND_Y-LEG_LENGTH){
+      p.y = GROUND_Y-LEG_LENGTH;
       p.vy = 0;
       p.onGround = true;
     }
@@ -7503,7 +7506,8 @@
 
   function attemptKick(p){
     if (p.kickCooldown > 0) return;
-    var dx = ball.x-p.x, dy = ball.y-p.y;
+    var foot = footPos(p);
+    var dx = ball.x-foot.x, dy = ball.y-foot.y;
     var dist = Math.sqrt(dx*dx+dy*dy);
     if (dist > KICK_RANGE) return;
     p.kickCooldown = KICK_COOLDOWN;
@@ -7520,18 +7524,28 @@
     setTimeout(function(){ beep(420, 0.06, 'square'); }, 40);
   }
 
-  function collideBallPlayer(p){
-    var dx = ball.x-p.x, dy = ball.y-p.y;
+  function circleOverlap(cx, cy, cr, bx, by, br){
+    var dx = bx-cx, dy = by-cy;
     var dist = Math.sqrt(dx*dx+dy*dy);
-    var minDist = PLAYER_R+BALL_R;
+    var minDist = cr+br;
     if (dist > 0.001 && dist < minDist){
-      var nx = dx/dist, ny = dy/dist;
-      var overlap = minDist-dist;
-      ball.x += nx*overlap;
-      ball.y += ny*overlap;
+      return {nx: dx/dist, ny: dy/dist, overlap: minDist-dist};
+    }
+    return null;
+  }
+
+  function collideBallPlayer(p){
+    var foot = footPos(p);
+    var hit = circleOverlap(foot.x, foot.y, FOOT_R, ball.x, ball.y, BALL_R);
+    if (!hit && ball.y < p.y+PLAYER_R*0.3){
+      hit = circleOverlap(p.x, p.y, PLAYER_R, ball.x, ball.y, BALL_R);
+    }
+    if (hit){
+      ball.x += hit.nx*hit.overlap;
+      ball.y += hit.ny*hit.overlap;
       var relSpeed = 250;
-      ball.vx = nx*relSpeed + p.vx*0.5;
-      ball.vy = ny*relSpeed + p.vy*0.3 - 40;
+      ball.vx = hit.nx*relSpeed + p.vx*0.5;
+      ball.vy = hit.ny*relSpeed + p.vy*0.3 - 40;
     }
   }
 
@@ -7610,14 +7624,15 @@
   }
 
   // ---------- Dibujo ----------
+  var SKY_H = 90;
   function drawPitch(){
     var c = ctx;
     var crowdH = 46;
-    var skyGrad = c.createLinearGradient(0,0,0,GROUND_Y-GOAL_H-30);
+    var skyGrad = c.createLinearGradient(0,0,0,SKY_H);
     skyGrad.addColorStop(0, '#8fd3f4');
     skyGrad.addColorStop(1, '#cfeadf');
     c.fillStyle = skyGrad;
-    c.fillRect(0,0,CANVAS_W,GROUND_Y-GOAL_H-30);
+    c.fillRect(0,0,CANVAS_W,SKY_H);
 
     c.fillStyle = 'rgba(30,22,50,0.4)';
     c.fillRect(0,0,CANVAS_W,crowdH);
@@ -7631,7 +7646,7 @@
     c.fillStyle = 'rgba(0,0,0,0.25)';
     c.fillRect(0,crowdH-6,CANVAS_W,6);
 
-    var grassTop = GROUND_Y-GOAL_H-30;
+    var grassTop = SKY_H;
     var grassGrad = c.createLinearGradient(0,grassTop,0,CANVAS_H);
     grassGrad.addColorStop(0, '#4fae4f');
     grassGrad.addColorStop(1, '#1f6a29');
@@ -7718,19 +7733,24 @@
     c.save();
     c.translate(p.x, p.y);
 
-    var legSwing = Math.abs(p.vx) > 5 && p.onGround && !reducedMotion ? Math.sin(t*10)*8 : 0;
-    c.strokeStyle = p.team.shorts;
-    c.lineWidth = 7;
-    c.lineCap = 'round';
+    var legSwing = Math.abs(p.vx) > 5 && p.onGround && !reducedMotion ? Math.sin(t*10)*7 : 0;
+    var footX, footY;
     if (p.kicking > 0){
       var kProg = 1-(p.kicking/0.18);
-      var kickX = p.attackDir*(12+kProg*18);
-      c.beginPath(); c.moveTo(-5,PLAYER_R-6); c.lineTo(-5-p.attackDir*3, PLAYER_R+12); c.stroke();
-      c.beginPath(); c.moveTo(5,PLAYER_R-8); c.lineTo(kickX, PLAYER_R-4); c.stroke();
+      footX = p.attackDir*(10+kProg*26);
+      footY = LEG_LENGTH - kProg*14;
     } else {
-      c.beginPath(); c.moveTo(-6,PLAYER_R-6); c.lineTo(-6+legSwing*0.35,PLAYER_R+13); c.stroke();
-      c.beginPath(); c.moveTo(6,PLAYER_R-6); c.lineTo(6-legSwing*0.35,PLAYER_R+13); c.stroke();
+      footX = legSwing;
+      footY = LEG_LENGTH;
     }
+    c.strokeStyle = p.team.shorts;
+    c.lineWidth = 10;
+    c.lineCap = 'round';
+    c.beginPath(); c.moveTo(0,PLAYER_R-4); c.lineTo(footX,footY); c.stroke();
+    c.fillStyle = '#f5f5f5';
+    c.beginPath(); c.ellipse(footX,footY,7,5,0,0,Math.PI*2); c.fill();
+    c.strokeStyle = 'rgba(0,0,0,0.2)'; c.lineWidth = 1;
+    c.stroke();
 
     c.fillStyle = p.team.shirt;
     c.beginPath();

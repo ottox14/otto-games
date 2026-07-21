@@ -32,7 +32,6 @@
   ];
 
   var SPORTS = {
-    futbol:  {title:'⚽ Fútbol',  hint:'¡Tocá "¡Ya!" cuando la barra esté en la zona verde!', zoneWidth:0.32, speed:0.55},
     basquet: {title:'🏀 Básquet', hint:'¡La zona es más chica, apuntá bien!', zoneWidth:0.20, speed:0.65},
     voley:   {title:'🏐 Vóley',   hint:'¡Devolvé la pelota en el momento justo!', zoneWidth:0.24, speed:0.8}
   };
@@ -100,6 +99,23 @@
   var miniGameScoreEl = document.getElementById('miniGameScore');
   var miniGameCloseBtn = document.getElementById('miniGameCloseBtn');
 
+  var futbolOverlay = document.getElementById('futbolOverlay');
+  var futbolHintEl = document.getElementById('futbolHint');
+  var futbolScoreEl = document.getElementById('futbolScore');
+  var futbolResultEl = document.getElementById('futbolResult');
+  var futbolCanvas = document.getElementById('futbolCanvas');
+  var futbolCtx = futbolCanvas.getContext('2d');
+  var futbolCloseBtn = document.getElementById('futbolCloseBtn');
+  var FUT_W = 280, FUT_H = 320;
+  function fitFutbolCanvas(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    futbolCanvas.width = FUT_W*dpr;
+    futbolCanvas.height = FUT_H*dpr;
+    futbolCtx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  fitFutbolCanvas();
+  window.addEventListener('resize', fitFutbolCanvas);
+
   var mimosOverlay = document.getElementById('mimosOverlay');
   var mimosArea = document.getElementById('mimosArea');
   var mimosCloseBtn = document.getElementById('mimosCloseBtn');
@@ -138,6 +154,7 @@
   var sleeping = false;
 
   function clamp100(n){ return Math.max(0, Math.min(100, n)); }
+  function clamp01(n){ return Math.max(0, Math.min(1, n)); }
 
   function loadProgress(){
     try {
@@ -175,9 +192,10 @@
   }
 
   // ---------- Dibujo del gato ----------
-  function drawCat(cx, cy, scale, variant, mood, bob, t){
+  function drawCat(cx, cy, scale, variant, mood, bob, t, rotation){
     ctx.save();
     ctx.translate(cx, cy+(bob||0));
+    if (rotation) ctx.rotate(rotation);
     ctx.scale(scale, scale);
 
     ctx.strokeStyle = variant.base;
@@ -403,7 +421,7 @@
   }
 
   // ---------- Salas: gestion generica ----------
-  var allRoomOverlays = [comerOverlay, banarOverlay, dormirOverlay, jugarMenuOverlay, miniGameOverlay, mimosOverlay];
+  var allRoomOverlays = [comerOverlay, banarOverlay, dormirOverlay, jugarMenuOverlay, miniGameOverlay, futbolOverlay, mimosOverlay];
   function closeAllRooms(){
     allRoomOverlays.forEach(function(o){ o.classList.add('is-hidden'); });
     roomOpen = null;
@@ -517,7 +535,7 @@
     miniGameScoreEl.textContent = 'Aciertos: 0/5';
     requestAnimationFrame(miniGameLoop);
   }
-  selectFutbolBtn.addEventListener('click', function(){ launchSport('futbol'); });
+  selectFutbolBtn.addEventListener('click', function(){ launchFutbol(); });
   selectBasquetBtn.addEventListener('click', function(){ launchSport('basquet'); });
   selectVoleyBtn.addEventListener('click', function(){ launchSport('voley'); });
 
@@ -571,6 +589,270 @@
     closeAllRooms();
     openRoom(jugarMenuOverlay, 'jugar');
   });
+
+  // ---------- Sala: Jugar / Fútbol (penales con arquero) ----------
+  var GOAL = {left:34, right:246, top:46, bottom:158};
+  var GOAL_MARGIN = 14;
+  var KICK_SPOT = {x:140, y:300};
+  var KEEPER_START = {x:140, y:104};
+  var FUTBOL_ROUNDS = 5;
+
+  var futbolRound = 0, futbolGoals = 0;
+  var futbolState = 'idle'; // 'aiming' | 'anim' | 'result' | 'done'
+  var futbolBall = {x:KICK_SPOT.x, y:KICK_SPOT.y};
+  var futbolShotTarget = null;
+  var futbolKeeperPos = {x:KEEPER_START.x, y:KEEPER_START.y};
+  var futbolKeeperTarget = {x:KEEPER_START.x, y:KEEPER_START.y};
+  var futbolKeeperRot = 0;
+  var futbolOutcome = null; // 'goal' | 'save'
+  var futbolAnimT = 0;
+  var futbolAnimDur = 0.5;
+  var futbolLastTs = null;
+  var futbolResultTimer = null;
+  var futbolAimPreview = null;
+
+  function launchFutbol(){
+    if (futbolResultTimer){ clearTimeout(futbolResultTimer); futbolResultTimer = null; }
+    closeAllRooms();
+    futbolOverlay.classList.remove('is-hidden');
+    roomOpen = 'futbol';
+    futbolRound = 0; futbolGoals = 0;
+    futbolResultEl.classList.add('is-hidden');
+    futbolResultEl.classList.remove('show','goal','save');
+    futbolScoreEl.textContent = 'Penales: 0/'+FUTBOL_ROUNDS+' · Goles: 0';
+    futbolHintEl.textContent = 'Tocá dentro del arco para patear';
+    resetFutbolShot();
+    futbolState = 'aiming';
+    futbolLastTs = null;
+    requestAnimationFrame(futbolLoop);
+  }
+
+  function resetFutbolShot(){
+    futbolBall.x = KICK_SPOT.x; futbolBall.y = KICK_SPOT.y;
+    futbolKeeperPos.x = KEEPER_START.x; futbolKeeperPos.y = KEEPER_START.y;
+    futbolKeeperTarget.x = KEEPER_START.x; futbolKeeperTarget.y = KEEPER_START.y;
+    futbolKeeperRot = 0;
+    futbolShotTarget = null;
+    futbolAnimT = 0;
+  }
+
+  function futbolCanvasPoint(e){
+    var rect = futbolCanvas.getBoundingClientRect();
+    var scaleX = FUT_W/rect.width, scaleY = FUT_H/rect.height;
+    var x = (e.clientX-rect.left)*scaleX;
+    var y = (e.clientY-rect.top)*scaleY;
+    return {
+      x: Math.max(GOAL.left+GOAL_MARGIN, Math.min(GOAL.right-GOAL_MARGIN, x)),
+      y: Math.max(GOAL.top+GOAL_MARGIN, Math.min(GOAL.bottom-GOAL_MARGIN, y))
+    };
+  }
+
+  futbolCanvas.addEventListener('pointermove', function(e){
+    if (futbolState !== 'aiming') return;
+    futbolAimPreview = futbolCanvasPoint(e);
+  });
+  futbolCanvas.addEventListener('pointerleave', function(){ futbolAimPreview = null; });
+  futbolCanvas.addEventListener('pointerdown', function(e){
+    if (futbolState !== 'aiming') return;
+    takeShot(futbolCanvasPoint(e));
+  });
+
+  function takeShot(target){
+    futbolShotTarget = target;
+    var cx = (GOAL.left+GOAL.right)/2, cy = (GOAL.top+GOAL.bottom)/2;
+    var halfW = (GOAL.right-GOAL.left)/2 - GOAL_MARGIN, halfH = (GOAL.bottom-GOAL.top)/2 - GOAL_MARGIN;
+    var nx = (target.x-cx)/halfW, ny = (target.y-cy)/halfH;
+    var d = Math.sqrt(nx*nx + ny*ny);
+    var saveChance = clamp01(0.72 - d*0.5 + futbolRound*0.02);
+    var isSave = Math.random() < saveChance;
+    futbolOutcome = isSave ? 'save' : 'goal';
+    if (isSave){
+      futbolKeeperTarget.x = target.x;
+      futbolKeeperTarget.y = target.y;
+    } else {
+      var altAngle = Math.random()*Math.PI*2;
+      var missDist = 70+Math.random()*40;
+      var altX = cx + Math.cos(altAngle)*missDist;
+      var altY = cy + Math.sin(altAngle)*missDist*0.6;
+      if (Math.hypot(altX-target.x, altY-target.y) < 60){
+        altX = cx - (target.x-cx);
+        altY = cy - (target.y-cy);
+      }
+      futbolKeeperTarget.x = Math.max(GOAL.left-10, Math.min(GOAL.right+10, altX));
+      futbolKeeperTarget.y = Math.max(GOAL.top-6, Math.min(GOAL.bottom+10, altY));
+    }
+    futbolState = 'anim';
+    futbolAnimT = 0;
+    futbolLastTs = null;
+  }
+
+  function resolveShot(){
+    futbolState = 'result';
+    futbolRound += 1;
+    if (futbolOutcome === 'goal'){
+      futbolGoals += 1;
+      beep(880, 0.1, 'triangle');
+      setTimeout(function(){ beep(1180, 0.14, 'triangle'); }, 90);
+      futbolHintEl.textContent = '¡GOOOL! ⚽';
+      futbolResultEl.textContent = '¡GOOL!';
+      futbolResultEl.className = 'futbol-result show goal';
+    } else {
+      beep(180, 0.16, 'sawtooth');
+      futbolHintEl.textContent = 'El gato la atajó';
+      futbolResultEl.textContent = '¡ATAJADA!';
+      futbolResultEl.className = 'futbol-result show save';
+    }
+    futbolScoreEl.textContent = 'Penales: '+futbolRound+'/'+FUTBOL_ROUNDS+' · Goles: '+futbolGoals;
+    futbolResultTimer = setTimeout(function(){
+      futbolResultEl.classList.add('is-hidden');
+      futbolResultEl.classList.remove('show');
+      if (futbolRound >= FUTBOL_ROUNDS){
+        finishFutbol();
+      } else {
+        resetFutbolShot();
+        futbolState = 'aiming';
+        futbolHintEl.textContent = 'Tocá dentro del arco para patear';
+      }
+    }, 1100);
+  }
+
+  function finishFutbol(){
+    futbolState = 'done';
+    var gain = futbolGoals*8;
+    felicidad = clamp100(felicidad + gain);
+    energia = clamp100(energia - 8);
+    updateStatBars();
+    futbolHintEl.textContent = 'Convertiste '+futbolGoals+' de '+FUTBOL_ROUNDS+' penales. +'+gain+' felicidad';
+    saveProgress();
+  }
+
+  futbolCloseBtn.addEventListener('click', function(){
+    if (futbolResultTimer){ clearTimeout(futbolResultTimer); futbolResultTimer = null; }
+    futbolState = 'idle';
+    closeAllRooms();
+    openRoom(jugarMenuOverlay, 'jugar');
+  });
+
+  function drawPentagon(c, cx, cy, r){
+    c.beginPath();
+    for (var i=0;i<5;i++){
+      var ang = -Math.PI/2 + i*(2*Math.PI/5);
+      var px = cx+Math.cos(ang)*r, py = cy+Math.sin(ang)*r;
+      if (i===0) c.moveTo(px,py); else c.lineTo(px,py);
+    }
+    c.closePath();
+    c.fill();
+  }
+
+  function drawBall(x,y){
+    var c = futbolCtx;
+    c.save();
+    c.translate(x,y);
+    c.fillStyle = '#f5f5f0';
+    c.beginPath(); c.arc(0,0,9,0,Math.PI*2); c.fill();
+    c.strokeStyle = 'rgba(30,30,30,0.5)';
+    c.lineWidth = 1;
+    c.stroke();
+    c.fillStyle = 'rgba(30,30,30,0.8)';
+    drawPentagon(c,0,-2.5,2.6);
+    drawPentagon(c,-4.5,3,2.2);
+    drawPentagon(c,4.5,3,2.2);
+    c.restore();
+  }
+
+  function drawNet(){
+    var c = futbolCtx;
+    c.save();
+    c.strokeStyle = 'rgba(255,255,255,0.25)';
+    c.lineWidth = 1;
+    c.beginPath();
+    var step = 12;
+    for (var x=GOAL.left; x<=GOAL.right; x+=step){ c.moveTo(x, GOAL.top); c.lineTo(x, GOAL.bottom); }
+    for (var y=GOAL.top; y<=GOAL.bottom; y+=step){ c.moveTo(GOAL.left, y); c.lineTo(GOAL.right, y); }
+    c.stroke();
+    c.restore();
+  }
+
+  function drawFutbol(ts){
+    var c = futbolCtx;
+    c.clearRect(0,0,FUT_W,FUT_H);
+
+    var skyGrad = c.createLinearGradient(0,0,0,FUT_H);
+    skyGrad.addColorStop(0, '#1c2f4a');
+    skyGrad.addColorStop(1, '#2f6b3a');
+    c.fillStyle = skyGrad;
+    c.fillRect(0,0,FUT_W,FUT_H);
+
+    c.fillStyle = 'rgba(255,255,255,0.05)';
+    for (var i=0;i<6;i+=2){ c.fillRect(0, GOAL.bottom + i*22, FUT_W, 22); }
+
+    drawNet();
+    c.fillStyle = '#f5f5f5';
+    c.fillRect(GOAL.left-6, GOAL.top-6, 6, GOAL.bottom-GOAL.top+6);
+    c.fillRect(GOAL.right, GOAL.top-6, 6, GOAL.bottom-GOAL.top+6);
+    c.fillRect(GOAL.left-6, GOAL.top-6, GOAL.right-GOAL.left+12, 6);
+
+    if (futbolState === 'aiming'){
+      c.save();
+      c.strokeStyle = 'rgba(255,255,255,0.35)';
+      c.setLineDash([4,4]);
+      c.strokeRect(GOAL.left+GOAL_MARGIN, GOAL.top+GOAL_MARGIN, (GOAL.right-GOAL.left)-GOAL_MARGIN*2, (GOAL.bottom-GOAL.top)-GOAL_MARGIN*2);
+      c.restore();
+      if (futbolAimPreview){
+        var p = futbolAimPreview;
+        c.save();
+        c.strokeStyle = 'rgba(255,255,255,0.85)';
+        c.lineWidth = 1.5;
+        c.beginPath(); c.arc(p.x,p.y,7,0,Math.PI*2); c.stroke();
+        c.beginPath();
+        c.moveTo(p.x-10,p.y); c.lineTo(p.x-4,p.y);
+        c.moveTo(p.x+4,p.y); c.lineTo(p.x+10,p.y);
+        c.moveTo(p.x,p.y-10); c.lineTo(p.x,p.y-4);
+        c.moveTo(p.x,p.y+4); c.lineTo(p.x,p.y+10);
+        c.stroke();
+        c.restore();
+      }
+    }
+
+    var mood = futbolState==='result' ? (futbolOutcome==='save' ? 'happy' : 'sad') : 'neutral';
+    var variant = VARIANTS_BY_ID[adopted] || VARIANTS[0];
+    var prevCtx = ctx;
+    ctx = futbolCtx;
+    drawCat(futbolKeeperPos.x, futbolKeeperPos.y, 0.5, variant, mood, 0, (ts||0)/1000, futbolKeeperRot);
+    ctx = prevCtx;
+
+    if (futbolState === 'anim' || futbolState === 'result' || futbolState === 'done'){
+      drawBall(futbolBall.x, futbolBall.y);
+    } else {
+      drawBall(KICK_SPOT.x, KICK_SPOT.y);
+    }
+  }
+
+  function futbolLoop(ts){
+    if (roomOpen !== 'futbol'){ futbolLastTs = null; return; }
+    if (futbolLastTs === null) futbolLastTs = ts;
+    var dt = Math.min(0.05, (ts-futbolLastTs)/1000);
+    futbolLastTs = ts;
+
+    if (futbolState === 'anim'){
+      futbolAnimT = Math.min(1, futbolAnimT + dt/futbolAnimDur);
+      var ease = 1-Math.pow(1-futbolAnimT, 2);
+      futbolBall.x = KICK_SPOT.x + (futbolShotTarget.x-KICK_SPOT.x)*ease;
+      futbolBall.y = KICK_SPOT.y + (futbolShotTarget.y-KICK_SPOT.y)*ease;
+
+      var diveE = Math.min(1, futbolAnimT/0.75);
+      var diveEase = 1-Math.pow(1-diveE, 3);
+      futbolKeeperPos.x = KEEPER_START.x + (futbolKeeperTarget.x-KEEPER_START.x)*diveEase;
+      futbolKeeperPos.y = KEEPER_START.y + (futbolKeeperTarget.y-KEEPER_START.y)*diveEase;
+      var dirSign = futbolKeeperTarget.x >= KEEPER_START.x ? 1 : -1;
+      futbolKeeperRot = dirSign*diveEase*(Math.PI/2.1);
+
+      if (futbolAnimT >= 1) resolveShot();
+    }
+
+    drawFutbol(ts);
+    requestAnimationFrame(futbolLoop);
+  }
 
   // ---------- Sala: Mimos ----------
   mimosArea.addEventListener('click', function(e){

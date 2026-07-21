@@ -238,6 +238,44 @@
   box-shadow:0 0 6px rgba(0,0,0,0.4);
 }
 
+.futbol-canvas-wrap{
+  position:relative;
+  width:100%;
+  max-width:300px;
+  margin:0 auto;
+}
+.futbol-canvas-wrap canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius:14px;
+  cursor:crosshair;
+}
+.futbol-result{
+  position:absolute;
+  top:38%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.6);
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:0.5px;
+  text-shadow:0 3px 10px rgba(0,0,0,0.6);
+  opacity:0;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.futbol-result.is-hidden{ display:none; }
+.futbol-result.show{ animation:futbolPop 1.1s ease-out forwards; }
+.futbol-result.goal{ color:var(--gold); }
+.futbol-result.save{ color:var(--coral); }
+@keyframes futbolPop{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+  25%{ opacity:1; transform:translate(-50%,-50%) scale(1.15); }
+  40%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  78%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-60%) scale(1); }
+}
+
 .mimos-area{
   font-size:100px;
   cursor:pointer;
@@ -261,4 +299,5 @@
 @media (prefers-reduced-motion: reduce){
   .sleep-zzz.active{ animation:none; }
   .bubble-pop, .heart-pop{ animation:none; opacity:0; }
+  .futbol-result.show{ animation:none; opacity:1; }
 }

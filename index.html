@@ -474,8 +474,19 @@
           <button class="text-btn" id="jugarMenuCloseBtn">Cerrar</button>
         </div>
 
+        <div class="overlay is-hidden" id="futbolOverlay">
+          <h2>⚽ Penales</h2>
+          <p id="futbolHint">Tocá dentro del arco para patear</p>
+          <div class="futbol-canvas-wrap">
+            <canvas id="futbolCanvas" width="280" height="320"></canvas>
+            <div class="futbol-result is-hidden" id="futbolResult"></div>
+          </div>
+          <p id="futbolScore">Penales: 0/5 · Goles: 0</p>
+          <button class="text-btn" id="futbolCloseBtn">Volver</button>
+        </div>
+
         <div class="overlay is-hidden" id="miniGameOverlay">
-          <h2 id="miniGameTitle">⚽ Fútbol</h2>
+          <h2 id="miniGameTitle">🏀 Básquet</h2>
           <p id="miniGameHint">¡Tocá "¡Ya!" cuando la barra esté en la zona verde!</p>
           <div class="timing-track" id="timingTrack">
             <div class="timing-zone" id="timingZone"></div>

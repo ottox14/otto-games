@@ -7544,7 +7544,9 @@
       ball.x += hit.nx*hit.overlap;
       ball.y += hit.ny*hit.overlap;
       var relSpeed = 250;
-      ball.vx = hit.nx*relSpeed + p.vx*0.5;
+      var vx = hit.nx*relSpeed + p.vx*0.5;
+      if (vx*p.attackDir < 0) vx = vx*0.25 + p.attackDir*110;
+      ball.vx = vx;
       ball.vy = hit.ny*relSpeed + p.vy*0.3 - 40;
     }
   }
@@ -7564,14 +7566,14 @@
     if (ball.y < BALL_R){ ball.y = BALL_R; ball.vy *= -0.5; }
 
     if (ball.x-BALL_R <= 0){
-      if (ball.y+BALL_R > GROUND_Y-GOAL_H){
+      if (ball.y-BALL_R > GROUND_Y-GOAL_H){
         scoreGoal('away');
         return;
       }
       ball.x = BALL_R; ball.vx *= -0.7;
     }
     if (ball.x+BALL_R >= CANVAS_W){
-      if (ball.y+BALL_R > GROUND_Y-GOAL_H){
+      if (ball.y-BALL_R > GROUND_Y-GOAL_H){
         scoreGoal('home');
         return;
       }

@@ -535,41 +535,75 @@
       <div class="title-row">
         <div>
           <h1 class="game-title">COPA LIBERTADORES</h1>
-          <p class="subtitle">Superclásico: River vs Boca</p>
+          <p class="subtitle" id="liberSubtitle">Elegí tu equipo y jugá el torneo</p>
         </div>
         <button class="mute-btn" id="liberMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
       </div>
 
-      <div class="liber-hud">
-        <div class="hud-chip liber-chip-river">🔴⚪ River <b id="liberScoreRiver">0</b></div>
-        <div class="hud-chip">⏱ <b id="liberTimeVal">1:30</b></div>
-        <div class="hud-chip liber-chip-boca">🔵🟡 Boca <b id="liberScoreBoca">0</b></div>
+      <div class="liber-sub-view" id="liberTeamSelectView">
+        <h2 class="liber-select-title">Elegí tu equipo</h2>
+        <div class="team-grid" id="liberTeamGrid"></div>
       </div>
 
-      <div class="frame liber-frame">
-        <canvas id="liberCanvas" width="920" height="480"></canvas>
-
-        <div class="overlay" id="liberStartOverlay">
-          <h2>¿Listo para el Superclásico?</h2>
-          <p>Manejás a River. Movete con las flechas, saltá con <kbd>&uarr;</kbd> y pateá con <kbd>Espacio</kbd>. Metela en el arco de Boca antes de que se acabe el tiempo.</p>
-          <button class="big-btn" id="liberStartBtn">▶ Empezar</button>
-        </div>
-
-        <div class="overlay is-hidden" id="liberOverOverlay">
-          <h2 id="liberOverTitle">¡Final del partido!</h2>
-          <p id="liberOverScore">River 0 - 0 Boca</p>
-          <button class="big-btn" id="liberRetryBtn">↻ Revancha</button>
+      <div class="liber-sub-view is-hidden" id="liberDifficultyView">
+        <button class="text-btn liber-back-step" id="liberDiffBackBtn">← Elegir otro equipo</button>
+        <h2 class="liber-select-title">Elegí la dificultad</h2>
+        <div class="diff-grid">
+          <button class="diff-btn diff-facil" data-diff="facil">🟢 Fácil</button>
+          <button class="diff-btn diff-normal" data-diff="normal">🟡 Normal</button>
+          <button class="diff-btn diff-dificil" data-diff="dificil">🟠 Difícil</button>
+          <button class="diff-btn diff-legendario" data-diff="legendario">🔴 Legendario</button>
         </div>
       </div>
 
-      <div class="controls-row">
-        <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Saltás con <kbd>&uarr;</kbd> · Pateás con <kbd>Espacio</kbd></p>
-        <div class="action-touch-controls">
-          <div class="joystick joystick-2way" id="liberJoystick" aria-label="Mover a River">
-            <div class="joystick-base"><div class="joystick-thumb"></div></div>
+      <div class="liber-sub-view is-hidden" id="liberStageView">
+        <h2 class="liber-select-title" id="liberStageTitle">Fase de grupos</h2>
+        <table class="group-table" id="liberGroupTable">
+          <thead><tr><th>Equipo</th><th>Pts</th><th>DG</th></tr></thead>
+          <tbody id="liberGroupTableBody"></tbody>
+        </table>
+        <p class="liber-stage-text" id="liberStageText">Próximo partido: vs Boca</p>
+        <button class="big-btn" id="liberStageContinueBtn">▶ Jugar partido</button>
+      </div>
+
+      <div class="liber-sub-view is-hidden" id="liberEndView">
+        <h2 class="liber-select-title" id="liberEndTitle">¡Campeón!</h2>
+        <p class="liber-stage-text" id="liberEndText"></p>
+        <button class="big-btn" id="liberEndRetryBtn">↻ Jugar de nuevo</button>
+      </div>
+
+      <div class="liber-sub-view is-hidden" id="liberMatchView">
+        <div class="liber-hud">
+          <div class="hud-chip liber-team-chip" id="liberHomeChip"><span class="team-badge" id="liberHomeBadge"></span> <b id="liberScoreHome">0</b></div>
+          <div class="hud-chip">⏱ <b id="liberTimeVal">1:30</b></div>
+          <div class="hud-chip liber-team-chip" id="liberAwayChip"><span class="team-badge" id="liberAwayBadge"></span> <b id="liberScoreAway">0</b></div>
+        </div>
+
+        <div class="frame liber-frame">
+          <canvas id="liberCanvas" width="920" height="480"></canvas>
+
+          <div class="overlay" id="liberStartOverlay">
+            <h2 id="liberStartTitle">¿Listo?</h2>
+            <p>Movete con las flechas, saltá con <kbd>&uarr;</kbd> y pateá con <kbd>Espacio</kbd>.</p>
+            <button class="big-btn" id="liberStartBtn">▶ Empezar</button>
           </div>
-          <button class="fire-btn" id="liberJumpBtn" aria-label="Saltar">⬆</button>
-          <button class="fire-btn bomb-btn" id="liberKickBtn" aria-label="Patear">⚽</button>
+
+          <div class="overlay is-hidden" id="liberOverOverlay">
+            <h2 id="liberOverTitle">¡Final del partido!</h2>
+            <p id="liberOverScore">0 - 0</p>
+            <button class="big-btn" id="liberOverContinueBtn">Continuar</button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Saltás con <kbd>&uarr;</kbd> · Pateás con <kbd>Espacio</kbd></p>
+          <div class="action-touch-controls">
+            <div class="joystick joystick-2way" id="liberJoystick" aria-label="Mover">
+              <div class="joystick-base"><div class="joystick-thumb"></div></div>
+            </div>
+            <button class="fire-btn" id="liberJumpBtn" aria-label="Saltar">⬆</button>
+            <button class="fire-btn bomb-btn" id="liberKickBtn" aria-label="Patear">⚽</button>
+          </div>
         </div>
       </div>
     </div>

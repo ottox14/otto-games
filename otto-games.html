@@ -1532,7 +1532,115 @@
   .sport-result.show{ animation:none; opacity:1; }
 }
 
-/* Estilos propios de Copa Libertadores: acentos de color en el marcador */
+/* Estilos propios de Copa Libertadores: seleccion de equipo/dificultad,
+   tabla de posiciones y marcador del partido */
+.liber-sub-view.is-hidden{ display:none; }
+.liber-sub-view{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:16px 20px;
+  min-height:420px;
+}
+.liber-select-title{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  text-align:center;
+}
+.liber-back-step{
+  align-self:flex-start;
+}
+
+.team-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:8px;
+  max-height:56vh;
+  overflow-y:auto;
+  padding:4px 2px;
+}
+.team-pick-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.06);
+  color:var(--ink);
+  border-radius:12px;
+  padding:10px 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  font-family:inherit;
+  cursor:pointer;
+  text-align:center;
+}
+.team-pick-btn:active{ transform:translateY(2px); }
+.team-badge{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:3px solid;
+  box-shadow:0 2px 6px rgba(0,0,0,0.35);
+}
+.team-pick-name{
+  font-size:11px;
+  font-weight:700;
+  line-height:1.2;
+}
+.team-pick-country{
+  font-size:9px;
+  color:var(--ink-soft);
+}
+
+.diff-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  max-width:420px;
+  margin:0 auto;
+  width:100%;
+}
+.diff-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:18px 10px;
+  font-family:inherit;
+  font-weight:800;
+  font-size:15px;
+  cursor:pointer;
+  color:#fff;
+}
+.diff-btn:active{ transform:translateY(2px); }
+.diff-facil{ background:linear-gradient(180deg,#4caf50,#2e7d32); }
+.diff-normal{ background:linear-gradient(180deg,#e0b400,#a87c00); }
+.diff-dificil{ background:linear-gradient(180deg,#e0672e,#a8420f); }
+.diff-legendario{ background:linear-gradient(180deg,#c81f3d,#7a0f22); }
+
+.group-table{
+  width:100%;
+  max-width:460px;
+  margin:0 auto;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.group-table.is-hidden{ display:none; }
+.group-table th, .group-table td{
+  padding:6px 8px;
+  text-align:center;
+  border-bottom:1px solid var(--panel-border);
+}
+.group-table th:first-child, .group-table td:first-child{ text-align:left; }
+.group-table tr.is-you td{ font-weight:800; color:var(--gold); }
+.group-table tr.is-qualified td:first-child::before{ content:'✓ '; color:#4caf50; }
+
+.liber-stage-text{
+  text-align:center;
+  color:var(--ink-soft);
+  margin:0;
+}
+
 .liber-hud{
   display:flex;
   align-items:center;
@@ -1540,8 +1648,16 @@
   gap:10px;
   flex-wrap:wrap;
 }
-.liber-chip-river b{ color:#ff5c7a; }
-.liber-chip-boca b{ color:#5cc9ff; }
+.liber-team-chip{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.liber-team-chip .team-badge{
+  width:18px;
+  height:18px;
+  border-width:2px;
+}
 </style>
 <div class="portal-bg" aria-hidden="true">
   <div class="stars" id="stars"></div>
@@ -2061,41 +2177,75 @@
       <div class="title-row">
         <div>
           <h1 class="game-title">COPA LIBERTADORES</h1>
-          <p class="subtitle">Superclásico: River vs Boca</p>
+          <p class="subtitle" id="liberSubtitle">Elegí tu equipo y jugá el torneo</p>
         </div>
         <button class="mute-btn" id="liberMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
       </div>
 
-      <div class="liber-hud">
-        <div class="hud-chip liber-chip-river">🔴⚪ River <b id="liberScoreRiver">0</b></div>
-        <div class="hud-chip">⏱ <b id="liberTimeVal">1:30</b></div>
-        <div class="hud-chip liber-chip-boca">🔵🟡 Boca <b id="liberScoreBoca">0</b></div>
+      <div class="liber-sub-view" id="liberTeamSelectView">
+        <h2 class="liber-select-title">Elegí tu equipo</h2>
+        <div class="team-grid" id="liberTeamGrid"></div>
       </div>
 
-      <div class="frame liber-frame">
-        <canvas id="liberCanvas" width="920" height="480"></canvas>
-
-        <div class="overlay" id="liberStartOverlay">
-          <h2>¿Listo para el Superclásico?</h2>
-          <p>Manejás a River. Movete con las flechas, saltá con <kbd>&uarr;</kbd> y pateá con <kbd>Espacio</kbd>. Metela en el arco de Boca antes de que se acabe el tiempo.</p>
-          <button class="big-btn" id="liberStartBtn">▶ Empezar</button>
-        </div>
-
-        <div class="overlay is-hidden" id="liberOverOverlay">
-          <h2 id="liberOverTitle">¡Final del partido!</h2>
-          <p id="liberOverScore">River 0 - 0 Boca</p>
-          <button class="big-btn" id="liberRetryBtn">↻ Revancha</button>
+      <div class="liber-sub-view is-hidden" id="liberDifficultyView">
+        <button class="text-btn liber-back-step" id="liberDiffBackBtn">← Elegir otro equipo</button>
+        <h2 class="liber-select-title">Elegí la dificultad</h2>
+        <div class="diff-grid">
+          <button class="diff-btn diff-facil" data-diff="facil">🟢 Fácil</button>
+          <button class="diff-btn diff-normal" data-diff="normal">🟡 Normal</button>
+          <button class="diff-btn diff-dificil" data-diff="dificil">🟠 Difícil</button>
+          <button class="diff-btn diff-legendario" data-diff="legendario">🔴 Legendario</button>
         </div>
       </div>
 
-      <div class="controls-row">
-        <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Saltás con <kbd>&uarr;</kbd> · Pateás con <kbd>Espacio</kbd></p>
-        <div class="action-touch-controls">
-          <div class="joystick joystick-2way" id="liberJoystick" aria-label="Mover a River">
-            <div class="joystick-base"><div class="joystick-thumb"></div></div>
+      <div class="liber-sub-view is-hidden" id="liberStageView">
+        <h2 class="liber-select-title" id="liberStageTitle">Fase de grupos</h2>
+        <table class="group-table" id="liberGroupTable">
+          <thead><tr><th>Equipo</th><th>Pts</th><th>DG</th></tr></thead>
+          <tbody id="liberGroupTableBody"></tbody>
+        </table>
+        <p class="liber-stage-text" id="liberStageText">Próximo partido: vs Boca</p>
+        <button class="big-btn" id="liberStageContinueBtn">▶ Jugar partido</button>
+      </div>
+
+      <div class="liber-sub-view is-hidden" id="liberEndView">
+        <h2 class="liber-select-title" id="liberEndTitle">¡Campeón!</h2>
+        <p class="liber-stage-text" id="liberEndText"></p>
+        <button class="big-btn" id="liberEndRetryBtn">↻ Jugar de nuevo</button>
+      </div>
+
+      <div class="liber-sub-view is-hidden" id="liberMatchView">
+        <div class="liber-hud">
+          <div class="hud-chip liber-team-chip" id="liberHomeChip"><span class="team-badge" id="liberHomeBadge"></span> <b id="liberScoreHome">0</b></div>
+          <div class="hud-chip">⏱ <b id="liberTimeVal">1:30</b></div>
+          <div class="hud-chip liber-team-chip" id="liberAwayChip"><span class="team-badge" id="liberAwayBadge"></span> <b id="liberScoreAway">0</b></div>
+        </div>
+
+        <div class="frame liber-frame">
+          <canvas id="liberCanvas" width="920" height="480"></canvas>
+
+          <div class="overlay" id="liberStartOverlay">
+            <h2 id="liberStartTitle">¿Listo?</h2>
+            <p>Movete con las flechas, saltá con <kbd>&uarr;</kbd> y pateá con <kbd>Espacio</kbd>.</p>
+            <button class="big-btn" id="liberStartBtn">▶ Empezar</button>
           </div>
-          <button class="fire-btn" id="liberJumpBtn" aria-label="Saltar">⬆</button>
-          <button class="fire-btn bomb-btn" id="liberKickBtn" aria-label="Patear">⚽</button>
+
+          <div class="overlay is-hidden" id="liberOverOverlay">
+            <h2 id="liberOverTitle">¡Final del partido!</h2>
+            <p id="liberOverScore">0 - 0</p>
+            <button class="big-btn" id="liberOverContinueBtn">Continuar</button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Saltás con <kbd>&uarr;</kbd> · Pateás con <kbd>Espacio</kbd></p>
+          <div class="action-touch-controls">
+            <div class="joystick joystick-2way" id="liberJoystick" aria-label="Mover">
+              <div class="joystick-base"><div class="joystick-thumb"></div></div>
+            </div>
+            <button class="fire-btn" id="liberJumpBtn" aria-label="Saltar">⬆</button>
+            <button class="fire-btn bomb-btn" id="liberKickBtn" aria-label="Patear">⚽</button>
+          </div>
         </div>
       </div>
     </div>
@@ -6743,29 +6893,91 @@
 })();
 </script>
 <script>
-// Copa Libertadores: preview estilo "cabezazo" (miniball) - River vs Boca.
-// Un jugador humano (River) contra una CPU (Boca), fisica simple de
-// gravedad + rebotes, patada con rango, gol al cruzar la linea dentro
-// del alto del arco.
+// Copa Libertadores: minijuego estilo "cabezones" (miniball/head-soccer).
+// Elegis tu equipo y la dificultad, y jugas una fase de grupos (3 partidos)
+// seguida de semifinal y final si clasificas. Fisica simple de gravedad +
+// rebotes, patada con rango.
 (function(){
   var CANVAS_W = 920, CANVAS_H = 480;
   var GROUND_Y = 400;
   var GOAL_H = 130;
   var GOAL_DEPTH = 26;
-  var PLAYER_R = 30;
+  var PLAYER_R = 34;
   var BALL_R = 14;
   var GRAVITY = 1500;
   var JUMP_VY = -580;
   var MOVE_SPEED = 250;
-  var AI_MOVE_SPEED = 215;
   var KICK_RANGE = 70;
   var KICK_COOLDOWN = 0.35;
   var MATCH_SECONDS = 90;
 
-  var TEAMS = {
-    river: {name:'River', shirt:'#fbfbfb', band:'#d61f3c', shorts:'#151b3d', attackDir:1},
-    boca:  {name:'Boca',  shirt:'#12295c', band:'#ffd23f', shorts:'#ffd23f', attackDir:-1}
+  var TEAMS = [
+    {id:'lanus', name:'Lanús', country:'Argentina', shirt:'#7a1f3d', band:'#111111', shorts:'#111111', pattern:'solid'},
+    {id:'platense', name:'Platense', country:'Argentina', shirt:'#e3cf9c', band:'#1a1a1a', shorts:'#1a1a1a', pattern:'stripes'},
+    {id:'estudiantes', name:'Estudiantes de La Plata', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#ffffff', pattern:'sash'},
+    {id:'independiente_rivadavia', name:'Independiente Rivadavia', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#c8102e', pattern:'stripes'},
+    {id:'rosario_central', name:'Rosario Central', country:'Argentina', shirt:'#1c3f94', band:'#ffd400', shorts:'#000000', pattern:'sash'},
+    {id:'boca', name:'Boca Juniors', country:'Argentina', shirt:'#0b3f8f', band:'#ffd400', shorts:'#0b3f8f', pattern:'band'},
+    {id:'argentinos', name:'Argentinos Juniors', country:'Argentina', shirt:'#ffffff', band:'#e2001a', shorts:'#e2001a', pattern:'halves'},
+    {id:'river', name:'River Plate', country:'Argentina', shirt:'#ffffff', band:'#d61f3c', shorts:'#0b1a3a', pattern:'sash'},
+
+    {id:'always_ready', name:'Always Ready', country:'Bolivia', shirt:'#f5f5f5', band:'#111111', shorts:'#111111', pattern:'band'},
+    {id:'bolivar', name:'Bolívar', country:'Bolivia', shirt:'#4fb8e6', band:'#ffffff', shorts:'#4fb8e6', pattern:'band'},
+    {id:'the_strongest', name:'The Strongest', country:'Bolivia', shirt:'#ffd400', band:'#111111', shorts:'#111111', pattern:'stripes'},
+    {id:'nacional_potosi', name:'Nacional Potosí', country:'Bolivia', shirt:'#1c7a3c', band:'#ffffff', shorts:'#1c7a3c', pattern:'band'},
+
+    {id:'flamengo', name:'Flamengo', country:'Brasil', shirt:'#e2001a', band:'#111111', shorts:'#111111', pattern:'stripes'},
+    {id:'corinthians', name:'Corinthians', country:'Brasil', shirt:'#ffffff', band:'#111111', shorts:'#111111', pattern:'solid'},
+    {id:'palmeiras', name:'Palmeiras', country:'Brasil', shirt:'#0a6c34', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
+    {id:'cruzeiro', name:'Cruzeiro', country:'Brasil', shirt:'#0033a0', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
+    {id:'mirassol', name:'Mirassol', country:'Brasil', shirt:'#ffd400', band:'#0a6c34', shorts:'#0a6c34', pattern:'band'},
+    {id:'fluminense', name:'Fluminense', country:'Brasil', shirt:'#7a1f3d', band:'#0a6c34', shorts:'#ffffff', pattern:'stripes'},
+    {id:'botafogo', name:'Botafogo', country:'Brasil', shirt:'#111111', band:'#ffffff', shorts:'#ffffff', pattern:'stripes'},
+    {id:'bahia', name:'Bahía', country:'Brasil', shirt:'#0033a0', band:'#e2001a', shorts:'#ffffff', pattern:'stripes'},
+
+    {id:'coquimbo', name:'Coquimbo Unido', country:'Chile', shirt:'#5b2a86', band:'#111111', shorts:'#111111', pattern:'halves'},
+    {id:'ohiggins', name:"O'Higgins", country:'Chile', shirt:'#0a6c34', band:'#ffffff', shorts:'#0a6c34', pattern:'band'},
+    {id:'huachipato', name:'Huachipato', country:'Chile', shirt:'#111111', band:'#ffffff', shorts:'#111111', pattern:'stripes'},
+
+    {id:'tolima', name:'Deportes Tolima', country:'Colombia', shirt:'#7a1f3d', band:'#ffd400', shorts:'#7a1f3d', pattern:'band'},
+    {id:'santa_fe', name:'Independiente Santa Fe', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'solid'},
+    {id:'junior', name:'Junior de Barranquilla', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'stripes'},
+    {id:'medellin', name:'Independiente Medellín', country:'Colombia', shirt:'#c8102e', band:'#111111', shorts:'#111111', pattern:'solid'},
+
+    {id:'liga_de_quito', name:'Liga de Quito', country:'Ecuador', shirt:'#ffffff', band:'#0033a0', shorts:'#0033a0', pattern:'band'},
+    {id:'independiente_del_valle', name:'Independiente del Valle', country:'Ecuador', shirt:'#0a2a5e', band:'#e2001a', shorts:'#0a2a5e', pattern:'band'},
+    {id:'barcelona_sc', name:'Barcelona SC', country:'Ecuador', shirt:'#ffd400', band:'#111111', shorts:'#111111', pattern:'band'},
+
+    {id:'cerro_porteno', name:'Cerro Porteño', country:'Paraguay', shirt:'#e2001a', band:'#0033a0', shorts:'#0033a0', pattern:'stripes'},
+    {id:'libertad', name:'Club Libertad', country:'Paraguay', shirt:'#ffffff', band:'#111111', shorts:'#111111', pattern:'band'},
+    {id:'sportivo_2_de_mayo', name:'Sportivo 2 de Mayo', country:'Paraguay', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
+    {id:'guarani', name:'Club Guaraní', country:'Paraguay', shirt:'#111111', band:'#e2001a', shorts:'#111111', pattern:'band'},
+
+    {id:'cusco_fc', name:'Cusco FC', country:'Perú', shirt:'#7a1f3d', band:'#ffffff', shorts:'#7a1f3d', pattern:'band'},
+    {id:'universitario', name:'Universitario de Deportes', country:'Perú', shirt:'#f0e6c8', band:'#7a1f3d', shorts:'#7a1f3d', pattern:'band'},
+    {id:'sporting_cristal', name:'Sporting Cristal', country:'Perú', shirt:'#4fb8e6', band:'#ffffff', shorts:'#4fb8e6', pattern:'sash'},
+    {id:'alianza_lima', name:'Alianza Lima', country:'Perú', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
+
+    {id:'nacional', name:'Club Nacional', country:'Uruguay', shirt:'#ffffff', band:'#0033a0', shorts:'#ffffff', pattern:'sash'},
+    {id:'penarol', name:'Peñarol', country:'Uruguay', shirt:'#111111', band:'#ffd400', shorts:'#111111', pattern:'stripes'},
+    {id:'liverpool_uy', name:'Liverpool FC', country:'Uruguay', shirt:'#111111', band:'#ffffff', shorts:'#111111', pattern:'band'},
+    {id:'juventud', name:'Juventud de Las Piedras', country:'Uruguay', shirt:'#0033a0', band:'#ffd400', shorts:'#0033a0', pattern:'band'},
+
+    {id:'la_guaira', name:'Deportivo La Guaira', country:'Venezuela', shirt:'#ffd400', band:'#0033a0', shorts:'#0033a0', pattern:'band'},
+    {id:'ucv', name:'UCV', country:'Venezuela', shirt:'#0033a0', band:'#ffd400', shorts:'#0033a0', pattern:'band'},
+    {id:'tachira', name:'Deportivo Táchira', country:'Venezuela', shirt:'#7a1f3d', band:'#ffd400', shorts:'#7a1f3d', pattern:'band'},
+    {id:'carabobo', name:'Carabobo FC', country:'Venezuela', shirt:'#7a1f3d', band:'#111111', shorts:'#111111', pattern:'band'}
+  ];
+  var TEAMS_BY_ID = {};
+  TEAMS.forEach(function(t){ TEAMS_BY_ID[t.id] = t; });
+
+  var DIFFICULTIES = {
+    facil:      {label:'Fácil',      aiSpeed:170, reactMin:0.28, reactMax:0.50, kickChance:0.35, interceptRange:70,  qMin:0.40, qMax:0.75},
+    normal:     {label:'Normal',     aiSpeed:215, reactMin:0.18, reactMax:0.34, kickChance:0.55, interceptRange:90,  qMin:0.60, qMax:1.10},
+    dificil:    {label:'Difícil',    aiSpeed:250, reactMin:0.12, reactMax:0.22, kickChance:0.72, interceptRange:110, qMin:0.80, qMax:1.25},
+    legendario: {label:'Legendario', aiSpeed:290, reactMin:0.06, reactMax:0.14, kickChance:0.90, interceptRange:140, qMin:1.00, qMax:1.35}
   };
+  var currentDifficulty = DIFFICULTIES.normal;
 
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -6775,16 +6987,35 @@
   var backFromLiberBtn = document.getElementById('backFromLiberBtn');
   var muteBtn = document.getElementById('liberMuteBtn');
 
-  var scoreRiverEl = document.getElementById('liberScoreRiver');
-  var scoreBocaEl = document.getElementById('liberScoreBoca');
+  var teamSelectView = document.getElementById('liberTeamSelectView');
+  var teamGridEl = document.getElementById('liberTeamGrid');
+  var difficultyView = document.getElementById('liberDifficultyView');
+  var diffBackBtn = document.getElementById('liberDiffBackBtn');
+  var stageView = document.getElementById('liberStageView');
+  var stageTitleEl = document.getElementById('liberStageTitle');
+  var groupTableEl = document.getElementById('liberGroupTable');
+  var groupTableBody = document.getElementById('liberGroupTableBody');
+  var stageTextEl = document.getElementById('liberStageText');
+  var stageContinueBtn = document.getElementById('liberStageContinueBtn');
+  var endView = document.getElementById('liberEndView');
+  var endTitleEl = document.getElementById('liberEndTitle');
+  var endTextEl = document.getElementById('liberEndText');
+  var endRetryBtn = document.getElementById('liberEndRetryBtn');
+  var matchView = document.getElementById('liberMatchView');
+
+  var homeChipBadge = document.getElementById('liberHomeBadge');
+  var awayChipBadge = document.getElementById('liberAwayBadge');
+  var scoreHomeEl = document.getElementById('liberScoreHome');
+  var scoreAwayEl = document.getElementById('liberScoreAway');
   var timeValEl = document.getElementById('liberTimeVal');
 
   var startOverlay = document.getElementById('liberStartOverlay');
+  var startTitleEl = document.getElementById('liberStartTitle');
   var startBtn = document.getElementById('liberStartBtn');
   var overOverlay = document.getElementById('liberOverOverlay');
   var overTitleEl = document.getElementById('liberOverTitle');
   var overScoreEl = document.getElementById('liberOverScore');
-  var retryBtn = document.getElementById('liberRetryBtn');
+  var overContinueBtn = document.getElementById('liberOverContinueBtn');
 
   var canvas = document.getElementById('liberCanvas');
   var ctx = canvas.getContext('2d');
@@ -6827,50 +7058,325 @@
     muteBtn.setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar sonido');
   });
 
-  // ---------- Estado ----------
-  function makePlayer(teamId, x, isAI){
+  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+  function shuffle(arr){
+    for (var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+  function pickRandomTeams(n, excludeIds){
+    var pool = TEAMS.filter(function(t){ return excludeIds.indexOf(t.id) === -1; });
+    shuffle(pool);
+    return pool.slice(0,n).map(function(t){ return t.id; });
+  }
+
+  // ---------- Campana (torneo) ----------
+  var campaign = {
+    yourId: null, difficulty: 'normal', group: [], standings: {},
+    fixtureQueue: [], fixtureIndex: 0, stage: null,
+    semiOpponent: null, finalOpponent: null, shootoutNote: false
+  };
+
+  function makeStandingsMap(teamIds){
+    var map = {};
+    teamIds.forEach(function(id){ map[id] = {teamId:id, pts:0, gf:0, ga:0, played:0}; });
+    return map;
+  }
+  function applyResultTo(map, aId, bId, golA, golB){
+    var sa = map[aId], sb = map[bId];
+    sa.gf += golA; sa.ga += golB; sa.played += 1;
+    sb.gf += golB; sb.ga += golA; sb.played += 1;
+    if (golA > golB) sa.pts += 3;
+    else if (golB > golA) sb.pts += 3;
+    else { sa.pts += 1; sb.pts += 1; }
+  }
+  function simFixtureTo(map, aId, bId){
+    applyResultTo(map, aId, bId, Math.floor(Math.random()*4), Math.floor(Math.random()*4));
+  }
+  function sortStandingsMap(map, teamIds){
+    return teamIds.map(function(id){ return map[id]; }).slice().sort(function(a,b){
+      if (b.pts !== a.pts) return b.pts-a.pts;
+      var gdA = a.gf-a.ga, gdB = b.gf-b.ga;
+      if (gdB !== gdA) return gdB-gdA;
+      if (b.gf !== a.gf) return b.gf-a.gf;
+      return Math.random()-0.5;
+    });
+  }
+  function allPairs(teamIds){
+    var pairs = [];
+    for (var i=0;i<teamIds.length;i++){
+      for (var j=i+1;j<teamIds.length;j++){ pairs.push([teamIds[i], teamIds[j]]); }
+    }
+    return pairs;
+  }
+  function simulateFullGroup(teamIds){
+    var map = makeStandingsMap(teamIds);
+    allPairs(teamIds).forEach(function(pair){ simFixtureTo(map, pair[0], pair[1]); });
+    return sortStandingsMap(map, teamIds);
+  }
+
+  function applyResult(aId, bId, golA, golB){ applyResultTo(campaign.standings, aId, bId, golA, golB); }
+  function simFixture(aId, bId){ simFixtureTo(campaign.standings, aId, bId); }
+  function sortedStandings(){ return sortStandingsMap(campaign.standings, campaign.group); }
+
+  var GROUP_LETTERS = ['A','B','C','D','E','F','G','H'];
+  function startCampaign(yourId, difficulty){
+    campaign.yourId = yourId;
+    campaign.difficulty = difficulty;
+    currentDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
+
+    var others31 = pickRandomTeams(31, [yourId]);
+    var pool32 = shuffle([yourId].concat(others31));
+    campaign.allGroups = [];
+    for (var g=0; g<8; g++){ campaign.allGroups.push(pool32.slice(g*4,(g+1)*4)); }
+    var yourGroupIndex = 0;
+    for (var gi=0; gi<8; gi++){
+      if (campaign.allGroups[gi].indexOf(yourId) !== -1){ yourGroupIndex = gi; break; }
+    }
+    campaign.groupLetter = GROUP_LETTERS[yourGroupIndex];
+    campaign.group = campaign.allGroups[yourGroupIndex];
+    var others = campaign.group.filter(function(id){ return id !== yourId; });
+
+    campaign.standings = {};
+    campaign.group.forEach(function(id){
+      campaign.standings[id] = {teamId:id, pts:0, gf:0, ga:0, played:0};
+    });
+    simFixture(others[0], others[1]);
+    simFixture(others[0], others[2]);
+    simFixture(others[1], others[2]);
+    campaign.fixtureQueue = shuffle(others.slice());
+    campaign.fixtureIndex = 0;
+    campaign.stage = 'group';
+    campaign.shootoutNote = false;
+
+    campaign.otherGroupWinners = [];
+    for (var og=0; og<8; og++){
+      if (og === yourGroupIndex) continue;
+      var sorted = simulateFullGroup(campaign.allGroups[og]);
+      campaign.otherGroupWinners.push(sorted[0].teamId);
+    }
+
+    showStageScreen();
+  }
+
+  function renderStandingsTable(){
+    var sorted = sortedStandings();
+    groupTableBody.innerHTML = '';
+    sorted.forEach(function(s, idx){
+      var tr = document.createElement('tr');
+      var cls = '';
+      if (s.teamId === campaign.yourId) cls += 'is-you ';
+      if (campaign.fixtureIndex >= 3 && idx < 2) cls += 'is-qualified';
+      tr.className = cls.trim();
+      var gd = s.gf-s.ga;
+      tr.innerHTML = '<td>'+TEAMS_BY_ID[s.teamId].name+'</td><td>'+s.pts+'</td><td>'+(gd>0?'+':'')+gd+'</td>';
+      groupTableBody.appendChild(tr);
+    });
+  }
+
+  function hideAllSubViews(){
+    teamSelectView.classList.add('is-hidden');
+    difficultyView.classList.add('is-hidden');
+    stageView.classList.add('is-hidden');
+    endView.classList.add('is-hidden');
+    matchView.classList.add('is-hidden');
+  }
+
+  function showStageScreen(){
+    hideAllSubViews();
+    stageView.classList.remove('is-hidden');
+    if (campaign.stage === 'group'){
+      groupTableEl.classList.remove('is-hidden');
+      renderStandingsTable();
+      stageTitleEl.textContent = 'Grupo '+campaign.groupLetter+' · Fase de grupos ('+(campaign.fixtureIndex+1)+'/3)';
+      var opp = TEAMS_BY_ID[campaign.fixtureQueue[campaign.fixtureIndex]];
+      stageTextEl.textContent = 'Próximo partido: vs '+opp.name;
+      stageContinueBtn.textContent = '▶ Jugar partido';
+    } else if (campaign.stage === 'knockout-semi'){
+      groupTableEl.classList.add('is-hidden');
+      stageTitleEl.textContent = '¡Clasificaste a semifinales!';
+      stageTextEl.textContent = 'Semifinal vs '+TEAMS_BY_ID[campaign.semiOpponent].name;
+      stageContinueBtn.textContent = '▶ Jugar semifinal';
+    } else if (campaign.stage === 'knockout-final'){
+      groupTableEl.classList.add('is-hidden');
+      stageTitleEl.textContent = '¡Estás en la final!';
+      stageTextEl.textContent = 'Final vs '+TEAMS_BY_ID[campaign.finalOpponent].name;
+      stageContinueBtn.textContent = '▶ Jugar la final';
+    }
+  }
+
+  function endCampaign(resultType){
+    hideAllSubViews();
+    endView.classList.remove('is-hidden');
+    var titleMap = {
+      champion: '🏆 ¡Campeón de la Copa Libertadores!',
+      'runner-up': '🥈 Subcampeón',
+      'eliminated-semi': 'Eliminado en semifinales',
+      'eliminated-group': 'Eliminado en fase de grupos'
+    };
+    endTitleEl.textContent = titleMap[resultType] || 'Fin del torneo';
+    var extra = campaign.shootoutNote ? ' Se definió por penales.' : '';
+    endTextEl.textContent = 'Jugaste con '+TEAMS_BY_ID[campaign.yourId].name+' en dificultad '+DIFFICULTIES[campaign.difficulty].label+'.'+extra;
+  }
+
+  stageContinueBtn.addEventListener('click', function(){
+    ensureAudio();
+    if (campaign.stage === 'group'){
+      startMatchVs(campaign.fixtureQueue[campaign.fixtureIndex]);
+    } else if (campaign.stage === 'knockout-semi'){
+      startMatchVs(campaign.semiOpponent);
+    } else if (campaign.stage === 'knockout-final'){
+      startMatchVs(campaign.finalOpponent);
+    }
+  });
+
+  function finishGroupStage(){
+    var sorted = sortedStandings();
+    var yourIndex = -1;
+    for (var i=0;i<sorted.length;i++){ if (sorted[i].teamId === campaign.yourId){ yourIndex = i; break; } }
+    if (yourIndex < 2){
+      campaign.stage = 'knockout-semi';
+      var winnersPool = shuffle(campaign.otherGroupWinners.slice());
+      campaign.semiOpponent = winnersPool[0];
+      campaign.remainingWinners = winnersPool.slice(1);
+      showStageScreen();
+    } else {
+      endCampaign('eliminated-group');
+    }
+  }
+
+  function resolveKnockout(){
+    var outcome;
+    if (scoreHome > scoreAway) outcome = 'win';
+    else if (scoreAway > scoreHome) outcome = 'lose';
+    else {
+      campaign.shootoutNote = true;
+      outcome = Math.random() < 0.5 ? 'win' : 'lose';
+    }
+    if (campaign.stage === 'knockout-semi'){
+      if (outcome === 'win'){
+        campaign.stage = 'knockout-final';
+        campaign.finalOpponent = campaign.remainingWinners[0];
+        showStageScreen();
+      } else {
+        endCampaign('eliminated-semi');
+      }
+    } else if (campaign.stage === 'knockout-final'){
+      endCampaign(outcome === 'win' ? 'champion' : 'runner-up');
+    }
+  }
+
+  function afterMatchContinue(){
+    overOverlay.classList.add('is-hidden');
+    if (campaign.stage === 'group'){
+      var oppId = campaign.fixtureQueue[campaign.fixtureIndex];
+      applyResult(campaign.yourId, oppId, scoreHome, scoreAway);
+      campaign.fixtureIndex += 1;
+      if (campaign.fixtureIndex >= 3) finishGroupStage();
+      else showStageScreen();
+    } else {
+      resolveKnockout();
+    }
+  }
+  overContinueBtn.addEventListener('click', afterMatchContinue);
+
+  // ---------- Seleccion de equipo y dificultad ----------
+  var pendingTeamId = null;
+  function buildTeamGrid(){
+    teamGridEl.innerHTML = '';
+    TEAMS.forEach(function(team){
+      var btn = document.createElement('button');
+      btn.className = 'team-pick-btn';
+      btn.innerHTML = '<span class="team-badge" style="background:'+team.shirt+';border-color:'+team.band+'"></span>'+
+        '<span class="team-pick-name">'+team.name+'</span>'+
+        '<span class="team-pick-country">'+team.country+'</span>';
+      btn.addEventListener('click', function(){
+        ensureAudio();
+        pendingTeamId = team.id;
+        teamSelectView.classList.add('is-hidden');
+        difficultyView.classList.remove('is-hidden');
+      });
+      teamGridEl.appendChild(btn);
+    });
+  }
+  buildTeamGrid();
+
+  diffBackBtn.addEventListener('click', function(){
+    difficultyView.classList.add('is-hidden');
+    teamSelectView.classList.remove('is-hidden');
+  });
+
+  var diffButtons = document.querySelectorAll('.diff-btn');
+  for (var di=0; di<diffButtons.length; di++){
+    diffButtons[di].addEventListener('click', function(e){
+      ensureAudio();
+      startCampaign(pendingTeamId, e.currentTarget.getAttribute('data-diff'));
+    });
+  }
+
+  function showTeamSelect(){
+    hideAllSubViews();
+    teamSelectView.classList.remove('is-hidden');
+    pauseLiberLoop();
+  }
+  endRetryBtn.addEventListener('click', showTeamSelect);
+
+  // ---------- Estado del partido ----------
+  function makePlayer(team, x, isAI, attackDir){
     return {
-      teamId: teamId, team: TEAMS[teamId],
-      x: x, y: GROUND_Y-PLAYER_R, vx: 0, vy: 0,
-      onGround: true, facing: TEAMS[teamId].attackDir, isAI: !!isAI,
+      team: team, x: x, y: GROUND_Y-PLAYER_R, vx: 0, vy: 0,
+      onGround: true, facing: attackDir, isAI: !!isAI, attackDir: attackDir,
       kickCooldown: 0, kicking: 0,
       aiDecisionT: 0, aiDir: 0, aiWantsJump: false
     };
   }
-  var river = makePlayer('river', CANVAS_W*0.28, false);
-  var boca = makePlayer('boca', CANVAS_W*0.72, true);
+  var home = makePlayer(TEAMS_BY_ID.river, CANVAS_W*0.28, false, 1);
+  var away = makePlayer(TEAMS_BY_ID.boca, CANVAS_W*0.72, true, -1);
   var ball = {x:CANVAS_W/2, y:GROUND_Y-BALL_R, vx:0, vy:0};
 
-  var scoreRiver = 0, scoreBoca = 0;
+  var scoreHome = 0, scoreAway = 0;
   var matchTimeLeft = MATCH_SECONDS;
   var matchState = 'idle'; // 'idle' | 'playing' | 'goal' | 'over'
   var goalTimer = 0;
-  var lastGoalTeam = null;
-
-  function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+  var lastGoalSide = null;
 
   function resetKickoff(){
-    river.x = CANVAS_W*0.28; river.y = GROUND_Y-PLAYER_R; river.vx=0; river.vy=0; river.onGround=true;
-    boca.x = CANVAS_W*0.72; boca.y = GROUND_Y-PLAYER_R; boca.vx=0; boca.vy=0; boca.onGround=true;
-    river.kickCooldown=0; boca.kickCooldown=0;
+    home.x = CANVAS_W*0.28; home.y = GROUND_Y-PLAYER_R; home.vx=0; home.vy=0; home.onGround=true; home.kickCooldown=0;
+    away.x = CANVAS_W*0.72; away.y = GROUND_Y-PLAYER_R; away.vx=0; away.vy=0; away.onGround=true; away.kickCooldown=0;
     ball.x = CANVAS_W/2; ball.y = GROUND_Y-BALL_R; ball.vx=0; ball.vy=0;
   }
 
-  function updateHud(){
-    scoreRiverEl.textContent = scoreRiver;
-    scoreBocaEl.textContent = scoreBoca;
+  function updateMatchHud(){
+    scoreHomeEl.textContent = scoreHome;
+    scoreAwayEl.textContent = scoreAway;
     var m = Math.floor(Math.max(0,matchTimeLeft)/60);
     var s = Math.floor(Math.max(0,matchTimeLeft)%60);
     timeValEl.textContent = m+':'+(s<10?'0':'')+s;
   }
 
-  function resetMatch(){
-    scoreRiver = 0; scoreBoca = 0;
+  function startMatchVs(opponentId){
+    var yourTeam = TEAMS_BY_ID[campaign.yourId];
+    var oppTeam = TEAMS_BY_ID[opponentId];
+    home = makePlayer(yourTeam, CANVAS_W*0.28, false, 1);
+    away = makePlayer(oppTeam, CANVAS_W*0.72, true, -1);
+    scoreHome = 0; scoreAway = 0;
     matchTimeLeft = MATCH_SECONDS;
     matchState = 'idle';
     goalTimer = 0;
     resetKickoff();
-    updateHud();
+    updateMatchHud();
+    homeChipBadge.style.background = yourTeam.shirt;
+    homeChipBadge.style.borderColor = yourTeam.band;
+    awayChipBadge.style.background = oppTeam.shirt;
+    awayChipBadge.style.borderColor = oppTeam.band;
+    startTitleEl.textContent = '¿Listo para jugar vs '+oppTeam.name+'?';
+
+    hideAllSubViews();
+    matchView.classList.remove('is-hidden');
+    startOverlay.classList.remove('is-hidden');
+    overOverlay.classList.add('is-hidden');
     draw(0);
   }
 
@@ -6882,15 +7388,15 @@
 
   function doJump(){
     if (matchState !== 'playing') return;
-    if (river.onGround){
-      river.vy = JUMP_VY;
-      river.onGround = false;
+    if (home.onGround){
+      home.vy = JUMP_VY;
+      home.onGround = false;
       beep(500, 0.08, 'sine');
     }
   }
   function doKick(){
     if (matchState !== 'playing') return;
-    attemptKick(river);
+    attemptKick(home);
   }
 
   var KEY_DIR = {ArrowLeft:'left', ArrowRight:'right'};
@@ -6982,17 +7488,16 @@
   }
 
   function resolvePlayerCollision(){
-    var dx = boca.x-river.x;
-    var dy = boca.y-river.y;
+    var dx = away.x-home.x, dy = away.y-home.y;
     var dist = Math.sqrt(dx*dx+dy*dy);
     var minDist = PLAYER_R*1.7;
     if (dist > 0 && dist < minDist){
       var overlap = (minDist-dist)/2;
       var nx = dx/dist, ny = dy/dist;
-      river.x -= nx*overlap; river.y -= ny*overlap;
-      boca.x += nx*overlap; boca.y += ny*overlap;
-      river.x = clamp(river.x, PLAYER_R, CANVAS_W-PLAYER_R);
-      boca.x = clamp(boca.x, PLAYER_R, CANVAS_W-PLAYER_R);
+      home.x -= nx*overlap; home.y -= ny*overlap;
+      away.x += nx*overlap; away.y += ny*overlap;
+      home.x = clamp(home.x, PLAYER_R, CANVAS_W-PLAYER_R);
+      away.x = clamp(away.x, PLAYER_R, CANVAS_W-PLAYER_R);
     }
   }
 
@@ -7003,14 +7508,13 @@
     if (dist > KICK_RANGE) return;
     p.kickCooldown = KICK_COOLDOWN;
     p.kicking = 0.18;
-    var attackDir = p.team.attackDir;
-    var power = 600, lift = -320;
+    var power = 600, lift = -430;
     if (p.isAI){
-      var quality = 0.6 + Math.random()*0.6;
+      var quality = currentDifficulty.qMin + Math.random()*(currentDifficulty.qMax-currentDifficulty.qMin);
       power *= quality;
       lift *= 0.55 + Math.random()*0.6;
     }
-    ball.vx = attackDir*power + p.vx*0.35;
+    ball.vx = p.attackDir*power + p.vx*0.35;
     ball.vy = lift + Math.min(0, dy)*0.4;
     beep(320, 0.07, 'square');
     setTimeout(function(){ beep(420, 0.06, 'square'); }, 40);
@@ -7047,61 +7551,60 @@
 
     if (ball.x-BALL_R <= 0){
       if (ball.y+BALL_R > GROUND_Y-GOAL_H){
-        scoreGoal('boca');
+        scoreGoal('away');
         return;
       }
       ball.x = BALL_R; ball.vx *= -0.7;
     }
     if (ball.x+BALL_R >= CANVAS_W){
       if (ball.y+BALL_R > GROUND_Y-GOAL_H){
-        scoreGoal('river');
+        scoreGoal('home');
         return;
       }
       ball.x = CANVAS_W-BALL_R; ball.vx *= -0.7;
     }
   }
 
-  function scoreGoal(teamId){
+  function scoreGoal(side){
     if (matchState !== 'playing') return;
-    if (teamId === 'river') scoreRiver += 1; else scoreBoca += 1;
-    lastGoalTeam = teamId;
+    if (side === 'home') scoreHome += 1; else scoreAway += 1;
+    lastGoalSide = side;
     matchState = 'goal';
     goalTimer = 1.6;
-    updateHud();
+    updateMatchHud();
     beep(700, 0.12, 'triangle');
     setTimeout(function(){ beep(950, 0.12, 'triangle'); }, 100);
     setTimeout(function(){ beep(1200, 0.18, 'triangle'); }, 220);
   }
 
   function updateAI(dt){
-    boca.aiDecisionT -= dt;
-    if (boca.aiDecisionT <= 0){
-      boca.aiDecisionT = 0.18 + Math.random()*0.16;
-      var dx = ball.x-boca.x, dy = ball.y-boca.y;
-      boca.aiDir = Math.abs(dx) < 16 ? 0 : (dx>0 ? 1 : -1);
-      boca.aiWantsJump = boca.onGround && ball.y < boca.y-30 && Math.abs(dx) < 90 && ball.vy > -80;
-      if (Math.sqrt(dx*dx+dy*dy) < KICK_RANGE && Math.random() < 0.55){
-        attemptKick(boca);
+    away.aiDecisionT -= dt;
+    if (away.aiDecisionT <= 0){
+      away.aiDecisionT = currentDifficulty.reactMin + Math.random()*(currentDifficulty.reactMax-currentDifficulty.reactMin);
+      var dx = ball.x-away.x, dy = ball.y-away.y;
+      away.aiDir = Math.abs(dx) < 16 ? 0 : (dx>0 ? 1 : -1);
+      away.aiWantsJump = away.onGround && ball.y < away.y-30 && Math.abs(dx) < currentDifficulty.interceptRange && ball.vy > -80;
+      if (Math.sqrt(dx*dx+dy*dy) < KICK_RANGE && Math.random() < currentDifficulty.kickChance){
+        attemptKick(away);
       }
     }
-    boca.vx = boca.aiDir*AI_MOVE_SPEED;
-    if (boca.aiDir !== 0) boca.facing = boca.aiDir;
-    if (boca.aiWantsJump && boca.onGround){
-      boca.vy = JUMP_VY;
-      boca.onGround = false;
-      boca.aiWantsJump = false;
+    away.vx = away.aiDir*currentDifficulty.aiSpeed;
+    if (away.aiDir !== 0) away.facing = away.aiDir;
+    if (away.aiWantsJump && away.onGround){
+      away.vy = JUMP_VY;
+      away.onGround = false;
+      away.aiWantsJump = false;
     }
   }
 
   function endMatch(){
     matchState = 'over';
-    var title, scoreText;
-    scoreText = 'River '+scoreRiver+' - '+scoreBoca+' Boca';
-    if (scoreRiver > scoreBoca) title = '¡Ganó River!';
-    else if (scoreBoca > scoreRiver) title = '¡Ganó Boca!';
-    else title = '¡Empate!';
+    var title;
+    if (scoreHome > scoreAway) title = '¡Ganaste!';
+    else if (scoreAway > scoreHome) title = 'Perdiste';
+    else title = 'Empate';
     overTitleEl.textContent = title;
-    overScoreEl.textContent = scoreText;
+    overScoreEl.textContent = home.team.name+' '+scoreHome+' - '+scoreAway+' '+away.team.name;
     overOverlay.classList.remove('is-hidden');
     pauseLiberLoop();
   }
@@ -7109,20 +7612,24 @@
   // ---------- Dibujo ----------
   function drawPitch(){
     var c = ctx;
+    var crowdH = 46;
     var skyGrad = c.createLinearGradient(0,0,0,GROUND_Y-GOAL_H-30);
     skyGrad.addColorStop(0, '#8fd3f4');
     skyGrad.addColorStop(1, '#cfeadf');
     c.fillStyle = skyGrad;
     c.fillRect(0,0,CANVAS_W,GROUND_Y-GOAL_H-30);
 
-    c.fillStyle = 'rgba(50,40,80,0.22)';
-    c.fillRect(0,10,CANVAS_W,26);
-    for (var cx=6; cx<CANVAS_W; cx+=9){
-      c.fillStyle = ['#ff9fc0','#ffd23f','#6fe0d9','#ffffff','#ff7fa8'][(cx*7)%5];
-      c.globalAlpha = 0.55;
-      c.fillRect(cx, 14+((cx%3)*3), 4, 4);
+    c.fillStyle = 'rgba(30,22,50,0.4)';
+    c.fillRect(0,0,CANVAS_W,crowdH);
+    for (var cx=4; cx<CANVAS_W; cx+=8){
+      c.fillStyle = ['#ff9fc0','#ffd23f','#6fe0d9','#ffffff','#ff7fa8','#8fd3f4'][(cx*11)%6];
+      c.globalAlpha = 0.7;
+      var rowY = 6 + ((Math.floor(cx/8)%4))*10;
+      c.fillRect(cx, rowY, 5, 5);
     }
     c.globalAlpha = 1;
+    c.fillStyle = 'rgba(0,0,0,0.25)';
+    c.fillRect(0,crowdH-6,CANVAS_W,6);
 
     var grassTop = GROUND_Y-GOAL_H-30;
     var grassGrad = c.createLinearGradient(0,grassTop,0,CANVAS_H);
@@ -7163,9 +7670,10 @@
     c.strokeStyle = '#f5f5f5';
     c.lineWidth = 5;
     c.beginPath();
-    c.moveTo(gx+dir*GOAL_DEPTH, GROUND_Y);
-    c.lineTo(gx+dir*GOAL_DEPTH, topY);
+    c.moveTo(gx, GROUND_Y);
     c.lineTo(gx, topY);
+    c.lineTo(gx+dir*GOAL_DEPTH, topY);
+    c.lineTo(gx+dir*GOAL_DEPTH, GROUND_Y);
     c.stroke();
   }
 
@@ -7179,24 +7687,49 @@
     c.restore();
   }
 
+  function drawKitPattern(c, team){
+    c.fillStyle = team.band;
+    switch (team.pattern){
+      case 'sash':
+        c.beginPath();
+        c.moveTo(-PLAYER_R,-8); c.lineTo(-PLAYER_R,8); c.lineTo(PLAYER_R,-8); c.lineTo(PLAYER_R,-24);
+        c.closePath(); c.fill();
+        break;
+      case 'band':
+        c.fillRect(-PLAYER_R,-10,PLAYER_R*2,14);
+        break;
+      case 'stripes':
+        var stripeW = 8;
+        for (var sx=-PLAYER_R; sx<PLAYER_R; sx+=stripeW*2){
+          c.fillRect(sx,-PLAYER_R,stripeW,PLAYER_R*2);
+        }
+        break;
+      case 'halves':
+        c.fillRect(0,-PLAYER_R,PLAYER_R,PLAYER_R*2);
+        break;
+      default:
+        c.beginPath(); c.arc(0,-14,5,0,Math.PI*2); c.fill();
+    }
+  }
+
   function drawPlayer(p, t){
     var c = ctx;
     drawShadow(p.x);
     c.save();
     c.translate(p.x, p.y);
 
-    var legSwing = Math.abs(p.vx) > 5 && p.onGround && !reducedMotion ? Math.sin(t*10)*10 : 0;
+    var legSwing = Math.abs(p.vx) > 5 && p.onGround && !reducedMotion ? Math.sin(t*10)*8 : 0;
     c.strokeStyle = p.team.shorts;
-    c.lineWidth = 9;
+    c.lineWidth = 7;
     c.lineCap = 'round';
     if (p.kicking > 0){
       var kProg = 1-(p.kicking/0.18);
-      var kickX = p.team.attackDir*(14+kProg*20);
-      c.beginPath(); c.moveTo(-6,PLAYER_R-4); c.lineTo(-6+ -p.team.attackDir*4, PLAYER_R+16); c.stroke();
-      c.beginPath(); c.moveTo(6,PLAYER_R-6); c.lineTo(kickX, PLAYER_R-2); c.stroke();
+      var kickX = p.attackDir*(12+kProg*18);
+      c.beginPath(); c.moveTo(-5,PLAYER_R-6); c.lineTo(-5-p.attackDir*3, PLAYER_R+12); c.stroke();
+      c.beginPath(); c.moveTo(5,PLAYER_R-8); c.lineTo(kickX, PLAYER_R-4); c.stroke();
     } else {
-      c.beginPath(); c.moveTo(-7,PLAYER_R-4); c.lineTo(-7+legSwing*0.4,PLAYER_R+18); c.stroke();
-      c.beginPath(); c.moveTo(7,PLAYER_R-4); c.lineTo(7-legSwing*0.4,PLAYER_R+18); c.stroke();
+      c.beginPath(); c.moveTo(-6,PLAYER_R-6); c.lineTo(-6+legSwing*0.35,PLAYER_R+13); c.stroke();
+      c.beginPath(); c.moveTo(6,PLAYER_R-6); c.lineTo(6-legSwing*0.35,PLAYER_R+13); c.stroke();
     }
 
     c.fillStyle = p.team.shirt;
@@ -7209,21 +7742,19 @@
 
     c.save();
     c.beginPath(); c.arc(0,0,PLAYER_R,0,Math.PI*2); c.clip();
-    c.fillStyle = p.team.band;
-    if (p.teamId === 'river'){
-      c.beginPath();
-      c.moveTo(-PLAYER_R,-8); c.lineTo(-PLAYER_R,8); c.lineTo(PLAYER_R,-8); c.lineTo(PLAYER_R,-24);
-      c.closePath(); c.fill();
-    } else {
-      c.fillRect(-PLAYER_R,-10,PLAYER_R*2,14);
-    }
+    drawKitPattern(c, p.team);
     c.restore();
 
     c.fillStyle = '#241a3d';
     var eyeDir = p.facing >= 0 ? 1 : -1;
     c.beginPath();
-    c.arc(eyeDir*8-2,-6,3,0,Math.PI*2);
-    c.arc(eyeDir*8+8,-6,3,0,Math.PI*2);
+    c.arc(eyeDir*9-2,-8,4.4,0,Math.PI*2);
+    c.arc(eyeDir*9+10,-8,4.4,0,Math.PI*2);
+    c.fill();
+    c.fillStyle = '#fff';
+    c.beginPath();
+    c.arc(eyeDir*9-1,-9,1.4,0,Math.PI*2);
+    c.arc(eyeDir*9+11,-9,1.4,0,Math.PI*2);
     c.fill();
 
     c.restore();
@@ -7262,17 +7793,17 @@
     var prog = clamp(1-(goalTimer/1.6), 0, 1);
     var scale = prog < 0.25 ? (prog/0.25) : 1;
     var alpha = prog > 0.8 ? (1-prog)/0.2 : 1;
-    var team = TEAMS[lastGoalTeam];
+    var team = lastGoalSide === 'home' ? home.team : away.team;
     c.save();
     c.globalAlpha = clamp(alpha,0,1);
     c.translate(CANVAS_W/2, CANVAS_H*0.4);
     c.scale(scale, scale);
-    c.font = '900 54px system-ui, sans-serif';
+    c.font = '900 50px system-ui, sans-serif';
     c.textAlign = 'center';
     c.textBaseline = 'middle';
     c.fillStyle = 'rgba(0,0,0,0.5)';
     c.fillText('¡GOL DE '+team.name.toUpperCase()+'!', 3, 3);
-    c.fillStyle = lastGoalTeam==='boca' ? '#ffd23f' : '#ff5c7a';
+    c.fillStyle = team.band === '#ffffff' || team.band === '#f5f5f5' ? team.shirt : team.band;
     c.fillText('¡GOL DE '+team.name.toUpperCase()+'!', 0, 0);
     c.restore();
   }
@@ -7280,8 +7811,8 @@
   function draw(ts){
     var t = (ts||0)/1000;
     drawPitch();
-    drawPlayer(river, t);
-    drawPlayer(boca, t);
+    drawPlayer(home, t);
+    drawPlayer(away, t);
     drawBall();
     drawGoalText();
   }
@@ -7308,23 +7839,23 @@
       matchTimeLeft -= dt;
       if (matchTimeLeft <= 0){
         matchTimeLeft = 0;
-        updateHud();
+        updateMatchHud();
         endMatch();
         draw(ts);
         return;
       }
-      updateHud();
+      updateMatchHud();
 
-      river.vx = currentDir()==='left' ? -MOVE_SPEED : (currentDir()==='right' ? MOVE_SPEED : 0);
-      if (currentDir()) river.facing = currentDir()==='right' ? 1 : -1;
+      home.vx = currentDir()==='left' ? -MOVE_SPEED : (currentDir()==='right' ? MOVE_SPEED : 0);
+      if (currentDir()) home.facing = currentDir()==='right' ? 1 : -1;
 
-      updatePlayerPhysics(river, dt);
-      updatePlayerPhysics(boca, dt);
+      updatePlayerPhysics(home, dt);
+      updatePlayerPhysics(away, dt);
       updateAI(dt);
       resolvePlayerCollision();
       updateBall(dt);
-      collideBallPlayer(river);
-      collideBallPlayer(boca);
+      collideBallPlayer(home);
+      collideBallPlayer(away);
     } else if (matchState === 'goal'){
       goalTimer -= dt;
       if (goalTimer <= 0){
@@ -7345,9 +7876,7 @@
   playLiberBtn.addEventListener('click', function(){
     portalView.classList.add('is-hidden');
     liberView.classList.remove('is-hidden');
-    startOverlay.classList.remove('is-hidden');
-    overOverlay.classList.add('is-hidden');
-    resetMatch();
+    showTeamSelect();
   });
   backFromLiberBtn.addEventListener('click', function(){
     liberView.classList.add('is-hidden');
@@ -7358,13 +7887,6 @@
   startBtn.addEventListener('click', function(){
     ensureAudio();
     startOverlay.classList.add('is-hidden');
-    matchState = 'playing';
-    startLiberLoop();
-  });
-  retryBtn.addEventListener('click', function(){
-    ensureAudio();
-    overOverlay.classList.add('is-hidden');
-    resetMatch();
     matchState = 'playing';
     startLiberLoop();
   });

@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="css/space-invaders.css">
 <link rel="stylesheet" href="css/papa-millonaria.css">
 <link rel="stylesheet" href="css/mi-gatito.css">
+<link rel="stylesheet" href="css/copa-libertadores.css">
 </head>
 <body>
 
@@ -77,6 +78,14 @@
         <p>Adoptá un gatito y cuidalo: dale de comer, bañalo, dejalo dormir y jugá con él a la pelota. ¡Que no le falte nada!</p>
         <div class="tags"><span class="tag">Mascotas</span><span class="tag">Cuidado</span></div>
         <button class="play-btn" id="playGatoBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">🏆</div>
+        <h2>Copa Libertadores</h2>
+        <p>Preview: Superclásico River-Boca al mejor estilo cabezazo. Movete, saltá y pateá para meterla en el arco rival.</p>
+        <div class="tags"><span class="tag">Deportes</span><span class="tag">1 vs CPU</span></div>
+        <button class="play-btn" id="playLiberBtn">▶ Jugar</button>
       </article>
 
       <article class="game-card coming-soon">
@@ -518,6 +527,54 @@
     </div>
   </div>
 
+  <div class="view is-hidden" id="libertadoresView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromLiberBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">COPA LIBERTADORES</h1>
+          <p class="subtitle">Superclásico: River vs Boca</p>
+        </div>
+        <button class="mute-btn" id="liberMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="liber-hud">
+        <div class="hud-chip liber-chip-river">🔴⚪ River <b id="liberScoreRiver">0</b></div>
+        <div class="hud-chip">⏱ <b id="liberTimeVal">1:30</b></div>
+        <div class="hud-chip liber-chip-boca">🔵🟡 Boca <b id="liberScoreBoca">0</b></div>
+      </div>
+
+      <div class="frame liber-frame">
+        <canvas id="liberCanvas" width="920" height="480"></canvas>
+
+        <div class="overlay" id="liberStartOverlay">
+          <h2>¿Listo para el Superclásico?</h2>
+          <p>Manejás a River. Movete con las flechas, saltá con <kbd>&uarr;</kbd> y pateá con <kbd>Espacio</kbd>. Metela en el arco de Boca antes de que se acabe el tiempo.</p>
+          <button class="big-btn" id="liberStartBtn">▶ Empezar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="liberOverOverlay">
+          <h2 id="liberOverTitle">¡Final del partido!</h2>
+          <p id="liberOverScore">River 0 - 0 Boca</p>
+          <button class="big-btn" id="liberRetryBtn">↻ Revancha</button>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Saltás con <kbd>&uarr;</kbd> · Pateás con <kbd>Espacio</kbd></p>
+        <div class="action-touch-controls">
+          <div class="joystick joystick-2way" id="liberJoystick" aria-label="Mover a River">
+            <div class="joystick-base"><div class="joystick-thumb"></div></div>
+          </div>
+          <button class="fire-btn" id="liberJumpBtn" aria-label="Saltar">⬆</button>
+          <button class="fire-btn bomb-btn" id="liberKickBtn" aria-label="Patear">⚽</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/portal.js"></script>
@@ -527,5 +584,6 @@
 <script src="js/space-invaders.js"></script>
 <script src="js/papa-millonaria.js"></script>
 <script src="js/mi-gatito.js"></script>
+<script src="js/copa-libertadores.js"></script>
 </body>
 </html>

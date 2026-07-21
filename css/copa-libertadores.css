@@ -1,0 +1,10 @@
+/* Estilos propios de Copa Libertadores: acentos de color en el marcador */
+.liber-hud{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.liber-chip-river b{ color:#ff5c7a; }
+.liber-chip-boca b{ color:#5cc9ff; }

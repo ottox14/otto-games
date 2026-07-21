@@ -474,16 +474,37 @@
           <button class="text-btn" id="jugarMenuCloseBtn">Cerrar</button>
         </div>
 
-        <div class="overlay is-hidden" id="miniGameOverlay">
-          <h2 id="miniGameTitle">⚽ Fútbol</h2>
-          <p id="miniGameHint">¡Tocá "¡Ya!" cuando la barra esté en la zona verde!</p>
-          <div class="timing-track" id="timingTrack">
-            <div class="timing-zone" id="timingZone"></div>
-            <div class="timing-marker" id="timingMarker"></div>
+        <div class="overlay is-hidden" id="futbolOverlay">
+          <h2>⚽ Penales</h2>
+          <p id="futbolHint">Tocá dentro del arco para patear</p>
+          <div class="sport-canvas-wrap">
+            <canvas id="futbolCanvas" width="280" height="320"></canvas>
+            <div class="sport-result is-hidden" id="futbolResult"></div>
           </div>
-          <button class="big-btn" id="timingActionBtn">¡Ya!</button>
-          <p id="miniGameScore">Aciertos: 0/5</p>
-          <button class="text-btn" id="miniGameCloseBtn">Volver</button>
+          <p id="futbolScore">Penales: 0/5 · Goles: 0</p>
+          <button class="text-btn" id="futbolCloseBtn">Volver</button>
+        </div>
+
+        <div class="overlay is-hidden" id="basquetOverlay">
+          <h2>🏀 Básquet</h2>
+          <p id="basquetHint">Tocá cerca del aro para tirar</p>
+          <div class="sport-canvas-wrap">
+            <canvas id="basquetCanvas" width="280" height="320"></canvas>
+            <div class="sport-result is-hidden" id="basquetResult"></div>
+          </div>
+          <p id="basquetScore">Tiros: 0/5 · Encestes: 0</p>
+          <button class="text-btn" id="basquetCloseBtn">Volver</button>
+        </div>
+
+        <div class="overlay is-hidden" id="voleyOverlay">
+          <h2>🏐 Vóley</h2>
+          <p id="voleyHint">Tocá del otro lado de la red para rematar</p>
+          <div class="sport-canvas-wrap">
+            <canvas id="voleyCanvas" width="280" height="320"></canvas>
+            <div class="sport-result is-hidden" id="voleyResult"></div>
+          </div>
+          <p id="voleyScore">Remates: 0/5 · Puntos: 0</p>
+          <button class="text-btn" id="voleyCloseBtn">Volver</button>
         </div>
 
         <div class="overlay is-hidden" id="mimosOverlay">

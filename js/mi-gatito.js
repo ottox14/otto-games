@@ -1,6 +1,6 @@
 (function(){
   var SAVE_KEY = 'miGatitoSave';
-  var DECAY_RATE = 100/900; // se vacia del todo en 15 minutos activos
+  var DECAY_RATE = 100/10800; // se vacia del todo en 3 horas activas
   var SLEEP_RATE = 8; // recupera energia por segundo mientras duerme
   var MAX_OFFLINE_SECONDS = 6*3600;
 

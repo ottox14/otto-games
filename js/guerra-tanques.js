@@ -1,24 +1,75 @@
+// Guerra de Tanques: campana de 20 niveles al estilo Battle City. Tu tanque
+// conserva las mejoras que vas desbloqueando nivel a nivel (velocidad, cadencia,
+// vida, escudo, patron de disparo, etc). Cada nivel trae un enemigo distinto y
+// un mapa con su propia mecanica de terreno. Los niveles 5/10/15/20 son jefes;
+// al vencer al Nivel 20 desbloqueas el Tanque Legendario.
 (function(){
   var TILE = 32, COLS = 13, ROWS = 13;
-  var EMPTY=0, BRICK=1, STEEL=2, BASE=3;
+  var EMPTY=0, BRICK=1, STEEL=2, BASE=3, CRATE=4, ROCK=5, WATER=6, SAND=7,
+      ICE=8, ELECTRIC=9, PORTAL_A=10, PORTAL_B=11, TOGGLE=12, CONVEYOR=13;
 
   var PLAYER_SIZE = 26, ENEMY_SIZE = 26, BULLET_SIZE = 5;
-  var PLAYER_SPEED = 130, PLAYER_BULLET_SPEED = 300, ENEMY_BULLET_SPEED = 220;
-  var LIVES_START = 3, RESPAWN_DELAY = 1.2, INVULN_TIME = 1.5;
+  var PLAYER_SPEED = 130, PLAYER_BULLET_SPEED = 300, ENEMY_BULLET_SPEED = 200;
+  var RESPAWN_DELAY = 1.2, INVULN_TIME = 1.5;
   var MAX_CONCURRENT_ENEMIES = 4;
   var SPAWN_COLS = [1, 6, 11];
-
   var BOMB_SPEED = 150, BOMB_RADIUS = 50;
-  var LASER_SPEED = 480;
+  var LASER_SPEED = 420;
   var PLAYER_BOMB_COOLDOWN = 4;
+  var BASE_HP = 3;
 
-  var ENEMY_TYPES = {
-    normal: { color:'#9c8a6e', speedMult:1,    fireMin:1.2, fireMax:2.5, maxBullets:1, bulletType:'normal' },
-    rapid:  { color:'#4caf50', speedMult:1.1,  fireMin:0.5, fireMax:0.6, maxBullets:2, bulletType:'normal' },
-    bomber: { color:'#7a5cff', speedMult:0.85, fireMin:2.6, fireMax:4.0, maxBullets:1, bulletType:'bomb'   }
+  // ---------- Definicion de los 20 niveles ----------
+  var LEVELS = [
+    {n:1,  enemy:'recluta',       map:'open',   upgrade:{key:'speed', mult:1.10,  label:'+10% velocidad'}},
+    {n:2,  enemy:'doble',         map:'cover',  upgrade:{key:'fireRate', mult:0.85, label:'+15% velocidad de disparo'}},
+    {n:3,  enemy:'bombardero',    map:'boxes',  upgrade:{key:'maxHp', mult:1.20,  label:'+20% vida máxima'}},
+    {n:4,  enemy:'francotirador', map:'rocks',  upgrade:{key:'speed', mult:1.10,  label:'+10% velocidad de movimiento'}},
+    {n:5,  enemy:null, boss:'laser',  map:'boss1', upgrade:{key:'shotPattern', value:'double', label:'Doble disparo permanente'}},
+    {n:6,  enemy:'escudo',        map:'bridges',upgrade:{key:'damage', mult:1.20, label:'+20% daño'}},
+    {n:7,  enemy:'rebote',        map:'maze',   upgrade:{key:'bulletSpeed', mult:1.25, label:'Balas más rápidas'}},
+    {n:8,  enemy:'lanzaminas',    map:'mines',  upgrade:{key:'fireRate', mult:0.85, label:'Mayor velocidad de recarga'}},
+    {n:9,  enemy:'congelador',    map:'barrels',upgrade:{key:'shield', value:1, label:'Escudo que bloquea un disparo'}},
+    {n:10, enemy:null, boss:'spider', map:'boss2', upgrade:{key:'shotPattern', value:'triple', label:'Triple disparo'}},
+    {n:11, enemy:'kamikaze',      map:'river',  upgrade:{key:'maxHp', mult:1.25, label:'+25% vida'}},
+    {n:12, enemy:'triple',        map:'sand',   upgrade:{key:'maxBullets', value:1, label:'Mayor alcance de disparo'}},
+    {n:13, enemy:'electrico',     map:'electric',upgrade:{key:'pierce', value:true, label:'Balas perforantes'}},
+    {n:14, enemy:'fantasma',      map:'fog',    upgrade:{key:'dodge', value:0.15, label:'Probabilidad de esquivar un disparo'}},
+    {n:15, enemy:null, boss:'giant',  map:'boss3', upgrade:{key:'laserCannon', value:true, label:'Cañón láser'}},
+    {n:16, enemy:'lanzallamas',   map:'ice',    upgrade:{key:'speed', mult:1.15, label:'+15% velocidad'}},
+    {n:17, enemy:'magnetico',     map:'portals',upgrade:{key:'homing', value:true, label:'Misiles guiados'}},
+    {n:18, enemy:'misilero',      map:'meteors',upgrade:{key:'shieldRegen', value:true, label:'Escudo regenerativo'}},
+    {n:19, enemy:'experimental',  map:'shifting',upgrade:{key:'shotPattern', value:'quad', label:'Disparo cuádruple'}},
+    {n:20, enemy:null, boss:'supreme', map:'boss4', upgrade:{key:'legendary', value:true, label:'Tanque Legendario desbloqueado'}}
+  ];
+
+  var ENEMY_DEFS = {
+    recluta:       {color:'#9c8a6e', speedMult:1,    fireMin:1.3, fireMax:2.4},
+    doble:         {color:'#4caf50', speedMult:1,    fireMin:1.6, fireMax:2.4, pattern:'double'},
+    bombardero:    {color:'#7a5cff', speedMult:0.85, fireMin:2.6, fireMax:4.0, bulletType:'bomb'},
+    francotirador: {color:'#ff8a4a', speedMult:0.8,  fireMin:2.2, fireMax:3.2, sniper:true},
+    escudo:        {color:'#5c8aa8', speedMult:0.9,  fireMin:1.6, fireMax:2.6, shielded:true},
+    rebote:        {color:'#3ecfcf', speedMult:1,    fireMin:1.4, fireMax:2.2, bounces:1},
+    lanzaminas:    {color:'#8a6d3b', speedMult:0.9,  fireMin:99,  fireMax:99,  minelayer:true},
+    congelador:    {color:'#7fd6ff', speedMult:0.85, fireMin:1.8, fireMax:2.8, freeze:true},
+    kamikaze:      {color:'#ff3e3e', speedMult:1.7,  fireMin:99,  fireMax:99,  rush:true},
+    triple:        {color:'#e08a2b', speedMult:1,    fireMin:1.8, fireMax:2.6, pattern:'spread3'},
+    electrico:     {color:'#ffe94a', speedMult:1,    fireMin:1.3, fireMax:2.0, bulletSpeedMult:2.4},
+    fantasma:      {color:'#cbb8ff', speedMult:1,    fireMin:1.6, fireMax:2.4, phasing:true},
+    lanzallamas:   {color:'#ff6a3c', speedMult:0.9,  fireMin:99,  fireMax:99,  flamer:true},
+    magnetico:     {color:'#38e0c0', speedMult:1,    fireMin:1.6, fireMax:2.4, homingBullet:true},
+    misilero:      {color:'#b23bd6', speedMult:0.85, fireMin:2.4, fireMax:3.4, missile:true},
+    experimental:  {color:'#ff3ea5', speedMult:1,    fireMin:1.4, fireMax:2.2, experimental:true}
   };
+  var BOSS_DEFS = {
+    laser:   {color:'#ff3e3e', hp:14, speed:40, label:'Jefe Láser'},
+    spider:  {color:'#b23bd6', hp:22, speed:65, label:'Jefe Araña'},
+    giant:   {color:'#8a5a2b', hp:34, speed:26, label:'Jefe Gigante'},
+    supreme: {color:'#ffd23f', hp:48, speed:44, label:'Tanque Supremo'}
+  };
+  var OPPOSITE_DIR = {up:'down', down:'up', left:'right', right:'left'};
 
-  function isBossLevel(n){ return n % 5 === 0; }
+  function levelDef(n){ return LEVELS[Math.min(n,LEVELS.length)-1]; }
+  function isBossLevel(n){ return !!levelDef(n).boss; }
 
   var canvas = document.getElementById('tanksCanvas');
   var ctx = canvas.getContext('2d');
@@ -41,12 +92,14 @@
   var livesEl = document.getElementById('tanksLivesVal');
   var enemiesEl = document.getElementById('tanksEnemiesVal');
   var levelEl = document.getElementById('tanksLevelVal');
+  var hpEl = document.getElementById('tanksHpVal');
   var startOverlay = document.getElementById('tanksStartOverlay');
   var startTitleEl = document.getElementById('tanksStartTitle');
   var startDescEl = document.getElementById('tanksStartDesc');
   var startBtn = document.getElementById('tanksStartBtn');
   var clearOverlay = document.getElementById('tanksClearOverlay');
   var clearTitleEl = document.getElementById('tanksClearTitle');
+  var clearDescEl = document.getElementById('tanksClearDesc');
   var nextBtn = document.getElementById('tanksNextBtn');
   var overOverlay = document.getElementById('tanksOverOverlay');
   var overTitleEl = document.getElementById('tanksOverTitle');
@@ -97,109 +150,306 @@
     muteBtn.setAttribute('aria-label', muted ? 'Activar sonido' : 'Silenciar sonido');
   });
 
-  function getLevelConfig(n){
-    var mix = ['normal'];
-    if (n>=2) mix.push('normal','rapid');
-    if (n>=3) mix.push('rapid','bomber');
+  // ---------- Mejoras permanentes del jugador (persisten entre niveles) ----------
+  function freshUpgrades(){
     return {
-      totalEnemies: Math.min(24, 6 + n*2),
-      enemySpeed: Math.min(150, 90 + n*6),
-      spawnInterval: Math.max(1.2, 2.4 - n*0.12),
-      bricks: 10 + n*2,
-      steels: 4 + Math.floor(n/2),
-      enemyMix: mix,
-      playerMaxBullets: n>=3 ? 2 : 1,
-      bombUnlocked: n>=4,
-      isBoss: isBossLevel(n),
-      bossHp: 5 + Math.floor(n/5)*2
+      speedMult:1, fireRateMult:1, maxHpMult:1, damageMult:1, bulletSpeedMult:1,
+      maxBulletsBonus:0, shotPattern:'single', shieldMax:0, shieldRegen:false,
+      pierce:false, dodge:0, homing:false, laserCannon:false, legendary:false
     };
   }
+  var upgrades = freshUpgrades();
+  function applyLevelUpgrade(def){
+    var u = def.upgrade;
+    if (!u) return;
+    if (u.key==='speed') upgrades.speedMult *= u.mult;
+    else if (u.key==='fireRate') upgrades.fireRateMult *= u.mult;
+    else if (u.key==='maxHp') upgrades.maxHpMult *= u.mult;
+    else if (u.key==='damage') upgrades.damageMult *= u.mult;
+    else if (u.key==='bulletSpeed') upgrades.bulletSpeedMult *= u.mult;
+    else if (u.key==='maxBullets') upgrades.maxBulletsBonus += u.value;
+    else if (u.key==='shotPattern') upgrades.shotPattern = u.value;
+    else if (u.key==='shield') upgrades.shieldMax += u.value;
+    else if (u.key==='pierce') upgrades.pierce = true;
+    else if (u.key==='dodge') upgrades.dodge = Math.min(0.6, upgrades.dodge+u.value);
+    else if (u.key==='homing') upgrades.homing = true;
+    else if (u.key==='laserCannon') upgrades.laserCannon = true;
+    else if (u.key==='shieldRegen') upgrades.shieldRegen = true;
+    else if (u.key==='legendary') upgrades.legendary = true;
+  }
 
-  function generateMap(cfg){
+  // ---------- Generacion de mapa ----------
+  function emptyGrid(){
     var grid = [];
     for (var r=0; r<ROWS; r++) grid.push(new Array(COLS).fill(EMPTY));
+    return grid;
+  }
+  function placeBase(grid){
     var baseRow = ROWS-2, baseCol = Math.floor(COLS/2);
     grid[baseRow][baseCol] = BASE;
     [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1]].forEach(function(o){
       var rr = baseRow+o[0], cc = baseCol+o[1];
       if (rr>=0 && rr<ROWS && cc>=0 && cc<COLS) grid[rr][cc] = BRICK;
     });
-    for (var i=0;i<cfg.bricks;i++){
-      var r1 = 2+Math.floor(Math.random()*(ROWS-6));
-      var c1 = 1+Math.floor(Math.random()*(COLS-2));
-      if (grid[r1][c1]===EMPTY) grid[r1][c1]=BRICK;
-      if (Math.random()<0.5){
-        var c2 = c1+1;
-        if (c2<COLS-1 && grid[r1][c2]===EMPTY) grid[r1][c2]=BRICK;
+    return {baseRow:baseRow, baseCol:baseCol};
+  }
+  function inSafeZone(r,c,baseRow,baseCol){
+    if (r<=1) return true; // fila de spawn de enemigos
+    if (r>=ROWS-3 && Math.abs(c-baseCol)<=2) return true; // zona de base/spawn jugador
+    return false;
+  }
+  function scatterTiles(grid, baseRow, baseCol, tileType, count, opts){
+    opts = opts || {};
+    var placed = 0, tries = 0;
+    while (placed < count && tries < count*12){
+      tries++;
+      var r = 2+Math.floor(Math.random()*(ROWS-5));
+      var c = 1+Math.floor(Math.random()*(COLS-2));
+      if (inSafeZone(r,c,baseRow,baseCol)) continue;
+      if (grid[r][c] !== EMPTY) continue;
+      grid[r][c] = tileType;
+      placed++;
+      if (opts.pairWith && Math.random()<0.5){
+        var c2 = c+(Math.random()<0.5?1:-1);
+        if (c2>=1 && c2<COLS-1 && grid[r][c2]===EMPTY && !inSafeZone(r,c2,baseRow,baseCol)){
+          grid[r][c2] = tileType;
+        }
       }
     }
-    for (var j=0;j<cfg.steels;j++){
-      var r2 = 3+Math.floor(Math.random()*(ROWS-7));
-      var c3 = 1+Math.floor(Math.random()*(COLS-2));
-      if (grid[r2][c3]===EMPTY) grid[r2][c3]=STEEL;
+  }
+  function buildBridgeMap(grid, baseRow, baseCol, lanes){
+    for (var r=2;r<ROWS-3;r++){
+      for (var c=1;c<COLS-1;c++){
+        if (lanes.indexOf(c)===-1) grid[r][c] = WATER;
+      }
     }
-    return {grid:grid, baseRow:baseRow, baseCol:baseCol};
+  }
+  function buildMaze(grid, baseRow, baseCol){
+    for (var r=2;r<ROWS-3;r++){
+      for (var c=1;c<COLS-1;c++){
+        if (inSafeZone(r,c,baseRow,baseCol)) continue;
+        var edge = (r%2===0) ? (Math.random()<0.65) : (c%3===0 && Math.random()<0.8);
+        if (edge) grid[r][c] = BRICK;
+      }
+    }
+  }
+
+  var hazards; // {mines:[], barrels handled as tiles, turrets:[]}
+  var portalPairs, toggleWalls, conveyorTiles, meteorState, fogLevel;
+
+  function buildMap(theme, n){
+    var grid = emptyGrid();
+    var base = placeBase(grid);
+    hazards = {mines:[], turrets:[]};
+    portalPairs = []; toggleWalls = []; conveyorTiles = []; fogLevel = false;
+    meteorState = {timer: 3+Math.random()*2, warnings:[]};
+
+    var brickCount = 8 + n, steelCount = 3 + Math.floor(n/3);
+    switch(theme){
+      case 'open':
+        break;
+      case 'cover':
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, brickCount, {pairWith:true});
+        scatterTiles(grid, base.baseRow, base.baseCol, STEEL, steelCount);
+        break;
+      case 'boxes':
+        scatterTiles(grid, base.baseRow, base.baseCol, CRATE, brickCount+6, {pairWith:true});
+        break;
+      case 'rocks':
+        scatterTiles(grid, base.baseRow, base.baseCol, ROCK, 8);
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, 6);
+        break;
+      case 'boss1':
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, 10, {pairWith:true});
+        break;
+      case 'bridges':
+        buildBridgeMap(grid, base.baseRow, base.baseCol, [1,6,11]);
+        break;
+      case 'maze':
+        buildMaze(grid, base.baseRow, base.baseCol);
+        break;
+      case 'mines':
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, 6);
+        for (var m=0;m<7;m++){
+          var mr = 2+Math.floor(Math.random()*(ROWS-5)), mc = 1+Math.floor(Math.random()*(COLS-2));
+          if (!inSafeZone(mr,mc,base.baseRow,base.baseCol)) hazards.mines.push({x:mc*TILE+TILE/2, y:mr*TILE+TILE/2, r:14, armed:true});
+        }
+        break;
+      case 'barrels':
+        scatterTiles(grid, base.baseRow, base.baseCol, CRATE, 6);
+        break; // los barriles se manejan como CRATE que además explota (ver explodeBarrel)
+      case 'boss2':
+        for (var br=3; br<ROWS-4; br+=2){
+          for (var bc=2; bc<COLS-2; bc+=3){
+            if (!inSafeZone(br,bc,base.baseRow,base.baseCol)) grid[br][bc] = STEEL;
+          }
+        }
+        break;
+      case 'river':
+        buildBridgeMap(grid, base.baseRow, base.baseCol, [2,3,9,10]);
+        break;
+      case 'sand':
+        scatterTiles(grid, base.baseRow, base.baseCol, SAND, 20);
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, 5);
+        break;
+      case 'electric':
+        scatterTiles(grid, base.baseRow, base.baseCol, ELECTRIC, 14);
+        break;
+      case 'fog':
+        fogLevel = true;
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, brickCount, {pairWith:true});
+        break;
+      case 'boss3':
+        for (var cr=3; cr<ROWS-4; cr++){
+          var dir = cr%2===0 ? 'right' : 'left';
+          for (var cc=2; cc<COLS-2; cc++){
+            if (inSafeZone(cr,cc,base.baseRow,base.baseCol)) continue;
+            if ((cr+cc)%3===0){ grid[cr][cc]=CONVEYOR; conveyorTiles.push({r:cr,c:cc,dir:dir}); }
+          }
+        }
+        break;
+      case 'ice':
+        for (var ir=2; ir<ROWS-3; ir++){
+          for (var ic=1; ic<COLS-1; ic++){
+            if (inSafeZone(ir,ic,base.baseRow,base.baseCol)) continue;
+            if (Math.random()<0.55) grid[ir][ic] = ICE;
+          }
+        }
+        scatterTiles(grid, base.baseRow, base.baseCol, ROCK, 5);
+        break;
+      case 'portals':
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, 6);
+        for (var pp=0; pp<2; pp++){
+          var pa = findEmptyCell(grid, base), pb = findEmptyCell(grid, base);
+          if (pa && pb){
+            grid[pa.r][pa.c] = PORTAL_A; grid[pb.r][pb.c] = PORTAL_B;
+            portalPairs.push({a:pa, b:pb});
+          }
+        }
+        break;
+      case 'meteors':
+        scatterTiles(grid, base.baseRow, base.baseCol, BRICK, 5);
+        break;
+      case 'shifting':
+        for (var tr=2; tr<ROWS-3; tr++){
+          for (var tc=1; tc<COLS-1; tc++){
+            if (inSafeZone(tr,tc,base.baseRow,base.baseCol)) continue;
+            if ((tr*3+tc)%5===0){ toggleWalls.push({r:tr,c:tc,phase:Math.random()*3}); }
+          }
+        }
+        break;
+      case 'boss4':
+        for (var fr=2; fr<ROWS-3; fr++){
+          for (var fc=1; fc<COLS-1; fc++){
+            if (inSafeZone(fr,fc,base.baseRow,base.baseCol)) continue;
+            var pick = Math.random();
+            if (pick<0.12) grid[fr][fc] = ICE;
+            else if (pick<0.22) grid[fr][fc] = ELECTRIC;
+            else if (pick<0.28) grid[fr][fc] = ROCK;
+            else if (pick<0.34) grid[fr][fc] = CRATE;
+          }
+        }
+        var qa = findEmptyCell(grid, base), qb = findEmptyCell(grid, base);
+        if (qa && qb){ grid[qa.r][qa.c]=PORTAL_A; grid[qb.r][qb.c]=PORTAL_B; portalPairs.push({a:qa,b:qb}); }
+        hazards.turrets.push({x:2*TILE+TILE/2, y:5*TILE+TILE/2, dir:'right', timer:2});
+        hazards.turrets.push({x:(COLS-3)*TILE+TILE/2, y:5*TILE+TILE/2, dir:'left', timer:2.6});
+        break;
+    }
+    toggleWalls.forEach(function(tw){ grid[tw.r][tw.c] = TOGGLE; });
+    return {grid:grid, baseRow:base.baseRow, baseCol:base.baseCol};
+  }
+  function findEmptyCell(grid, base){
+    for (var tries=0; tries<40; tries++){
+      var r = 2+Math.floor(Math.random()*(ROWS-5)), c = 1+Math.floor(Math.random()*(COLS-2));
+      if (!inSafeZone(r,c,base.baseRow,base.baseCol) && grid[r][c]===EMPTY) return {r:r,c:c};
+    }
+    return null;
   }
 
   function rectsOverlap(a,b){
     return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
   }
 
-  var grid, baseRow, baseCol, currentCfg;
+  var grid, baseRow, baseCol, currentLevelDef, currentEnemyDef;
   var player = null;
   var enemies = [];
   var bullets = [];
   var particles = [];
+  var flames = [];
   var currentLevel = 1;
-  var lives = LIVES_START;
+  var lives = 3;
   var totalEnemies = 0, spawnedEnemies = 0, killedCount = 0;
   var spawnTimer = 0;
   var respawnTimer = 0;
   var gameState = 'start';
+  var shiftTimer = 0;
 
-  function cellBlocked(cell){ return cell===BRICK || cell===STEEL || cell===BASE; }
-
-  function isBlockedForTank(x,y,w,h,exclude){
+  function cellBlockedFor(cell, phase){
+    if (cell===BRICK || cell===STEEL || cell===BASE || cell===ROCK || cell===CRATE || cell===WATER) return true;
+    if (cell===TOGGLE) return phase!=='open';
+    return false;
+  }
+  function togglePhaseAt(r,c){
+    var tw = null;
+    for (var i=0;i<toggleWalls.length;i++){ if (toggleWalls[i].r===r && toggleWalls[i].c===c){ tw=toggleWalls[i]; break; } }
+    if (!tw) return 'open';
+    var t = (shiftTimer+tw.phase) % 3;
+    return t < 1.8 ? 'closed' : 'open';
+  }
+  function isBlockedForTank(x,y,w,h,exclude,canPhase){
     if (x<0 || y<0 || x+w>COLS*TILE || y+h>ROWS*TILE) return true;
     var c0=Math.floor(x/TILE), c1=Math.floor((x+w-1)/TILE);
     var r0=Math.floor(y/TILE), r1=Math.floor((y+h-1)/TILE);
     for (var r=r0;r<=r1;r++){
       for (var c=c0;c<=c1;c++){
-        if (cellBlocked(grid[r][c])) return true;
+        var cell = grid[r][c];
+        if (canPhase && cell===BRICK) continue;
+        if (cell===TOGGLE){ if (cellBlockedFor(cell, togglePhaseAt(r,c))) return true; continue; }
+        if (cellBlockedFor(cell)) return true;
       }
     }
     var testBox = {x:x,y:y,w:w,h:h};
     if (player && player.alive && !player.respawning && player!==exclude && rectsOverlap(testBox, player)) return true;
     for (var i=0;i<enemies.length;i++){
       var e = enemies[i];
-      if (e.alive && e!==exclude && rectsOverlap(testBox, e)) return true;
+      if (e.alive && e!==exclude && !e.phased && rectsOverlap(testBox, e)) return true;
     }
     return false;
   }
 
+  var nextTankId = 1;
   function makeTank(x,y,isPlayer,type){
-    var t = type || 'normal';
-    var stats = ENEMY_TYPES[t] || ENEMY_TYPES.normal;
+    var def = isPlayer ? null : (ENEMY_DEFS[type] || ENEMY_DEFS.recluta);
     return {
+      id: nextTankId++,
       x:x, y:y, w:isPlayer?PLAYER_SIZE:ENEMY_SIZE, h:isPlayer?PLAYER_SIZE:ENEMY_SIZE,
-      dir:'up', speed: isPlayer?PLAYER_SPEED:90,
-      isPlayer:isPlayer, type:t, alive:true, respawning:false,
-      bulletCount:0, maxBullets: isPlayer?1:stats.maxBullets,
-      invuln:0, bombCooldown:0,
-      moveTimer:0, fireTimer: isPlayer?0:(stats.fireMin+Math.random()*(stats.fireMax-stats.fireMin))
+      dir:'up', speed: isPlayer?(PLAYER_SPEED*upgrades.speedMult):90,
+      isPlayer:isPlayer, type:type||'normal', alive:true, respawning:false,
+      bulletCount:0, maxBullets: isPlayer?(1+upgrades.maxBulletsBonus):1,
+      invuln:0, bombCooldown:0, hp: isPlayer?Math.max(1,Math.round(BASE_HP*upgrades.maxHpMult)):1,
+      shield: isPlayer?upgrades.shieldMax:0, shieldMax: isPlayer?upgrades.shieldMax:0,
+      shieldRegenTimer:0, frozenTimer:0, glideDir:null, glideTime:0,
+      moveTimer:0, fireTimer: isPlayer?0:(def?def.fireMin+Math.random()*(def.fireMax-def.fireMin):1.5),
+      snipeState:'idle', snipeTimer:0, snipeAngle:0,
+      mineTimer: def&&def.minelayer ? (1.5+Math.random()*1.5) : 0,
+      flameTimer: def&&def.flamer ? (1.2+Math.random()*1.2) : 0,
+      phaseTimer: def&&def.phasing ? 2 : 0, phased:false,
+      weaponTimer: def&&def.experimental ? 3.5 : 0, weaponIndex:0,
+      portalCooldown:0
     };
   }
 
-  function makeBoss(x,y,hp){
+  function makeBoss(bossKey, x, y){
+    var def = BOSS_DEFS[bossKey];
+    var hp = Math.round(def.hp + currentLevel*0.4);
     return {
-      x:x, y:y, w:ENEMY_SIZE*1.8, h:ENEMY_SIZE*1.8,
-      dir:'left', speed:40,
-      isPlayer:false, type:'boss', alive:true, respawning:false,
-      bulletCount:0, maxBullets:1, invuln:0,
-      hp:hp, maxHp:hp,
-      moveTimer:1, fireTimer:0,
-      summonTimer: 4+Math.random()*2,
-      laserTimer: 3+Math.random()*2
+      id: nextTankId++,
+      x:x, y:y, w:ENEMY_SIZE*1.9, h:ENEMY_SIZE*1.9,
+      dir:'left', speed:def.speed, bossKey:bossKey,
+      isPlayer:false, type:'boss', alive:true, respawning:false, phased:false,
+      bulletCount:0, maxBullets:3, invuln:0,
+      hp:hp, maxHp:hp, moveTimer:1,
+      phaseTimer: 2.5+Math.random(), shieldTimer:0, telegraph:0
     };
   }
 
@@ -212,26 +462,99 @@
     else if (dir==='left') dx=-tank.speed*dt;
     else if (dir==='right') dx=tank.speed*dt;
     var nx=tank.x+dx, ny=tank.y+dy;
-    if (!isBlockedForTank(nx, ny, tank.w, tank.h, tank)){
+    if (!isBlockedForTank(nx, ny, tank.w, tank.h, tank, tank.phased)){
       tank.x = nx; tank.y = ny;
     }
   }
+
+  // Efectos de terreno: hielo (desliza), arena (frena), cinta (empuja), portal.
+  function terrainAt(tank){
+    var cx = tank.x+tank.w/2, cy = tank.y+tank.h/2;
+    var c = Math.floor(cx/TILE), r = Math.floor(cy/TILE);
+    if (r<0||r>=ROWS||c<0||c>=COLS) return {cell:EMPTY,r:r,c:c};
+    return {cell:grid[r][c], r:r, c:c};
+  }
+  function applyTerrain(tank, dt){
+    var t = terrainAt(tank);
+    if (t.cell===ICE){
+      if (tank.dir) { tank.glideDir = tank.dir; tank.glideTime = 0.35; }
+    } else if (tank.glideTime>0 && !isMoving(tank)){
+      tank.glideTime -= dt;
+      moveTank(tank, tank.glideDir, dt*0.8);
+    }
+    if (t.cell===SAND) tank.sandSlow = true; else tank.sandSlow = false;
+    if (t.cell===CONVEYOR){
+      var cv = null;
+      for (var i=0;i<conveyorTiles.length;i++){ if (conveyorTiles[i].r===t.r && conveyorTiles[i].c===t.c){ cv=conveyorTiles[i]; break; } }
+      if (cv) moveTank(tank, cv.dir, dt*0.6);
+    }
+    if (t.cell===ELECTRIC && Math.floor(performance.now()/500)%2===0){
+      damageEntity(tank, 1, 'electric');
+    }
+    if ((t.cell===PORTAL_A || t.cell===PORTAL_B) && tank.portalCooldown<=0){
+      var pair = portalPairs.filter(function(p){ return (p.a.r===t.r&&p.a.c===t.c) || (p.b.r===t.r&&p.b.c===t.c); })[0];
+      if (pair){
+        var dest = (pair.a.r===t.r && pair.a.c===t.c) ? pair.b : pair.a;
+        tank.x = dest.c*TILE + (TILE-tank.w)/2;
+        tank.y = dest.r*TILE + (TILE-tank.h)/2;
+        tank.portalCooldown = 0.8;
+        beep(600,0.08,'sine');
+      }
+    }
+    if (tank.portalCooldown>0) tank.portalCooldown -= dt;
+  }
+  function isMoving(tank){ return false; } // el deslizamiento se controla via glideTime
 
   function randomDir(){
     var dirs = ['up','down','left','right'];
     return dirs[Math.floor(Math.random()*dirs.length)];
   }
 
-  function fireBullet(tank, bulletType){
-    if (tank.bulletCount >= tank.maxBullets) return;
-    var type = bulletType || 'normal';
-    var speed = tank.isPlayer ? PLAYER_BULLET_SPEED : (type==='bomb' ? BOMB_SPEED : (type==='laser' ? LASER_SPEED : ENEMY_BULLET_SPEED));
-    var w = type==='bomb' ? 10 : (type==='laser' ? 7 : BULLET_SIZE);
-    var h = type==='bomb' ? 10 : (type==='laser' ? 14 : BULLET_SIZE);
+  function bulletAngleFromDir(dir){
+    return {up:-Math.PI/2, down:Math.PI/2, left:Math.PI, right:0}[dir];
+  }
+  function fireBullet(tank, opts){
+    opts = opts || {};
+    var pattern = opts.pattern || 'single';
+    var count = pattern==='double'?2 : pattern==='spread3'?3 : pattern==='quad'?4 : 1;
+    if (tank.bulletCount + count > tank.maxBullets && tank.isPlayer){
+      count = Math.max(0, tank.maxBullets - tank.bulletCount);
+      if (count<=0) return;
+    } else if (!tank.isPlayer && tank.bulletCount >= tank.maxBullets){
+      return;
+    }
+    var baseAngle = opts.angle !== undefined ? opts.angle : bulletAngleFromDir(tank.dir);
+    var type = opts.type || 'normal';
+    var speedBase = tank.isPlayer
+      ? PLAYER_BULLET_SPEED*upgrades.bulletSpeedMult*(type==='bomb'?BOMB_SPEED/PLAYER_BULLET_SPEED:1)
+      : (type==='bomb'?BOMB_SPEED:(type==='laser'?LASER_SPEED:ENEMY_BULLET_SPEED*(opts.speedMult||1)));
+    var w = type==='bomb'?10:(type==='laser'?7:BULLET_SIZE);
+    var h = type==='bomb'?10:(type==='laser'?14:BULLET_SIZE);
     var cx = tank.x+tank.w/2, cy = tank.y+tank.h/2;
-    var b = {x:cx-w/2, y:cy-h/2, w:w, h:h, dir:tank.dir, speed:speed, owner:tank, dead:false, type:type};
-    tank.bulletCount += 1;
-    bullets.push(b);
+    var spreadStep = pattern==='spread3' ? 0.26 : pattern==='quad' ? 0.42/3 : 0;
+    for (var i=0;i<count;i++){
+      var ang = baseAngle;
+      if (pattern==='double'){
+        var perp = baseAngle+Math.PI/2;
+        var off = (i===0?-6:6);
+        var bx = cx+Math.cos(perp)*off, by = cy+Math.sin(perp)*off;
+      } else if (pattern==='spread3'){
+        ang = baseAngle + (i-1)*spreadStep;
+        var bx = cx, by = cy;
+      } else if (pattern==='quad'){
+        ang = baseAngle + (i-1.5)*spreadStep;
+        var bx = cx, by = cy;
+      } else {
+        var bx = cx, by = cy;
+      }
+      var b = {
+        x:bx-w/2, y:by-h/2, w:w, h:h, vx:Math.cos(ang), vy:Math.sin(ang), speed:speedBase,
+        owner:tank, dead:false, type:type, bounces: opts.bounces||0,
+        pierce: !!opts.pierce, hitOnce:{}, homing: !!opts.homing, missile: !!opts.missile
+      };
+      tank.bulletCount += 1;
+      bullets.push(b);
+    }
     beep(tank.isPlayer?720:(type==='bomb'?300:(type==='laser'?900:420)), 0.05, 'square');
   }
 
@@ -250,13 +573,41 @@
       });
     }
   }
-
   function updateParticles(dt){
     for (var i=particles.length-1;i>=0;i--){
       var p = particles[i];
       p.age += dt;
       if (p.age >= p.life){ particles.splice(i,1); continue; }
       p.x += p.vx*dt; p.y += p.vy*dt;
+    }
+  }
+
+  // ---------- Dano ----------
+  function damageEntity(tank, amount, source){
+    if (tank.isPlayer){
+      if (tank.invuln>0 || !tank.alive || tank.respawning) return;
+      if (upgrades.dodge>0 && Math.random()<upgrades.dodge){
+        beep(1200,0.05,'triangle');
+        return;
+      }
+      if (tank.shield>0){
+        tank.shield -= 1;
+        spawnExplosion(tank.x+tank.w/2, tank.y+tank.h/2);
+        beep(500,0.08,'sine');
+        return;
+      }
+      tank.hp -= amount;
+      tank.invuln = 0.5;
+      if (tank.hp<=0) killTank(tank);
+      else { beep(220,0.08,'square'); updateHUD(); }
+    } else if (tank.type==='boss'){
+      if (tank.shieldTimer>0) return;
+      tank.hp -= Math.max(1, Math.round(amount*upgrades.damageMult));
+      spawnExplosion(tank.x+tank.w/2, tank.y+tank.h/2);
+      beep(300,0.1,'square');
+      if (tank.hp<=0) killBoss(tank);
+    } else {
+      killTank(tank);
     }
   }
 
@@ -289,17 +640,7 @@
     player.alive = true; player.respawning = false;
     player.dir = 'up'; player.bulletCount = 0;
     player.invuln = INVULN_TIME;
-  }
-
-  function damageTank(tank){
-    if (tank.type === 'boss'){
-      tank.hp -= 1;
-      spawnExplosion(tank.x+tank.w/2, tank.y+tank.h/2);
-      beep(300, 0.1, 'square');
-      if (tank.hp <= 0) killBoss(tank);
-    } else {
-      killTank(tank);
-    }
+    player.hp = Math.max(1, Math.round(BASE_HP*upgrades.maxHpMult));
   }
 
   function killBoss(boss){
@@ -315,28 +656,27 @@
     triggerLevelClear();
   }
 
-  function explodeBomb(cx, cy, fromPlayer, excludeTank){
+  function explodeAt(cx, cy, radius, fromPlayer, excludeTank){
     beep(150, 0.3, 'sawtooth');
-    spawnExplosion(cx, cy);
     spawnExplosion(cx, cy);
     var col0 = Math.floor(cx/TILE), row0 = Math.floor(cy/TILE);
     for (var r=row0-1; r<=row0+1; r++){
       for (var c=col0-1; c<=col0+1; c++){
         if (r<0 || r>=ROWS || c<0 || c>=COLS) continue;
-        if (grid[r][c]===BRICK) grid[r][c]=EMPTY;
+        if (grid[r][c]===BRICK || grid[r][c]===CRATE) grid[r][c]=EMPTY;
       }
     }
     function inRadius(t){
       var dx = (t.x+t.w/2)-cx, dy = (t.y+t.h/2)-cy;
-      return Math.sqrt(dx*dx+dy*dy) <= BOMB_RADIUS;
+      return Math.sqrt(dx*dx+dy*dy) <= radius;
     }
     if (fromPlayer){
       for (var i=enemies.length-1;i>=0;i--){
         var e = enemies[i];
-        if (e && e!==excludeTank && e.alive && inRadius(e)) damageTank(e);
+        if (e && e!==excludeTank && e.alive && inRadius(e)) damageEntity(e, 3);
       }
-    } else if (player!==excludeTank && player && player.alive && !player.respawning && player.invuln<=0 && inRadius(player)){
-      killTank(player);
+    } else if (player!==excludeTank && player && player.alive && !player.respawning && inRadius(player)){
+      damageEntity(player, 2, 'bomb');
     }
   }
 
@@ -345,14 +685,12 @@
       triggerLevelClear();
     }
   }
-
   function triggerBaseDestroyed(){
     if (gameState !== 'play') return;
     spawnExplosion(baseCol*TILE+TILE/2, baseRow*TILE+TILE/2);
     beep(90, 0.4, 'sawtooth');
     triggerGameOver('¡Base destruida!');
   }
-
   function triggerGameOver(title){
     if (gameState !== 'play') return;
     gameState = 'over';
@@ -361,16 +699,59 @@
     overLevelEl.textContent = currentLevel;
     overOverlay.classList.remove('is-hidden');
   }
-
   function triggerLevelClear(){
     gameState = 'clear';
     pauseTanksLoop();
-    clearTitleEl.textContent = '¡Nivel '+currentLevel+' superado!';
+    applyLevelUpgrade(currentLevelDef);
+    var isFinal = currentLevel >= LEVELS.length;
+    clearTitleEl.textContent = isFinal ? '🏆 ¡Campaña completa!' : '¡Nivel '+currentLevel+' superado!';
+    clearDescEl.textContent = isFinal
+      ? '¡Desbloqueaste el Tanque Legendario! Combina todas las mejoras que conseguiste en los 20 niveles.'
+      : 'Mejora conseguida: '+currentLevelDef.upgrade.label;
+    nextBtn.textContent = isFinal ? '↻ Volver al Nivel 1' : '▶ Nivel siguiente';
     clearOverlay.classList.remove('is-hidden');
     beep(1046, 0.2, 'triangle');
   }
 
+  // ---------- IA de enemigos ----------
+  function pointSegDist(px,py, x1,y1, x2,y2){
+    var vx = x2-x1, vy = y2-y1;
+    var wx = px-x1, wy = py-y1;
+    var len2 = vx*vx+vy*vy;
+    var t = len2 > 0 ? Math.max(0,Math.min(1,(wx*vx+wy*vy)/len2)) : 0;
+    var cx = x1+vx*t, cy = y1+vy*t;
+    return Math.hypot(px-cx, py-cy);
+  }
+
   function updateEnemy(e, dt){
+    var def = ENEMY_DEFS[e.type] || ENEMY_DEFS.recluta;
+
+    if (def.phasing){
+      e.phaseTimer -= dt;
+      if (e.phaseTimer<=0){ e.phased = !e.phased; e.phaseTimer = e.phased?1.4:2.2; }
+    }
+    if (def.experimental){
+      e.weaponTimer -= dt;
+      if (e.weaponTimer<=0){ e.weaponIndex = (e.weaponIndex+1)%4; e.weaponTimer = 3.5; }
+    }
+
+    if (def.rush){
+      if (player && player.alive && !player.respawning){
+        var dx = (player.x+player.w/2)-(e.x+e.w/2), dy = (player.y+player.h/2)-(e.y+e.h/2);
+        e.dir = Math.abs(dx)>Math.abs(dy) ? (dx>0?'right':'left') : (dy>0?'down':'up');
+        var before={x:e.x,y:e.y};
+        moveTank(e, e.dir, dt);
+        var box = {x:e.x,y:e.y,w:e.w,h:e.h};
+        if (rectsOverlap(box, player)){
+          explodeAt(e.x+e.w/2, e.y+e.h/2, 46, false, null);
+          killTank(e);
+        } else if (e.x===before.x && e.y===before.y){
+          e.dir = randomDir();
+        }
+      }
+      return;
+    }
+
     e.moveTimer -= dt;
     if (e.moveTimer <= 0){
       e.dir = randomDir();
@@ -378,120 +759,190 @@
     }
     var beforeX=e.x, beforeY=e.y;
     moveTank(e, e.dir, dt);
-    if (e.x===beforeX && e.y===beforeY){
-      e.moveTimer = 0;
-    }
-    e.fireTimer -= dt;
-    if (e.fireTimer <= 0){
-      var stats = ENEMY_TYPES[e.type] || ENEMY_TYPES.normal;
-      fireBullet(e, stats.bulletType);
-      e.fireTimer = stats.fireMin + Math.random()*(stats.fireMax-stats.fireMin);
-    }
-  }
+    if (e.x===beforeX && e.y===beforeY) e.moveTimer = 0;
+    applyTerrain(e, dt);
 
-  function updateBoss(boss, dt){
-    if (!boss.alive) return;
-    boss.moveTimer -= dt;
-    if (boss.moveTimer <= 0){
-      boss.dir = Math.random()<0.5 ? 'left' : 'right';
-      boss.moveTimer = 1.5+Math.random()*1.5;
+    if (def.minelayer){
+      e.mineTimer -= dt;
+      if (e.mineTimer<=0 && hazards.mines.length<10){
+        hazards.mines.push({x:e.x+e.w/2, y:e.y+e.h/2, r:14, armed:true});
+        e.mineTimer = 2.5+Math.random()*1.5;
+        beep(200,0.1,'sine');
+      }
+      return;
     }
-    var beforeX = boss.x;
-    moveTank(boss, boss.dir, dt);
-    if (boss.x === beforeX) boss.moveTimer = 0;
-
-    boss.summonTimer -= dt;
-    if (boss.summonTimer <= 0){
-      if (enemies.length < MAX_CONCURRENT_ENEMIES){
-        var col = SPAWN_COLS[Math.floor(Math.random()*SPAWN_COLS.length)];
-        var sx = col*TILE + (TILE-ENEMY_SIZE)/2;
-        var sy = (TILE-ENEMY_SIZE)/2;
-        if (!isBlockedForTank(sx, sy, ENEMY_SIZE, ENEMY_SIZE, null)){
-          var reinforcement = makeTank(sx, sy, false, 'rapid');
-          reinforcement.speed = currentCfg.enemySpeed * ENEMY_TYPES.rapid.speedMult;
-          reinforcement.dir = 'down';
-          enemies.push(reinforcement);
+    if (def.flamer){
+      e.flameTimer -= dt;
+      if (e.flameTimer<=0){
+        var fang = bulletAngleFromDir(e.dir);
+        flames.push({x:e.x+e.w/2, y:e.y+e.h/2, ang:fang, life:0.6, age:0, owner:e});
+        e.flameTimer = 2+Math.random();
+      }
+      return;
+    }
+    if (def.sniper){
+      if (e.snipeState==='idle'){
+        e.fireTimer -= dt;
+        if (e.fireTimer<=0){ e.snipeState='aiming'; e.snipeTimer=0.65; }
+      } else if (e.snipeState==='aiming'){
+        if (player && player.alive){
+          e.snipeAngle = Math.atan2((player.y+player.h/2)-(e.y+e.h/2), (player.x+player.w/2)-(e.x+e.w/2));
+        }
+        e.snipeTimer -= dt;
+        if (e.snipeTimer<=0){
+          fireBullet(e, {angle:e.snipeAngle, speedMult:2.4});
+          e.snipeState='idle'; e.fireTimer = def.fireMin+Math.random()*(def.fireMax-def.fireMin);
         }
       }
-      boss.summonTimer = 5+Math.random()*2;
+      return;
     }
 
-    boss.laserTimer -= dt;
-    if (boss.laserTimer <= 0){
-      fireLaserAtPlayer(boss);
-      boss.laserTimer = 3.5+Math.random()*2;
+    e.fireTimer -= dt;
+    if (e.fireTimer <= 0){
+      var opts = {pattern: def.pattern||'single', type: def.bulletType||'normal', speedMult: def.bulletSpeedMult||1};
+      if (def.freeze) opts.freeze = true;
+      if (def.homingBullet) opts.homing = true;
+      if (def.missile) opts.missile = true;
+      if (def.experimental){
+        var kinds = [{pattern:'single',type:'normal'},{pattern:'single',type:'bomb'},{pattern:'spread3',type:'normal'},{pattern:'single',type:'laser'}];
+        var k = kinds[e.weaponIndex];
+        opts.pattern = k.pattern; opts.type = k.type;
+      }
+      fireBullet(e, opts);
+      e.fireTimer = def.fireMin + Math.random()*(def.fireMax-def.fireMin);
     }
   }
 
-  function fireLaserAtPlayer(boss){
-    if (boss.bulletCount >= boss.maxBullets) return;
-    if (!player || !player.alive || player.respawning) return;
-    var cx = boss.x+boss.w/2, cy = boss.y+boss.h/2;
-    var px = player.x+player.w/2, py = player.y+player.h/2;
-    var dx = px-cx, dy = py-cy;
-    var dist = Math.sqrt(dx*dx+dy*dy) || 1;
-    var vx = dx/dist, vy = dy/dist;
-    var size = 8;
-    var b = {x:cx-size/2, y:cy-size/2, w:size, h:size, vx:vx, vy:vy, speed:LASER_SPEED, owner:boss, dead:false, type:'laser'};
-    boss.bulletCount += 1;
-    bullets.push(b);
-    beep(900, 0.05, 'square');
+  // ---------- Jefes ----------
+  function updateBoss(boss, dt){
+    if (!boss.alive) return;
+    if (boss.shieldTimer>0) boss.shieldTimer -= dt;
+    boss.moveTimer -= dt;
+    var eratic = boss.bossKey==='spider';
+    if (boss.moveTimer <= 0){
+      boss.dir = randomDir();
+      boss.moveTimer = eratic ? (0.4+Math.random()*0.5) : (1.4+Math.random()*1.3);
+    }
+    var beforeX=boss.x, beforeY=boss.y;
+    moveTank(boss, boss.dir, dt);
+    if (boss.x===beforeX && boss.y===beforeY) boss.moveTimer = 0;
+    applyTerrain(boss, dt);
+
+    boss.phaseTimer -= dt;
+    if (boss.phaseTimer > 0) return;
+
+    if (boss.bossKey==='laser'){
+      fireBullet(boss, {angle: aimAngleAtPlayer(boss), type:'laser'});
+      if (Math.random()<0.5) summonReinforcement('doble');
+      boss.phaseTimer = 2.6+Math.random()*1.4;
+    } else if (boss.bossKey==='spider'){
+      fireBullet(boss, {angle: aimAngleAtPlayer(boss), pattern:'quad'});
+      if (Math.random()<0.6) summonReinforcement('kamikaze');
+      boss.phaseTimer = 2.2+Math.random();
+    } else if (boss.bossKey==='giant'){
+      if (Math.random()<0.5){
+        fireBullet(boss, {angle: aimAngleAtPlayer(boss)-0.3});
+        fireBullet(boss, {angle: aimAngleAtPlayer(boss)});
+        fireBullet(boss, {angle: aimAngleAtPlayer(boss)+0.3});
+      } else if (player && player.alive){
+        var dx=(player.x+player.w/2)-(boss.x+boss.w/2), dy=(player.y+player.h/2)-(boss.y+boss.h/2);
+        if (Math.hypot(dx,dy) < 100) damageEntity(player, 2, 'shockwave');
+        spawnExplosion(boss.x+boss.w/2, boss.y+boss.h/2);
+        beep(90,0.3,'sawtooth');
+      }
+      boss.phaseTimer = 3+Math.random()*1.5;
+    } else if (boss.bossKey==='supreme'){
+      var phase = Math.floor(Math.random()*4);
+      if (phase===0) fireBullet(boss, {angle:aimAngleAtPlayer(boss), type:'laser'});
+      else if (phase===1) fireBullet(boss, {angle:aimAngleAtPlayer(boss), pattern:'quad'});
+      else if (phase===2 && hazards.mines.length<10) hazards.mines.push({x:boss.x+boss.w/2, y:boss.y+boss.h/2, r:16, armed:true});
+      else { boss.shieldTimer = 1.4; summonReinforcement(Math.random()<0.5?'recluta':'doble'); }
+      boss.phaseTimer = 2+Math.random();
+    }
+  }
+  function aimAngleAtPlayer(boss){
+    if (!player || !player.alive) return 0;
+    return Math.atan2((player.y+player.h/2)-(boss.y+boss.h/2), (player.x+player.w/2)-(boss.x+boss.w/2));
+  }
+  function summonReinforcement(type){
+    if (enemies.length >= MAX_CONCURRENT_ENEMIES+1) return;
+    var col = SPAWN_COLS[Math.floor(Math.random()*SPAWN_COLS.length)];
+    var sx = col*TILE + (TILE-ENEMY_SIZE)/2, sy = (TILE-ENEMY_SIZE)/2;
+    if (isBlockedForTank(sx, sy, ENEMY_SIZE, ENEMY_SIZE, null)) return;
+    var r = makeTank(sx, sy, false, type);
+    r.speed = 90*(ENEMY_DEFS[type].speedMult||1);
+    r.dir = 'down';
+    enemies.push(r);
   }
 
+  // ---------- Balas, minas, barriles, torretas, meteoros ----------
   function updateBullets(dt){
     for (var i=bullets.length-1;i>=0;i--){
       var b = bullets[i];
       if (b.dead) continue;
-      var dx=0, dy=0;
-      if (b.vx!==undefined){
-        dx = b.vx*b.speed*dt;
-        dy = b.vy*b.speed*dt;
-      } else if (b.dir==='up') dy=-b.speed*dt;
-      else if (b.dir==='down') dy=b.speed*dt;
-      else if (b.dir==='left') dx=-b.speed*dt;
-      else dx=b.speed*dt;
+      if (b.homing || b.missile){
+        var targets = b.owner.isPlayer ? enemies : (player&&player.alive?[player]:[]);
+        if (targets.length){
+          var target = targets[0], bestD=Infinity;
+          targets.forEach(function(tt){ var d=Math.hypot((tt.x-b.x),(tt.y-b.y)); if(d<bestD){bestD=d;target=tt;} });
+          var desiredAng = Math.atan2((target.y+target.h/2)-b.y, (target.x+target.w/2)-b.x);
+          var curAng = Math.atan2(b.vy,b.vx);
+          var turn = b.missile?0.09:0.045;
+          var diff = ((desiredAng-curAng+Math.PI*3)%(Math.PI*2))-Math.PI;
+          curAng += Math.max(-turn,Math.min(turn,diff));
+          b.vx = Math.cos(curAng); b.vy = Math.sin(curAng);
+        }
+      }
+      var dx = b.vx*b.speed*dt, dy = b.vy*b.speed*dt;
       b.x += dx; b.y += dy;
       if (b.x<0 || b.y<0 || b.x>COLS*TILE || b.y>ROWS*TILE){
-        if (b.type==='bomb') explodeBomb(b.x+b.w/2, b.y+b.h/2, b.owner.isPlayer);
+        if (b.type==='bomb'||b.missile) explodeAt(b.x+b.w/2, b.y+b.h/2, b.missile?60:BOMB_RADIUS, b.owner.isPlayer);
         killBullet(b); continue;
       }
-
       var col = Math.floor((b.x+b.w/2)/TILE), row = Math.floor((b.y+b.h/2)/TILE);
       var cell = grid[row] && grid[row][col];
-      if (cell===BRICK || cell===STEEL || cell===BASE){
-        if (b.type==='bomb') explodeBomb(col*TILE+TILE/2, row*TILE+TILE/2, b.owner.isPlayer);
-        if (cell===BRICK){
-          grid[row][col]=EMPTY;
-          spawnExplosion(col*TILE+TILE/2, row*TILE+TILE/2);
-          beep(300, 0.08, 'square');
-        } else if (cell===STEEL){
-          beep(500, 0.06, 'square');
-        } else if (cell===BASE){
-          triggerBaseDestroyed();
+      var solidCell = cell===BRICK||cell===STEEL||cell===BASE||cell===CRATE||cell===ROCK||(cell===TOGGLE&&togglePhaseAt(row,col)==='closed');
+      if (solidCell){
+        if (b.type==='bomb'||b.missile) explodeAt(col*TILE+TILE/2, row*TILE+TILE/2, b.missile?60:BOMB_RADIUS, b.owner.isPlayer);
+        if (cell===BRICK){ grid[row][col]=EMPTY; spawnExplosion(col*TILE+TILE/2,row*TILE+TILE/2); beep(300,0.08,'square'); }
+        else if (cell===CRATE){ grid[row][col]=EMPTY; explodeAt(col*TILE+TILE/2,row*TILE+TILE/2, 44, b.owner.isPlayer); }
+        else if (cell===STEEL || cell===ROCK || cell===TOGGLE){ beep(500,0.06,'square'); }
+        else if (cell===BASE){ triggerBaseDestroyed(); }
+        if (b.bounces>0 && cell!==BASE && cell!==CRATE){
+          b.bounces -= 1;
+          if (Math.abs(dx)>Math.abs(dy)) b.vx=-b.vx; else b.vy=-b.vy;
+          continue;
         }
         killBullet(b);
         continue;
       }
-
       var bbox = {x:b.x, y:b.y, w:b.w, h:b.h};
       var hit = false;
       if (b.owner.isPlayer){
         for (var j=0;j<enemies.length;j++){
           var e = enemies[j];
-          if (e.alive && rectsOverlap(bbox, e)){
-            damageTank(e);
-            if (b.type==='bomb') explodeBomb(e.x+e.w/2, e.y+e.h/2, true, e);
-            hit = true;
-            break;
+          if (e.alive && !e.phased && rectsOverlap(bbox, e) && !(b.pierce && b.hitOnce[e.id])){
+            var shieldedDef = ENEMY_DEFS[e.type];
+            var incomingDir = Math.abs(b.vx)>Math.abs(b.vy) ? (b.vx>0?'right':'left') : (b.vy>0?'down':'up');
+            if (shieldedDef && shieldedDef.shielded && incomingDir===OPPOSITE_DIR[e.dir]){
+              spawnExplosion(b.x, b.y); beep(500,0.05,'sine');
+            } else {
+              damageEntity(e, 1);
+              if (b.type==='bomb'||b.missile) explodeAt(e.x+e.w/2, e.y+e.h/2, b.missile?60:BOMB_RADIUS, true, e);
+              b.hitOnce[e.id]=true;
+            }
+            hit = !b.pierce;
+            if (hit) break;
           }
         }
-      } else if (player && player.alive && !player.respawning && player.invuln<=0 && rectsOverlap(bbox, player)){
-        killTank(player);
-        if (b.type==='bomb') explodeBomb(player.x+player.w/2, player.y+player.h/2, false, player);
+      } else if (player && player.alive && !player.respawning && rectsOverlap(bbox, player)){
+        var ownerDef = ENEMY_DEFS[b.owner.type];
+        if (ownerDef && ownerDef.freeze){ player.frozenTimer = 1.3; }
+        damageEntity(player, 1);
+        if (b.type==='bomb'||b.missile) explodeAt(player.x+player.w/2, player.y+player.h/2, b.missile?60:BOMB_RADIUS, false, player);
         hit = true;
       }
       if (hit){ killBullet(b); continue; }
-
       for (var k=0;k<bullets.length;k++){
         var ob = bullets[k];
         if (ob===b || ob.dead) continue;
@@ -503,6 +954,57 @@
     bullets = bullets.filter(function(b){ return !b.dead; });
   }
 
+  function updateHazards(dt){
+    hazards.mines.forEach(function(m){
+      if (!m.armed) return;
+      if (player && player.alive && !player.respawning){
+        var d = Math.hypot((player.x+player.w/2)-m.x, (player.y+player.h/2)-m.y);
+        if (d < m.r+PLAYER_SIZE/2){ m.armed=false; explodeAt(m.x,m.y,50,false,null); }
+      }
+    });
+    hazards.mines = hazards.mines.filter(function(m){ return m.armed; });
+
+    hazards.turrets.forEach(function(t){
+      t.timer -= dt;
+      if (t.timer<=0){
+        fireBullet({x:t.x-BULLET_SIZE/2,y:t.y-BULLET_SIZE/2,w:0,h:0,isPlayer:false,bulletCount:0,maxBullets:99}, {angle:bulletAngleFromDir(t.dir)});
+        t.timer = 2.4+Math.random();
+      }
+    });
+
+    if (LEVELS[currentLevel-1] && LEVELS[currentLevel-1].map==='meteors'){
+      meteorState.timer -= dt;
+      if (meteorState.timer<=0){
+        var mr=2+Math.floor(Math.random()*(ROWS-5)), mc=1+Math.floor(Math.random()*(COLS-2));
+        meteorState.warnings.push({r:mr,c:mc,t:1.0});
+        meteorState.timer = 3.5+Math.random()*2;
+      }
+      for (var i=meteorState.warnings.length-1;i>=0;i--){
+        var w = meteorState.warnings[i];
+        w.t -= dt;
+        if (w.t<=0){
+          var cx=w.c*TILE+TILE/2, cy=w.r*TILE+TILE/2;
+          explodeAt(cx,cy,44,false,null);
+          if (player) { var d=Math.hypot((player.x+player.w/2)-cx,(player.y+player.h/2)-cy); if (d<44) damageEntity(player,1,'meteor'); }
+          meteorState.warnings.splice(i,1);
+        }
+      }
+    }
+  }
+
+  function updateFlames(dt){
+    for (var i=flames.length-1;i>=0;i--){
+      var f = flames[i];
+      f.age += dt;
+      if (f.age>=f.life){ flames.splice(i,1); continue; }
+      var fx = f.x+Math.cos(f.ang)*24, fy = f.y+Math.sin(f.ang)*24;
+      if (player && player.alive && !player.respawning){
+        var d = Math.hypot(fx-(player.x+player.w/2), fy-(player.y+player.h/2));
+        if (d<26 && Math.floor(f.age*6)%2===0) damageEntity(player, 1, 'flame');
+      }
+    }
+  }
+
   var dirStack = [];
   function pressDir(dir){ if (dirStack.indexOf(dir)===-1) dirStack.push(dir); }
   function releaseDir(dir){ var i=dirStack.indexOf(dir); if (i!==-1) dirStack.splice(i,1); }
@@ -510,13 +1012,19 @@
 
   function throwPlayerBomb(){
     if (!player || !player.alive || player.respawning) return;
-    if (!currentCfg.bombUnlocked) return;
+    if (currentLevel<4) return;
     if (player.bombCooldown > 0) return;
-    var w=10, h=10;
     var cx = player.x+player.w/2, cy = player.y+player.h/2;
-    bullets.push({x:cx-w/2, y:cy-h/2, w:w, h:h, dir:player.dir, speed:BOMB_SPEED, owner:player, dead:false, type:'bomb'});
+    bullets.push({x:cx-5,y:cy-5,w:10,h:10,vx:Math.cos(bulletAngleFromDir(player.dir)),vy:Math.sin(bulletAngleFromDir(player.dir)),
+      speed:BOMB_SPEED, owner:player, dead:false, type:'bomb', bounces:0, pierce:false, hitOnce:{}});
     player.bombCooldown = PLAYER_BOMB_COOLDOWN;
     beep(200, 0.15, 'sawtooth');
+  }
+
+  function playerFire(){
+    if (!player || !player.alive || player.respawning) return;
+    var type = upgrades.laserCannon ? 'laser' : 'normal';
+    fireBullet(player, {pattern:upgrades.shotPattern, type:type, pierce:upgrades.pierce, homing:upgrades.homing});
   }
 
   var KEY_DIR = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
@@ -527,7 +1035,7 @@
       pressDir(KEY_DIR[e.code]);
     } else if (e.code==='Space'){
       e.preventDefault();
-      if (gameState==='play' && player && player.alive && !player.respawning) fireBullet(player);
+      if (gameState==='play') playerFire();
     } else if (e.code==='KeyB'){
       e.preventDefault();
       if (gameState==='play') throwPlayerBomb();
@@ -591,7 +1099,7 @@
   bindJoystick(tJoystick, ['up','down','left','right']);
   tFire.addEventListener('pointerdown', function(e){
     e.preventDefault();
-    if (gameState==='play' && player && player.alive && !player.respawning) fireBullet(player);
+    if (gameState==='play') playerFire();
   });
   tBomb.addEventListener('pointerdown', function(e){
     e.preventDefault();
@@ -602,45 +1110,57 @@
     livesEl.textContent = Math.max(0, lives);
     enemiesEl.textContent = Math.max(0, totalEnemies-killedCount);
     levelEl.textContent = currentLevel;
+    if (hpEl && player) hpEl.textContent = Math.max(0,player.hp)+'/'+Math.round(BASE_HP*upgrades.maxHpMult)+(player.shieldMax?(' 🛡'+player.shield):'');
   }
 
   function spawnEnemies(dt){
-    if (currentCfg.isBoss) return;
+    if (currentLevelDef.boss) return;
     spawnTimer -= dt;
     if (spawnTimer<=0 && spawnedEnemies<totalEnemies && enemies.length<MAX_CONCURRENT_ENEMIES){
       var col = SPAWN_COLS[Math.floor(Math.random()*SPAWN_COLS.length)];
       var sx = col*TILE + (TILE-ENEMY_SIZE)/2;
       var sy = (TILE-ENEMY_SIZE)/2;
       if (!isBlockedForTank(sx, sy, ENEMY_SIZE, ENEMY_SIZE, null)){
-        var type = currentCfg.enemyMix[Math.floor(Math.random()*currentCfg.enemyMix.length)];
-        var e = makeTank(sx, sy, false, type);
-        e.speed = currentCfg.enemySpeed * (ENEMY_TYPES[type].speedMult || 1);
+        var e = makeTank(sx, sy, false, currentLevelDef.enemy);
+        e.speed = (90+currentLevel*2) * (currentEnemyDef.speedMult||1);
         e.dir = 'down';
         enemies.push(e);
         spawnedEnemies += 1;
       }
-      spawnTimer = currentCfg.spawnInterval;
+      spawnTimer = Math.max(1.1, 2.3-currentLevel*0.05);
     }
   }
 
   function tick(dt){
     if (gameState !== 'play') return;
+    shiftTimer += dt;
     if (player.respawning){
       respawnTimer -= dt;
       if (respawnTimer<=0) respawnPlayer();
     } else if (player.alive){
+      if (player.frozenTimer>0){ player.frozenTimer -= dt; }
+      var spd = PLAYER_SPEED*upgrades.speedMult*(player.frozenTimer>0?0.12:1)*(player.sandSlow?0.5:1);
+      player.speed = spd;
       moveTank(player, currentDir(), dt);
+      applyTerrain(player, dt);
       if (player.invuln>0) player.invuln -= dt;
       if (player.bombCooldown>0) player.bombCooldown -= dt;
+      if (upgrades.shieldRegen && player.shield<player.shieldMax){
+        player.shieldRegenTimer -= dt;
+        if (player.shieldRegenTimer<=0){ player.shield += 1; player.shieldRegenTimer = 8; updateHUD(); }
+      }
     }
     enemies.forEach(function(e){
       if (e.type==='boss') updateBoss(e, dt);
       else updateEnemy(e, dt);
     });
     updateBullets(dt);
+    updateHazards(dt);
+    updateFlames(dt);
     spawnEnemies(dt);
   }
 
+  // ---------- Dibujo ----------
   function drawBrick(x,y){
     ctx.fillStyle = '#b6531c';
     ctx.fillRect(x,y,TILE,TILE);
@@ -673,8 +1193,70 @@
     ctx.closePath();
     ctx.fill();
   }
-  function drawTank(tank, color){
+  function drawCrate(x,y){
+    ctx.fillStyle = '#c98a3f';
+    ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
+    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+    ctx.strokeRect(x+2,y+2,TILE-4,TILE-4);
+    ctx.beginPath(); ctx.moveTo(x+2,y+2); ctx.lineTo(x+TILE-2,y+TILE-2);
+    ctx.moveTo(x+TILE-2,y+2); ctx.lineTo(x+2,y+TILE-2); ctx.stroke();
+  }
+  function drawRock(x,y){
+    ctx.fillStyle = '#5a5248';
+    ctx.beginPath();
+    ctx.moveTo(x+4,y+TILE-2); ctx.lineTo(x+2,y+10); ctx.lineTo(x+14,y+2);
+    ctx.lineTo(x+TILE-4,y+6); ctx.lineTo(x+TILE-2,y+TILE-4); ctx.lineTo(x+18,y+TILE-2);
+    ctx.closePath(); ctx.fill();
+  }
+  function drawWater(x,y,t){
+    ctx.fillStyle = '#1c5c8a';
+    ctx.fillRect(x,y,TILE,TILE);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.beginPath();
+    var off = Math.sin(t*2+x*0.1)*3;
+    ctx.moveTo(x,y+TILE/2+off); ctx.lineTo(x+TILE,y+TILE/2-off);
+    ctx.stroke();
+  }
+  function drawSand(x,y){ ctx.fillStyle = '#d8c27a'; ctx.fillRect(x,y,TILE,TILE); }
+  function drawIce(x,y){
+    ctx.fillStyle = '#bfe8ff';
+    ctx.fillRect(x,y,TILE,TILE);
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.strokeRect(x+3,y+3,TILE-6,TILE-6);
+  }
+  function drawElectric(x,y,t){
+    var on = Math.floor(t*2)%2===0;
+    ctx.fillStyle = on ? '#fff06a' : '#8a7a2a';
+    ctx.fillRect(x,y,TILE,TILE);
+    if (on){
+      ctx.strokeStyle = '#fff'; ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(x+4,y+4); ctx.lineTo(x+16,y+16); ctx.lineTo(x+10,y+18); ctx.lineTo(x+TILE-4,y+TILE-4);
+      ctx.stroke();
+    }
+  }
+  function drawPortal(x,y,color){
+    ctx.fillStyle = '#111';
+    ctx.fillRect(x,y,TILE,TILE);
+    ctx.strokeStyle = color; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(x+TILE/2,y+TILE/2,10,0,Math.PI*2); ctx.stroke();
+  }
+  function drawToggle(x,y,phase){
+    if (phase==='closed'){ drawBrick(x,y); }
+    else { ctx.strokeStyle='rgba(255,80,80,0.5)'; ctx.strokeRect(x+3,y+3,TILE-6,TILE-6); }
+  }
+  function drawConveyor(x,y,dir,t){
+    ctx.fillStyle = '#3a3a3a';
+    ctx.fillRect(x,y,TILE,TILE);
+    ctx.fillStyle = '#ffd23f';
+    var off = (t*40)%TILE;
+    var arrow = {up:'↑',down:'↓',left:'←',right:'→'}[dir];
+    ctx.font='14px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(arrow, x+TILE/2, y+TILE/2);
+  }
+  function drawTank(tank, color, alpha){
     ctx.save();
+    ctx.globalAlpha = alpha!==undefined?alpha:1;
     ctx.translate(tank.x+tank.w/2, tank.y+tank.h/2);
     var rot = {up:0, right:Math.PI/2, down:Math.PI, left:-Math.PI/2}[tank.dir];
     ctx.rotate(rot);
@@ -686,32 +1268,28 @@
     ctx.fillStyle = '#2a2a2a';
     ctx.fillRect(-3,-tank.h/2-6,6,tank.h/2+6);
     ctx.restore();
+    ctx.globalAlpha = 1;
   }
   function drawBullet(b){
     if (b.type==='bomb'){
       ctx.fillStyle = '#ff8a4a';
-      ctx.beginPath();
-      ctx.arc(b.x+b.w/2, b.y+b.h/2, b.w/2, 0, Math.PI*2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(b.x+b.w/2, b.y+b.h/2, b.w/2, 0, Math.PI*2); ctx.fill();
     } else if (b.type==='laser'){
       ctx.save();
       ctx.translate(b.x+b.w/2, b.y+b.h/2);
-      var angle = Math.atan2(b.vy||1, b.vx||0);
-      ctx.rotate(angle - Math.PI/2);
+      ctx.rotate(Math.atan2(b.vy,b.vx)+Math.PI/2);
       ctx.fillStyle = '#ff3ea5';
       ctx.fillRect(-3, -9, 6, 18);
       ctx.restore();
     } else {
-      ctx.fillStyle = '#fff7d6';
+      ctx.fillStyle = b.missile ? '#b23bd6' : '#fff7d6';
       ctx.fillRect(b.x, b.y, b.w, b.h);
     }
   }
   function drawBossHpBar(boss){
-    var w = boss.w;
-    var x = boss.x, y = boss.y-10;
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(x, y, w, 5);
-    ctx.fillStyle = '#ff3e3e';
+    var w = boss.w, x = boss.x, y = boss.y-10;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x, y, w, 5);
+    ctx.fillStyle = boss.shieldTimer>0 ? '#5cc9ff' : '#ff3e3e';
     ctx.fillRect(x, y, w*Math.max(0,boss.hp/boss.maxHp), 5);
   }
   function drawParticles(){
@@ -722,6 +1300,45 @@
       ctx.fillRect(p.x-p.size/2, p.y-p.size/2, p.size, p.size);
     });
     ctx.globalAlpha = 1;
+  }
+  function drawFlames(){
+    flames.forEach(function(f){
+      var fx = f.x+Math.cos(f.ang)*24, fy = f.y+Math.sin(f.ang)*24;
+      ctx.globalAlpha = Math.max(0, 1-f.age/f.life);
+      ctx.fillStyle = '#ff6a2a';
+      ctx.beginPath(); ctx.arc(fx,fy,16,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  function drawMinesAndTurrets(){
+    hazards.mines.forEach(function(m){
+      ctx.fillStyle = '#c0392b';
+      ctx.beginPath(); ctx.arc(m.x, m.y, 7, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(m.x, m.y, 2, 0, Math.PI*2); ctx.fill();
+    });
+    hazards.turrets.forEach(function(t){
+      ctx.fillStyle = '#444';
+      ctx.fillRect(t.x-10, t.y-10, 20, 20);
+      ctx.fillStyle = '#ffd23f';
+      ctx.fillRect(t.x-2, t.y-2, 4, 4);
+    });
+    if (meteorState) meteorState.warnings.forEach(function(w){
+      ctx.strokeStyle = 'rgba(255,60,60,0.8)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(w.c*TILE+TILE/2, w.r*TILE+TILE/2, 22*(1-w.t), 0, Math.PI*2); ctx.stroke();
+    });
+  }
+  function drawSnipeTelegraph(){
+    enemies.forEach(function(e){
+      if (e.snipeState==='aiming'){
+        ctx.strokeStyle = 'rgba(255,40,40,0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(e.x+e.w/2, e.y+e.h/2);
+        ctx.lineTo(e.x+e.w/2+Math.cos(e.snipeAngle)*300, e.y+e.h/2+Math.sin(e.snipeAngle)*300);
+        ctx.stroke();
+      }
+    });
   }
 
   function render(t){
@@ -735,24 +1352,51 @@
           if (cell===BRICK) drawBrick(x,y);
           else if (cell===STEEL) drawSteel(x,y);
           else if (cell===BASE) drawBase(x,y);
+          else if (cell===CRATE) drawCrate(x,y);
+          else if (cell===ROCK) drawRock(x,y);
+          else if (cell===WATER) drawWater(x,y,t);
+          else if (cell===SAND) drawSand(x,y);
+          else if (cell===ICE) drawIce(x,y);
+          else if (cell===ELECTRIC) drawElectric(x,y,t);
+          else if (cell===PORTAL_A) drawPortal(x,y,'#5cc9ff');
+          else if (cell===PORTAL_B) drawPortal(x,y,'#ff5c9d');
+          else if (cell===TOGGLE) drawToggle(x,y,togglePhaseAt(r,c));
+          else if (cell===CONVEYOR){
+            var cv = conveyorTiles.filter(function(o){return o.r===r&&o.c===c;})[0];
+            drawConveyor(x,y,cv?cv.dir:'right',t);
+          }
         }
       }
     }
+    drawSnipeTelegraph();
+    drawMinesAndTurrets();
+    drawFlames();
     bullets.forEach(drawBullet);
     if (player && player.alive && !player.respawning){
       var blink = player.invuln>0 && !reducedMotion && Math.floor(t*10)%2===0;
-      if (!blink) drawTank(player, '#f4d03f');
+      var color = upgrades.legendary ? '#ffd23f' : '#f4d03f';
+      if (!blink) drawTank(player, color);
     }
     enemies.forEach(function(e){
       if (!e.alive) return;
       if (e.type==='boss'){
-        drawTank(e, '#ff3e3e');
+        drawTank(e, BOSS_DEFS[e.bossKey].color, e.shieldTimer>0?0.6:1);
         drawBossHpBar(e);
       } else {
-        drawTank(e, (ENEMY_TYPES[e.type]||ENEMY_TYPES.normal).color);
+        var def = ENEMY_DEFS[e.type]||ENEMY_DEFS.recluta;
+        drawTank(e, def.color, e.phased?0.35:1);
       }
     });
     drawParticles();
+    if (fogLevel && player){
+      ctx.save();
+      var grad = ctx.createRadialGradient(player.x+player.w/2,player.y+player.h/2, 40, player.x+player.w/2,player.y+player.h/2, 150);
+      grad.addColorStop(0,'rgba(0,0,0,0)');
+      grad.addColorStop(1,'rgba(0,0,0,0.82)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,COLS*TILE,ROWS*TILE);
+      ctx.restore();
+    }
   }
 
   var lastTime = null;
@@ -781,28 +1425,27 @@
 
   function startLevel(){
     gameState = 'play';
-    currentCfg = getLevelConfig(currentLevel);
-    var mapData = generateMap(currentCfg);
+    currentLevelDef = levelDef(currentLevel);
+    currentEnemyDef = currentLevelDef.enemy ? ENEMY_DEFS[currentLevelDef.enemy] : null;
+    var mapData = buildMap(currentLevelDef.map, currentLevel);
     grid = mapData.grid; baseRow = mapData.baseRow; baseCol = mapData.baseCol;
-    enemies = []; bullets = []; particles = [];
-    lives = LIVES_START;
+    enemies = []; bullets = []; particles = []; flames = [];
+    shiftTimer = 0;
     dirStack.length = 0;
 
     var spawnX = (baseCol-3)*TILE + (TILE-PLAYER_SIZE)/2;
     var spawnY = (ROWS-1)*TILE + (TILE-PLAYER_SIZE)/2;
     player = makeTank(spawnX, spawnY, true);
-    player.maxBullets = currentCfg.playerMaxBullets;
     player.invuln = INVULN_TIME;
     player.bombCooldown = 0;
 
-    if (currentCfg.isBoss){
-      totalEnemies = 1;
-      spawnedEnemies = 1;
-      var bossW = ENEMY_SIZE*1.8;
-      var boss = makeBoss((COLS*TILE-bossW)/2, TILE*1.5, currentCfg.bossHp);
+    if (currentLevelDef.boss){
+      totalEnemies = 1; spawnedEnemies = 1;
+      var bossW = ENEMY_SIZE*1.9;
+      var boss = makeBoss(currentLevelDef.boss, (COLS*TILE-bossW)/2, TILE*1.5);
       enemies.push(boss);
     } else {
-      totalEnemies = currentCfg.totalEnemies;
+      totalEnemies = Math.min(20, 6+currentLevel);
       spawnedEnemies = 0;
       spawnTimer = 0.6;
     }
@@ -812,22 +1455,32 @@
     startOverlay.classList.add('is-hidden');
     clearOverlay.classList.add('is-hidden');
     overOverlay.classList.add('is-hidden');
-    tBomb.style.display = currentCfg.bombUnlocked ? '' : 'none';
+    tBomb.style.display = currentLevel>=4 ? '' : 'none';
     ensureAudio();
     startTanksLoop();
   }
 
+  function enemyLabel(key){
+    var labels = {
+      recluta:'Tanque Recluta', doble:'Tanque Doble', bombardero:'Tanque Bombardero',
+      francotirador:'Tanque Francotirador', escudo:'Tanque Escudo', rebote:'Tanque Rebote',
+      lanzaminas:'Tanque Lanzaminas', congelador:'Tanque Congelador', kamikaze:'Tanque Kamikaze',
+      triple:'Tanque Triple', electrico:'Tanque Eléctrico', fantasma:'Tanque Fantasma',
+      lanzallamas:'Tanque Lanzallamas', magnetico:'Tanque Magnético', misilero:'Tanque Misilero',
+      experimental:'Tanque Experimental'
+    };
+    return labels[key] || key;
+  }
+
   function showTanksIntro(){
-    var cfg = getLevelConfig(currentLevel);
-    var hint = 'Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.';
-    if (cfg.isBoss){
-      startTitleEl.textContent = '¿Listo para el Jefe del Nivel '+currentLevel+'?';
-      hint = '¡Apareció un tanque JEFE! Aguanta varios disparos, invoca refuerzos rápidos y dispara láseres. Usá tus bombas (tecla B o el botón 💣) para hacerle más daño.';
+    var def = levelDef(currentLevel);
+    var hint = 'Usá las flechas para mover tu tanque y Espacio para disparar.';
+    if (def.boss){
+      startTitleEl.textContent = '¿Listo para el '+BOSS_DEFS[def.boss].label+'?';
+      hint = '¡Apareció un JEFE! Usá tus bombas (tecla B o 💣) y esquivá sus ataques. Al vencerlo desbloqueás: '+def.upgrade.label+'.';
     } else {
       startTitleEl.textContent = '¿Listo para el Nivel '+currentLevel+'?';
-      if (currentLevel===2) hint += ' ¡Cuidado, aparecen tanques verdes que disparan el doble de rápido!';
-      else if (currentLevel===3) hint += ' Ahora tu tanque también dispara más rápido, ¡pero cuidado con los tanques morados que tiran bombas!';
-      else if (currentLevel===4) hint += ' ¡Ya podés tirar una bomba con la tecla B (o el botón 💣) para destruir varios enemigos a la vez!';
+      hint += ' Enemigo de este nivel: '+enemyLabel(def.enemy)+'. Al superarlo desbloqueás: '+def.upgrade.label+'.';
     }
     startDescEl.textContent = hint;
   }
@@ -836,20 +1489,26 @@
   startBtn.addEventListener('click', startLevel);
   retryBtn.addEventListener('click', startLevel);
   nextBtn.addEventListener('click', function(){
-    currentLevel += 1;
+    if (currentLevel >= LEVELS.length){
+      currentLevel = 1;
+      upgrades = freshUpgrades();
+      lives = 3;
+    } else {
+      currentLevel += 1;
+    }
     showTanksIntro();
     startLevel();
   });
   resetBtn.addEventListener('click', function(){
     currentLevel = 1;
+    upgrades = freshUpgrades();
+    lives = 3;
     showTanksIntro();
     startLevel();
   });
 
-  var initialCfg = getLevelConfig(1);
-  var initialMap = generateMap(initialCfg);
+  var initialMap = buildMap(levelDef(1).map, 1);
   grid = initialMap.grid; baseRow = initialMap.baseRow; baseCol = initialMap.baseCol;
-  tBomb.style.display = initialCfg.bombUnlocked ? '' : 'none';
+  tBomb.style.display = 'none';
   render(0);
 })();
-

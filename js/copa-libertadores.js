@@ -105,6 +105,11 @@
   var teamGridEl = document.getElementById('liberTeamGrid');
   var difficultyView = document.getElementById('liberDifficultyView');
   var diffBackBtn = document.getElementById('liberDiffBackBtn');
+  var drawView = document.getElementById('liberDrawView');
+  var drawStatusEl = document.getElementById('liberDrawStatus');
+  var drawGridEl = document.getElementById('liberDrawGrid');
+  var drawSkipBtn = document.getElementById('liberDrawSkipBtn');
+  var drawContinueBtn = document.getElementById('liberDrawContinueBtn');
   var stageView = document.getElementById('liberStageView');
   var stageTitleEl = document.getElementById('liberStageTitle');
   var groupTableEl = document.getElementById('liberGroupTable');
@@ -272,15 +277,39 @@
   }
 
   var GROUP_LETTERS = ['A','B','C','D','E','F','G','H'];
+
+  // Bombos por fuerza: se sortea un equipo de cada bombo para cada grupo antes
+  // de pasar al siguiente bombo, como en un sorteo real de copa continental.
+  function buildGroupsWithPots(teamIds){
+    var sorted = teamIds.slice().sort(function(a,b){ return TEAMS_BY_ID[b].strength - TEAMS_BY_ID[a].strength; });
+    var pots = [sorted.slice(0,8), sorted.slice(8,16), sorted.slice(16,24), sorted.slice(24,32)];
+    var groups = [];
+    for (var g=0; g<8; g++) groups.push([]);
+    var drawOrder = [];
+    pots.forEach(function(pot, potIdx){
+      var potShuffled = shuffle(pot.slice());
+      var groupIndices = shuffle([0,1,2,3,4,5,6,7]);
+      for (var i=0;i<8;i++){
+        var gi = groupIndices[i];
+        var teamId = potShuffled[i];
+        groups[gi].push(teamId);
+        drawOrder.push({teamId:teamId, groupIndex:gi, potIndex:potIdx});
+      }
+    });
+    return {groups:groups, drawOrder:drawOrder};
+  }
+
   function startCampaign(yourId, difficulty){
     campaign.yourId = yourId;
     campaign.difficulty = difficulty;
     currentDifficulty = DIFFICULTIES[difficulty] || DIFFICULTIES.normal;
 
     var others31 = pickRandomTeams(31, [yourId]);
-    var pool32 = shuffle([yourId].concat(others31));
-    campaign.allGroups = [];
-    for (var g=0; g<8; g++){ campaign.allGroups.push(pool32.slice(g*4,(g+1)*4)); }
+    var pool32 = [yourId].concat(others31);
+    var built = buildGroupsWithPots(pool32);
+    campaign.allGroups = built.groups;
+    campaign.drawOrder = built.drawOrder;
+
     var yourGroupIndex = 0;
     for (var gi=0; gi<8; gi++){
       if (campaign.allGroups[gi].indexOf(yourId) !== -1){ yourGroupIndex = gi; break; }
@@ -303,8 +332,73 @@
       campaign.otherGroupWinners.push(sorted[0].teamId);
     }
 
-    showStageScreen();
+    startDrawAnimation();
   }
+
+  // ---------- Animacion del sorteo ----------
+  var drawTimer = null;
+  var drawStep = 0;
+  function renderEmptyGroupBoxes(){
+    drawGridEl.innerHTML = '';
+    for (var g=0; g<8; g++){
+      var box = document.createElement('div');
+      box.className = 'draw-group-box';
+      var title = document.createElement('div');
+      title.className = 'draw-group-title';
+      title.textContent = 'Grupo '+GROUP_LETTERS[g];
+      box.appendChild(title);
+      var slots = document.createElement('div');
+      slots.className = 'draw-group-slots';
+      slots.id = 'liberDrawSlots'+g;
+      for (var s=0; s<4; s++){
+        var slot = document.createElement('div');
+        slot.className = 'draw-slot';
+        slots.appendChild(slot);
+      }
+      box.appendChild(slots);
+      drawGridEl.appendChild(box);
+    }
+  }
+  function revealDrawStep(i){
+    var entry = campaign.drawOrder[i];
+    var team = TEAMS_BY_ID[entry.teamId];
+    var slotsEl = document.getElementById('liberDrawSlots'+entry.groupIndex);
+    var slot = slotsEl.children[entry.potIndex];
+    slot.className = 'draw-slot is-filled'+(entry.teamId === campaign.yourId ? ' is-you' : '');
+    slot.innerHTML = '<span class="team-badge draw-badge" style="background:'+team.shirt+';border-color:'+team.band+'"></span>'+
+      '<span class="draw-slot-name">'+team.name+'</span>';
+    drawStatusEl.textContent = 'Bombo '+(entry.potIndex+1)+' de 4 — '+team.name+' → Grupo '+GROUP_LETTERS[entry.groupIndex];
+  }
+  function finishDrawAnimation(){
+    if (drawTimer){ clearInterval(drawTimer); drawTimer = null; }
+    drawContinueBtn.classList.remove('is-hidden');
+    drawStatusEl.textContent = '¡Sorteo terminado! Grupo '+campaign.groupLetter+' es el tuyo.';
+  }
+  function startDrawAnimation(){
+    hideAllSubViews();
+    drawView.classList.remove('is-hidden');
+    renderEmptyGroupBoxes();
+    drawContinueBtn.classList.add('is-hidden');
+    drawStatusEl.textContent = 'Sorteando equipos...';
+    drawStep = 0;
+    if (drawTimer) clearInterval(drawTimer);
+    drawTimer = setInterval(function(){
+      if (drawStep >= campaign.drawOrder.length){
+        finishDrawAnimation();
+        return;
+      }
+      revealDrawStep(drawStep);
+      drawStep += 1;
+    }, 220);
+  }
+  drawSkipBtn.addEventListener('click', function(){
+    for (; drawStep < campaign.drawOrder.length; drawStep++){ revealDrawStep(drawStep); }
+    finishDrawAnimation();
+  });
+  drawContinueBtn.addEventListener('click', function(){
+    ensureAudio();
+    showStageScreen();
+  });
 
   function renderStandingsTable(){
     var sorted = sortedStandings();
@@ -365,6 +459,7 @@
   function hideAllSubViews(){
     teamSelectView.classList.add('is-hidden');
     difficultyView.classList.add('is-hidden');
+    drawView.classList.add('is-hidden');
     stageView.classList.add('is-hidden');
     endView.classList.add('is-hidden');
     matchView.classList.add('is-hidden');

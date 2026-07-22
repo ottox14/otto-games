@@ -575,16 +575,16 @@
       <div class="liber-sub-view is-hidden" id="liberMatchView">
         <div class="liber-hud">
           <div class="hud-chip liber-team-chip" id="liberHomeChip"><span class="team-badge" id="liberHomeBadge"></span> <b id="liberScoreHome">0</b></div>
-          <div class="hud-chip">⏱ <b id="liberTimeVal">1:30</b></div>
+          <div class="hud-chip" id="liberTurnChip">🎯 <b id="liberTurnVal">Tu turno</b></div>
           <div class="hud-chip liber-team-chip" id="liberAwayChip"><span class="team-badge" id="liberAwayBadge"></span> <b id="liberScoreAway">0</b></div>
         </div>
 
         <div class="frame liber-frame">
-          <canvas id="liberCanvas" width="920" height="480"></canvas>
+          <canvas id="liberCanvas" width="900" height="560"></canvas>
 
           <div class="overlay" id="liberStartOverlay">
             <h2 id="liberStartTitle">¿Listo?</h2>
-            <p>Movete con las flechas, saltá con <kbd>&uarr;</kbd> y pateá con <kbd>Espacio</kbd>.</p>
+            <p>Tocá una de tus fichas, arrastrá hacia atrás para apuntar y soltá para dispararla. Metela en el arco rival.</p>
             <button class="big-btn" id="liberStartBtn">▶ Empezar</button>
           </div>
 
@@ -596,14 +596,7 @@
         </div>
 
         <div class="controls-row">
-          <p class="hint">Movete con <kbd>&larr;</kbd><kbd>&rarr;</kbd> · Saltás con <kbd>&uarr;</kbd> · Pateás con <kbd>Espacio</kbd></p>
-          <div class="action-touch-controls">
-            <div class="joystick joystick-2way" id="liberJoystick" aria-label="Mover">
-              <div class="joystick-base"><div class="joystick-thumb"></div></div>
-            </div>
-            <button class="fire-btn" id="liberJumpBtn" aria-label="Saltar">⬆</button>
-            <button class="fire-btn bomb-btn" id="liberKickBtn" aria-label="Patear">⚽</button>
-          </div>
+          <p class="hint">Tocá tu ficha y arrastrá hacia atrás para apuntar · Soltá para disparar</p>
         </div>
       </div>
     </div>

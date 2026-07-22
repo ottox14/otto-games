@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="css/papa-millonaria.css">
 <link rel="stylesheet" href="css/mi-gatito.css">
 <link rel="stylesheet" href="css/copa-libertadores.css">
+<link rel="stylesheet" href="css/liga.css">
 </head>
 <body>
 
@@ -83,9 +84,17 @@
       <article class="game-card">
         <div class="card-art">🏆</div>
         <h2>Copa Libertadores</h2>
-        <p>Preview: Superclásico River-Boca al mejor estilo cabezazo. Movete, saltá y pateá para meterla en el arco rival.</p>
+        <p>Elegí tu equipo entre 46 clubes sudamericanos y jugá el torneo completo: sorteo, fase de grupos y eliminatorias. Fútbol de mesa por turnos, al estilo Miniball.</p>
         <div class="tags"><span class="tag">Deportes</span><span class="tag">1 vs CPU</span></div>
         <button class="play-btn" id="playLiberBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">⚽</div>
+        <h2>Modo Liga</h2>
+        <p>Elegí tu equipo entre los 20 de la liga y jugá la temporada completa, fecha a fecha, con tabla de posiciones en tiempo real. Mismo fútbol de mesa por turnos.</p>
+        <div class="tags"><span class="tag">Deportes</span><span class="tag">1 vs CPU</span></div>
+        <button class="play-btn" id="playLigaBtn">▶ Jugar</button>
       </article>
 
       <article class="game-card coming-soon">
@@ -613,6 +622,97 @@
     </div>
   </div>
 
+  <div class="view is-hidden" id="ligaView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromLigaBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">MODO LIGA</h1>
+          <p class="subtitle" id="ligaSubtitle">Elegí tu equipo y jugá la temporada completa</p>
+        </div>
+        <button class="mute-btn" id="ligaMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="liga-sub-view" id="ligaTeamSelectView">
+        <h2 class="liga-select-title">Elegí tu equipo</h2>
+        <div class="liga-team-grid" id="ligaTeamGrid"></div>
+      </div>
+
+      <div class="liga-sub-view is-hidden" id="ligaDifficultyView">
+        <button class="text-btn liga-back-step" id="ligaDiffBackBtn">← Elegir otro equipo</button>
+        <h2 class="liga-select-title">Elegí la dificultad</h2>
+        <div class="diff-grid">
+          <button class="diff-btn diff-facil" data-diff="facil">🟢 Fácil</button>
+          <button class="diff-btn diff-normal" data-diff="normal">🟡 Normal</button>
+          <button class="diff-btn diff-dificil" data-diff="dificil">🟠 Difícil</button>
+          <button class="diff-btn diff-legendario" data-diff="legendario">🔴 Legendario</button>
+        </div>
+      </div>
+
+      <div class="liga-sub-view is-hidden" id="ligaSeasonView">
+        <h2 class="liga-select-title" id="ligaSeasonTitle">Fecha 1 de 38</h2>
+        <div class="liga-season-layout">
+          <div class="liga-table-panel">
+            <div class="liga-table-scroll">
+              <table class="liga-table" id="ligaTable">
+                <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead>
+                <tbody id="ligaTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="liga-next-panel">
+            <p class="liga-next-label" id="ligaNextLabel">Fecha 1</p>
+            <p class="liga-next-match" id="ligaNextMatch">Equipo A vs Equipo B</p>
+            <button class="big-btn" id="ligaPlayBtn">▶ Jugar partido</button>
+            <div class="liga-results" id="ligaResults"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="liga-sub-view is-hidden" id="ligaEndView">
+        <h2 class="liga-select-title" id="ligaEndTitle">¡Temporada terminada!</h2>
+        <p class="liga-stage-text" id="ligaEndText"></p>
+        <div class="liga-table-scroll liga-final-table-wrap">
+          <table class="liga-table" id="ligaFinalTable">
+            <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr></thead>
+            <tbody id="ligaFinalTableBody"></tbody>
+          </table>
+        </div>
+        <button class="big-btn" id="ligaEndRetryBtn">↻ Jugar de nuevo</button>
+      </div>
+
+      <div class="liga-sub-view is-hidden" id="ligaMatchView">
+        <div class="liber-hud">
+          <div class="hud-chip liber-team-chip" id="ligaHomeChip"><span class="team-badge" id="ligaHomeBadge"></span> <b id="ligaScoreHome">0</b></div>
+          <div class="hud-chip" id="ligaTurnChip">🎯 <b id="ligaTurnVal">Tu turno</b> <span class="liber-time" id="ligaTimeVal">1:30</span></div>
+          <div class="hud-chip liber-team-chip" id="ligaAwayChip"><span class="team-badge" id="ligaAwayBadge"></span> <b id="ligaScoreAway">0</b></div>
+        </div>
+
+        <div class="frame liber-frame">
+          <canvas id="ligaCanvas" width="900" height="560"></canvas>
+
+          <div class="overlay" id="ligaStartOverlay">
+            <h2 id="ligaStartTitle">¿Listo?</h2>
+            <p>Tocá una de tus fichas, arrastrá hacia atrás para apuntar y soltá para dispararla. Metela en el arco rival.</p>
+            <button class="big-btn" id="ligaStartBtn">▶ Empezar</button>
+          </div>
+
+          <div class="overlay is-hidden" id="ligaOverOverlay">
+            <h2 id="ligaOverTitle">¡Final del partido!</h2>
+            <p id="ligaOverScore">0 - 0</p>
+            <button class="big-btn" id="ligaOverContinueBtn">Continuar</button>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <p class="hint">Tocá tu ficha y arrastrá hacia atrás para apuntar · Soltá para disparar</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/portal.js"></script>
@@ -623,5 +723,6 @@
 <script src="js/papa-millonaria.js"></script>
 <script src="js/mi-gatito.js"></script>
 <script src="js/copa-libertadores.js"></script>
+<script src="js/liga.js"></script>
 </body>
 </html>

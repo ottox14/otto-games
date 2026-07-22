@@ -7455,8 +7455,8 @@
   // ---------- Campana (torneo) ----------
   var campaign = {
     yourId: null, difficulty: 'normal', group: [], standings: {},
-    rounds: [], roundIndex: 0, stage: null,
-    semiOpponent: null, finalOpponent: null, shootoutNote: false
+    rounds: [], roundIndex: 0, stage: null, yourGroupIndex: 0,
+    groupQualifiers: [], bracket: null, shootoutNote: false
   };
 
   function makeStandingsMap(teamIds){
@@ -7574,6 +7574,7 @@
       if (campaign.allGroups[gi].indexOf(yourId) !== -1){ yourGroupIndex = gi; break; }
     }
     campaign.groupLetter = GROUP_LETTERS[yourGroupIndex];
+    campaign.yourGroupIndex = yourGroupIndex;
     var rawGroup = campaign.allGroups[yourGroupIndex];
     campaign.group = [yourId].concat(rawGroup.filter(function(id){ return id !== yourId; }));
     campaign.allGroups[yourGroupIndex] = campaign.group;
@@ -7584,11 +7585,14 @@
     campaign.stage = 'group';
     campaign.shootoutNote = false;
 
-    campaign.otherGroupWinners = [];
+    // Clasificados (1ro y 2do) de los otros 7 grupos, simulados de antemano para
+    // poder armar el cuadro completo de octavos apenas termines tu fase de grupos.
+    // El tuyo (indice yourGroupIndex) se completa recien cuando termines tus 3 fechas.
+    campaign.groupQualifiers = [];
     for (var og=0; og<8; og++){
-      if (og === yourGroupIndex) continue;
-      var sorted = simulateFullGroup(campaign.allGroups[og]);
-      campaign.otherGroupWinners.push(sorted[0].teamId);
+      if (og === yourGroupIndex){ campaign.groupQualifiers.push(null); continue; }
+      var sortedOg = simulateFullGroup(campaign.allGroups[og]);
+      campaign.groupQualifiers.push([sortedOg[0].teamId, sortedOg[1].teamId]);
     }
 
     startDrawAnimation();
@@ -7736,18 +7740,13 @@
       var opp = TEAMS_BY_ID[campaign.rounds[campaign.roundIndex].yourOpponent];
       stageTextEl.textContent = 'Próximo partido: vs '+opp.name;
       stageContinueBtn.textContent = '▶ Jugar partido';
-    } else if (campaign.stage === 'knockout-semi'){
+    } else if (campaign.stage === 'knockout'){
       groupTableEl.classList.add('is-hidden');
       if (fixtureListEl) fixtureListEl.classList.add('is-hidden');
-      stageTitleEl.textContent = '¡Clasificaste a semifinales!';
-      stageTextEl.textContent = 'Semifinal vs '+TEAMS_BY_ID[campaign.semiOpponent].name;
-      stageContinueBtn.textContent = '▶ Jugar semifinal';
-    } else if (campaign.stage === 'knockout-final'){
-      groupTableEl.classList.add('is-hidden');
-      if (fixtureListEl) fixtureListEl.classList.add('is-hidden');
-      stageTitleEl.textContent = '¡Estás en la final!';
-      stageTextEl.textContent = 'Final vs '+TEAMS_BY_ID[campaign.finalOpponent].name;
-      stageContinueBtn.textContent = '▶ Jugar la final';
+      var label = campaign.bracket.roundLabel;
+      stageTitleEl.textContent = label;
+      stageTextEl.textContent = label+' vs '+TEAMS_BY_ID[yourBracketOpponent()].name;
+      stageContinueBtn.textContent = '▶ Jugar '+label.toLowerCase();
     }
   }
 
@@ -7757,7 +7756,9 @@
     var titleMap = {
       champion: '🏆 ¡Campeón de la Copa Libertadores!',
       'runner-up': '🥈 Subcampeón',
-      'eliminated-semi': 'Eliminado en semifinales',
+      'eliminated-octavos': 'Eliminado en octavos de final',
+      'eliminated-cuartos': 'Eliminado en cuartos de final',
+      'eliminated-semifinal': 'Eliminado en semifinales',
       'eliminated-group': 'Eliminado en fase de grupos'
     };
     endTitleEl.textContent = titleMap[resultType] || 'Fin del torneo';
@@ -7769,47 +7770,90 @@
     ensureAudio();
     if (campaign.stage === 'group'){
       startMatchVs(campaign.rounds[campaign.roundIndex].yourOpponent);
-    } else if (campaign.stage === 'knockout-semi'){
-      startMatchVs(campaign.semiOpponent);
-    } else if (campaign.stage === 'knockout-final'){
-      startMatchVs(campaign.finalOpponent);
+    } else if (campaign.stage === 'knockout'){
+      startMatchVs(yourBracketOpponent());
     }
   });
+
+  function findYourMatchIndex(matches){
+    for (var i=0;i<matches.length;i++){
+      if (matches[i].a === campaign.yourId || matches[i].b === campaign.yourId) return i;
+    }
+    return -1;
+  }
+  function yourBracketOpponent(){
+    var m = campaign.bracket.matches[findYourMatchIndex(campaign.bracket.matches)];
+    return m.a === campaign.yourId ? m.b : m.a;
+  }
+  function pairAdjacent(ids){
+    var pairs = [];
+    for (var i=0;i<ids.length;i+=2){ pairs.push({a: ids[i], b: ids[i+1]}); }
+    return pairs;
+  }
+  function simulateKnockoutMatch(aId, bId){
+    var score = simRealisticScore(aId, bId, false);
+    if (score[0] > score[1]) return aId;
+    if (score[1] > score[0]) return bId;
+    return Math.random() < 0.5 ? aId : bId; // definicion por penales, no se muestra el detalle
+  }
+
+  // Cuadro de octavos: cruza el 1ro de cada grupo con el 2do de OTRO grupo
+  // (nunca el propio), como en un sorteo real de copa continental.
+  function buildOctavosMatches(){
+    var winners = [], runnersUp = [];
+    for (var g=0; g<8; g++){
+      winners.push(campaign.groupQualifiers[g][0]);
+      runnersUp.push(campaign.groupQualifiers[g][1]);
+    }
+    var offset = 1 + Math.floor(Math.random()*7);
+    var matches = [];
+    for (var g2=0; g2<8; g2++){
+      matches.push({a: winners[g2], b: runnersUp[(g2+offset)%8]});
+    }
+    return matches;
+  }
 
   function finishGroupStage(){
     var sorted = sortedStandings();
     var yourIndex = -1;
     for (var i=0;i<sorted.length;i++){ if (sorted[i].teamId === campaign.yourId){ yourIndex = i; break; } }
     if (yourIndex < 2){
-      campaign.stage = 'knockout-semi';
-      var winnersPool = shuffle(campaign.otherGroupWinners.slice());
-      campaign.semiOpponent = winnersPool[0];
-      campaign.remainingWinners = winnersPool.slice(1);
+      campaign.groupQualifiers[campaign.yourGroupIndex] = [sorted[0].teamId, sorted[1].teamId];
+      campaign.stage = 'knockout';
+      campaign.bracket = {roundName:'octavos', roundLabel:'Octavos de Final', matches: buildOctavosMatches()};
       showStageScreen();
     } else {
       endCampaign('eliminated-group');
     }
   }
 
+  var NEXT_KNOCKOUT_ROUND = {octavos:'cuartos', cuartos:'semifinal', semifinal:'final'};
+  var KNOCKOUT_ROUND_LABELS = {cuartos:'Cuartos de Final', semifinal:'Semifinal', final:'Final'};
   function resolveKnockout(){
-    var outcome;
-    if (scoreHome > scoreAway) outcome = 'win';
-    else if (scoreAway > scoreHome) outcome = 'lose';
+    var yourWon;
+    if (scoreHome > scoreAway) yourWon = true;
+    else if (scoreAway > scoreHome) yourWon = false;
     else {
       campaign.shootoutNote = true;
-      outcome = Math.random() < 0.5 ? 'win' : 'lose';
+      yourWon = Math.random() < 0.5;
     }
-    if (campaign.stage === 'knockout-semi'){
-      if (outcome === 'win'){
-        campaign.stage = 'knockout-final';
-        campaign.finalOpponent = campaign.remainingWinners[0];
-        showStageScreen();
-      } else {
-        endCampaign('eliminated-semi');
-      }
-    } else if (campaign.stage === 'knockout-final'){
-      endCampaign(outcome === 'win' ? 'champion' : 'runner-up');
+    var yourIdx = findYourMatchIndex(campaign.bracket.matches);
+    var winners = campaign.bracket.matches.map(function(m, i){
+      if (i === yourIdx) return yourWon ? campaign.yourId : (m.a === campaign.yourId ? m.b : m.a);
+      return simulateKnockoutMatch(m.a, m.b);
+    });
+
+    if (!yourWon){
+      endCampaign(campaign.bracket.roundName === 'final' ? 'runner-up' : 'eliminated-'+campaign.bracket.roundName);
+      return;
     }
+    if (campaign.bracket.roundName === 'final'){
+      endCampaign('champion');
+      return;
+    }
+    var nextRoundName = NEXT_KNOCKOUT_ROUND[campaign.bracket.roundName];
+    campaign.bracket = {roundName: nextRoundName, roundLabel: KNOCKOUT_ROUND_LABELS[nextRoundName], matches: pairAdjacent(winners)};
+    showStageScreen();
   }
 
   function afterMatchContinue(){
@@ -8158,14 +8202,37 @@
     });
     return minClear;
   }
-  function bestAdvancedTeammate(exclude, pieces, goalX){
-    var best = null, bestD = Infinity;
-    pieces.forEach(function(p){
-      if (p === exclude) return;
-      var d = Math.abs(p.x-goalX);
-      if (d < bestD){ bestD = d; best = p; }
+  // Ficha que mejor puede llegar a tocar la pelota ahora (cerca y con via libre),
+  // no solo la mas cercana - si no hay linea limpia, otra ficha puede servir mas.
+  function chooseActingPiece(){
+    var best = null, bestScore = -Infinity;
+    awayPieces.forEach(function(p){
+      var obstacles = homePieces.concat(awayPieces.filter(function(o){ return o !== p; }));
+      var clr = pathClearance(p.x, p.y, ballBody.x, ballBody.y, obstacles);
+      var d = dist(p, ballBody);
+      var score = clr*1.5 - d*0.08;
+      if (score > bestScore){ bestScore = score; best = p; }
     });
     return best;
+  }
+  // Prueba varios puntos a lo largo de la boca del arco rival y devuelve el de
+  // mejor despeje - asi la IA busca angulos en vez de tirar siempre al medio.
+  function bestGoalAngle(fromPoint, obstacles, samples){
+    var goalTop = PITCH_CY-GOAL_W/2+10, goalBot = PITCH_CY+GOAL_W/2-10;
+    var best = null, bestClr = -Infinity;
+    for (var i=0; i<samples; i++){
+      var f = samples>1 ? i/(samples-1) : 0.5;
+      var ty = goalTop+(goalBot-goalTop)*f;
+      var clr = pathClearance(fromPoint.x, fromPoint.y, PITCH_L, ty, obstacles);
+      if (clr > bestClr){ bestClr = clr; best = {x:PITCH_L, y:ty}; }
+    }
+    return {point: best, clearance: bestClr};
+  }
+  function fireWithNoise(diff, piece, aim, power){
+    var ang = aim.ang + (Math.random()*2-1)*diff.aimNoise;
+    var finalPower = clamp(power*(1+(Math.random()*2-1)*diff.powerNoise), 0.25, 1);
+    var speed = finalPower*MAX_DRAG*POWER_SCALE;
+    launchPiece(piece, Math.cos(ang)*speed, Math.sin(ang)*speed);
   }
   function aimDirectionForTarget(fromPiece, targetX, targetY){
     var bx = ballBody.x, by = ballBody.y;
@@ -8181,67 +8248,69 @@
   function performAIMove(){
     var diff = currentDifficulty;
     var goalX = PITCH_L, goalY = PITCH_CY;
-    var sorted = awayPieces.slice().sort(function(a,b){ return dist(a,ballBody)-dist(b,ballBody); });
+    var ownGoalX = PITCH_R, ownGoalY = PITCH_CY;
 
-    var chosen, targetX, targetY, powerLevel;
-
+    // Facil (o el margen de error de cualquier dificultad): jugada torpe e
+    // imprecisa, sin calculo de angulos ni rebotes - a proposito.
     if (diff.smart <= 0 || Math.random() < diff.mistakeChance){
-      chosen = awayPieces[Math.floor(Math.random()*awayPieces.length)];
+      var wild = awayPieces[Math.floor(Math.random()*awayPieces.length)];
       var wildAtGoal = Math.random() < 0.5;
-      targetX = (wildAtGoal ? goalX : ballBody.x) + (Math.random()*280-140);
-      targetY = (wildAtGoal ? goalY : ballBody.y) + (Math.random()*280-140);
-      powerLevel = 0.35+Math.random()*0.65;
-    } else if (diff.smart === 1){
-      chosen = sorted[0];
-      var deepInOwnHalf = ballBody.x > PITCH_CX + (PITCH_R-PITCH_L)*0.12;
-      if (deepInOwnHalf && Math.random() < 0.55){
-        targetX = PITCH_L + (PITCH_R-PITCH_L)*0.32;
-        targetY = ballBody.y + (Math.random()*180-90);
-        powerLevel = 0.7+Math.random()*0.25;
-      } else {
-        var clr = pathClearance(chosen.x, chosen.y, goalX, goalY, homePieces);
-        if (clr > PIECE_R*1.3){
-          targetX = goalX; targetY = goalY+(Math.random()*70-35);
-          powerLevel = 0.85+Math.random()*0.15;
-        } else {
-          var mate = bestAdvancedTeammate(chosen, awayPieces, goalX);
-          targetX = mate ? mate.x : goalX; targetY = mate ? mate.y : goalY;
-          powerLevel = 0.55+Math.random()*0.25;
-        }
-      }
-    } else {
-      var candidates = sorted.slice(0,3);
-      var best = null, bestScore = -Infinity;
-      candidates.forEach(function(p){
-        var clr = pathClearance(p.x, p.y, goalX, goalY, homePieces);
-        var distGoal = Math.hypot(p.x-goalX, p.y-goalY);
-        var score = clr*2-distGoal*0.12;
-        if (score > bestScore){ bestScore = score; best = p; }
-      });
-      chosen = best;
-      var clrBest = pathClearance(chosen.x, chosen.y, goalX, goalY, homePieces);
-      if (clrBest > PIECE_R*1.05){
-        targetX = goalX; targetY = goalY;
-        powerLevel = 0.92+Math.random()*0.08;
-      } else {
-        var mate2 = bestAdvancedTeammate(chosen, awayPieces, goalX);
-        var mateClear = mate2 ? pathClearance(chosen.x, chosen.y, mate2.x, mate2.y, homePieces) : -Infinity;
-        if (mate2 && mateClear > PIECE_R*0.9){
-          targetX = mate2.x; targetY = mate2.y;
-          powerLevel = 0.6+Math.random()*0.2;
-        } else {
-          targetX = PITCH_L+40;
-          targetY = ballBody.y > goalY ? PITCH_T+50 : PITCH_B-50;
-          powerLevel = 0.75+Math.random()*0.2;
-        }
-      }
+      var wtx = (wildAtGoal ? goalX : ballBody.x) + (Math.random()*280-140);
+      var wty = (wildAtGoal ? goalY : ballBody.y) + (Math.random()*280-140);
+      fireWithNoise(diff, wild, aimDirectionForTarget(wild, wtx, wty), 0.35+Math.random()*0.65);
+      return;
     }
 
-    var aim = aimDirectionForTarget(chosen, targetX, targetY);
-    var ang = aim.ang + (Math.random()*2-1)*diff.aimNoise;
-    var finalPower = clamp(powerLevel*(1+(Math.random()*2-1)*diff.powerNoise), 0.25, 1);
-    var speed = finalPower*MAX_DRAG*POWER_SCALE;
-    launchPiece(chosen, Math.cos(ang)*speed, Math.sin(ang)*speed);
+    var angleSamples = diff.smart >= 3 ? 7 : diff.smart >= 2 ? 5 : 3;
+    var defenseChance = diff.smart >= 3 ? 0.75 : diff.smart >= 2 ? 0.55 : 0.3;
+
+    // Defensa: si la pelota esta en mi mitad y hay peligro cerca de mi arco,
+    // la ficha mas cercana a la pelota despeja - siempre lejos de mi propio arco.
+    var ballInMyHalf = ballBody.x > PITCH_CX + (PITCH_R-PITCH_L)*0.04;
+    var dangerNearMyGoal = homePieces.some(function(h){ return dist(h, {x:ownGoalX,y:ownGoalY}) < (PITCH_R-PITCH_L)*0.32; });
+    if (ballInMyHalf && (dangerNearMyGoal || Math.random() < defenseChance)){
+      var defender = awayPieces.slice().sort(function(a,b){ return dist(a,ballBody)-dist(b,ballBody); })[0];
+      var clearY = ballBody.y > ownGoalY ? PITCH_T+40 : PITCH_B-40;
+      var clearX = PITCH_CX + (Math.random()*60-30);
+      fireWithNoise(diff, defender, aimDirectionForTarget(defender, clearX, clearY), 0.75+Math.random()*0.2);
+      return;
+    }
+
+    // Ataque: elijo la ficha que mejor puede tocar la pelota, evaluo tiro
+    // directo, luego pase a un companero mejor ubicado, y si no avanzo la
+    // pelota hacia el mejor angulo disponible - nunca me quedo quieta ni retrocedo.
+    var chosen = chooseActingPiece();
+    var obstacles = homePieces.concat(awayPieces.filter(function(o){ return o !== chosen; }));
+    var shotOpt = bestGoalAngle(chosen, obstacles, angleSamples);
+    var shotThreshold = PIECE_R*(diff.smart >= 3 ? 0.7 : diff.smart >= 2 ? 0.85 : 1.15);
+    var canShoot = shotOpt.clearance > shotThreshold;
+
+    var passOpt = null;
+    awayPieces.forEach(function(p){
+      if (p === chosen) return;
+      var pObstacles = homePieces.concat(awayPieces.filter(function(o){ return o !== p; }));
+      var pShot = bestGoalAngle(p, pObstacles, angleSamples);
+      var passLane = pathClearance(chosen.x, chosen.y, p.x, p.y, obstacles);
+      if (passLane > PIECE_R*0.8 && pShot.clearance > shotOpt.clearance+PIECE_R*0.5){
+        if (!passOpt || pShot.clearance > passOpt.clearance){ passOpt = {piece:p, clearance:pShot.clearance}; }
+      }
+    });
+
+    var targetPoint, power;
+    if (canShoot){
+      targetPoint = shotOpt.point;
+      power = diff.smart >= 2 ? 0.9+Math.random()*0.1 : 0.8+Math.random()*0.15;
+    } else if (passOpt && diff.smart >= 1){
+      targetPoint = {x:passOpt.piece.x, y:passOpt.piece.y};
+      power = 0.55+Math.random()*0.2;
+    } else {
+      // Sin tiro limpio ni pase claro: igual empujo la pelota hacia el mejor
+      // angulo que encontre, para seguir generando peligro en vez de retroceder.
+      targetPoint = shotOpt.point;
+      power = 0.65+Math.random()*0.2;
+    }
+
+    fireWithNoise(diff, chosen, aimDirectionForTarget(chosen, targetPoint.x, targetPoint.y), power);
   }
 
   // ---------- Dibujo ----------
@@ -9259,14 +9328,37 @@
     });
     return minClear;
   }
-  function bestAdvancedTeammate(exclude, pieces, goalX){
-    var best = null, bestD = Infinity;
-    pieces.forEach(function(p){
-      if (p === exclude) return;
-      var d = Math.abs(p.x-goalX);
-      if (d < bestD){ bestD = d; best = p; }
+  // Ficha que mejor puede llegar a tocar la pelota ahora (cerca y con via libre),
+  // no solo la mas cercana - si no hay linea limpia, otra ficha puede servir mas.
+  function chooseActingPiece(){
+    var best = null, bestScore = -Infinity;
+    awayPieces.forEach(function(p){
+      var obstacles = homePieces.concat(awayPieces.filter(function(o){ return o !== p; }));
+      var clr = pathClearance(p.x, p.y, ballBody.x, ballBody.y, obstacles);
+      var d = dist(p, ballBody);
+      var score = clr*1.5 - d*0.08;
+      if (score > bestScore){ bestScore = score; best = p; }
     });
     return best;
+  }
+  // Prueba varios puntos a lo largo de la boca del arco rival y devuelve el de
+  // mejor despeje - asi la IA busca angulos en vez de tirar siempre al medio.
+  function bestGoalAngle(fromPoint, obstacles, samples){
+    var goalTop = PITCH_CY-GOAL_W/2+10, goalBot = PITCH_CY+GOAL_W/2-10;
+    var best = null, bestClr = -Infinity;
+    for (var i=0; i<samples; i++){
+      var f = samples>1 ? i/(samples-1) : 0.5;
+      var ty = goalTop+(goalBot-goalTop)*f;
+      var clr = pathClearance(fromPoint.x, fromPoint.y, PITCH_L, ty, obstacles);
+      if (clr > bestClr){ bestClr = clr; best = {x:PITCH_L, y:ty}; }
+    }
+    return {point: best, clearance: bestClr};
+  }
+  function fireWithNoise(diff, piece, aim, power){
+    var ang = aim.ang + (Math.random()*2-1)*diff.aimNoise;
+    var finalPower = clamp(power*(1+(Math.random()*2-1)*diff.powerNoise), 0.25, 1);
+    var speed = finalPower*MAX_DRAG*POWER_SCALE;
+    launchPiece(piece, Math.cos(ang)*speed, Math.sin(ang)*speed);
   }
   function aimDirectionForTarget(fromPiece, targetX, targetY){
     var bx = ballBody.x, by = ballBody.y;
@@ -9282,67 +9374,69 @@
   function performAIMove(){
     var diff = currentDifficulty;
     var goalX = PITCH_L, goalY = PITCH_CY;
-    var sorted = awayPieces.slice().sort(function(a,b){ return dist(a,ballBody)-dist(b,ballBody); });
+    var ownGoalX = PITCH_R, ownGoalY = PITCH_CY;
 
-    var chosen, targetX, targetY, powerLevel;
-
+    // Facil (o el margen de error de cualquier dificultad): jugada torpe e
+    // imprecisa, sin calculo de angulos ni rebotes - a proposito.
     if (diff.smart <= 0 || Math.random() < diff.mistakeChance){
-      chosen = awayPieces[Math.floor(Math.random()*awayPieces.length)];
+      var wild = awayPieces[Math.floor(Math.random()*awayPieces.length)];
       var wildAtGoal = Math.random() < 0.5;
-      targetX = (wildAtGoal ? goalX : ballBody.x) + (Math.random()*280-140);
-      targetY = (wildAtGoal ? goalY : ballBody.y) + (Math.random()*280-140);
-      powerLevel = 0.35+Math.random()*0.65;
-    } else if (diff.smart === 1){
-      chosen = sorted[0];
-      var deepInOwnHalf = ballBody.x > PITCH_CX + (PITCH_R-PITCH_L)*0.12;
-      if (deepInOwnHalf && Math.random() < 0.55){
-        targetX = PITCH_L + (PITCH_R-PITCH_L)*0.32;
-        targetY = ballBody.y + (Math.random()*180-90);
-        powerLevel = 0.7+Math.random()*0.25;
-      } else {
-        var clr = pathClearance(chosen.x, chosen.y, goalX, goalY, homePieces);
-        if (clr > PIECE_R*1.3){
-          targetX = goalX; targetY = goalY+(Math.random()*70-35);
-          powerLevel = 0.85+Math.random()*0.15;
-        } else {
-          var mate = bestAdvancedTeammate(chosen, awayPieces, goalX);
-          targetX = mate ? mate.x : goalX; targetY = mate ? mate.y : goalY;
-          powerLevel = 0.55+Math.random()*0.25;
-        }
-      }
-    } else {
-      var candidates = sorted.slice(0,3);
-      var best = null, bestScore = -Infinity;
-      candidates.forEach(function(p){
-        var clr = pathClearance(p.x, p.y, goalX, goalY, homePieces);
-        var distGoal = Math.hypot(p.x-goalX, p.y-goalY);
-        var score = clr*2-distGoal*0.12;
-        if (score > bestScore){ bestScore = score; best = p; }
-      });
-      chosen = best;
-      var clrBest = pathClearance(chosen.x, chosen.y, goalX, goalY, homePieces);
-      if (clrBest > PIECE_R*1.05){
-        targetX = goalX; targetY = goalY;
-        powerLevel = 0.92+Math.random()*0.08;
-      } else {
-        var mate2 = bestAdvancedTeammate(chosen, awayPieces, goalX);
-        var mateClear = mate2 ? pathClearance(chosen.x, chosen.y, mate2.x, mate2.y, homePieces) : -Infinity;
-        if (mate2 && mateClear > PIECE_R*0.9){
-          targetX = mate2.x; targetY = mate2.y;
-          powerLevel = 0.6+Math.random()*0.2;
-        } else {
-          targetX = PITCH_L+40;
-          targetY = ballBody.y > goalY ? PITCH_T+50 : PITCH_B-50;
-          powerLevel = 0.75+Math.random()*0.2;
-        }
-      }
+      var wtx = (wildAtGoal ? goalX : ballBody.x) + (Math.random()*280-140);
+      var wty = (wildAtGoal ? goalY : ballBody.y) + (Math.random()*280-140);
+      fireWithNoise(diff, wild, aimDirectionForTarget(wild, wtx, wty), 0.35+Math.random()*0.65);
+      return;
     }
 
-    var aim = aimDirectionForTarget(chosen, targetX, targetY);
-    var ang = aim.ang + (Math.random()*2-1)*diff.aimNoise;
-    var finalPower = clamp(powerLevel*(1+(Math.random()*2-1)*diff.powerNoise), 0.25, 1);
-    var speed = finalPower*MAX_DRAG*POWER_SCALE;
-    launchPiece(chosen, Math.cos(ang)*speed, Math.sin(ang)*speed);
+    var angleSamples = diff.smart >= 3 ? 7 : diff.smart >= 2 ? 5 : 3;
+    var defenseChance = diff.smart >= 3 ? 0.75 : diff.smart >= 2 ? 0.55 : 0.3;
+
+    // Defensa: si la pelota esta en mi mitad y hay peligro cerca de mi arco,
+    // la ficha mas cercana a la pelota despeja - siempre lejos de mi propio arco.
+    var ballInMyHalf = ballBody.x > PITCH_CX + (PITCH_R-PITCH_L)*0.04;
+    var dangerNearMyGoal = homePieces.some(function(h){ return dist(h, {x:ownGoalX,y:ownGoalY}) < (PITCH_R-PITCH_L)*0.32; });
+    if (ballInMyHalf && (dangerNearMyGoal || Math.random() < defenseChance)){
+      var defender = awayPieces.slice().sort(function(a,b){ return dist(a,ballBody)-dist(b,ballBody); })[0];
+      var clearY = ballBody.y > ownGoalY ? PITCH_T+40 : PITCH_B-40;
+      var clearX = PITCH_CX + (Math.random()*60-30);
+      fireWithNoise(diff, defender, aimDirectionForTarget(defender, clearX, clearY), 0.75+Math.random()*0.2);
+      return;
+    }
+
+    // Ataque: elijo la ficha que mejor puede tocar la pelota, evaluo tiro
+    // directo, luego pase a un companero mejor ubicado, y si no avanzo la
+    // pelota hacia el mejor angulo disponible - nunca me quedo quieta ni retrocedo.
+    var chosen = chooseActingPiece();
+    var obstacles = homePieces.concat(awayPieces.filter(function(o){ return o !== chosen; }));
+    var shotOpt = bestGoalAngle(chosen, obstacles, angleSamples);
+    var shotThreshold = PIECE_R*(diff.smart >= 3 ? 0.7 : diff.smart >= 2 ? 0.85 : 1.15);
+    var canShoot = shotOpt.clearance > shotThreshold;
+
+    var passOpt = null;
+    awayPieces.forEach(function(p){
+      if (p === chosen) return;
+      var pObstacles = homePieces.concat(awayPieces.filter(function(o){ return o !== p; }));
+      var pShot = bestGoalAngle(p, pObstacles, angleSamples);
+      var passLane = pathClearance(chosen.x, chosen.y, p.x, p.y, obstacles);
+      if (passLane > PIECE_R*0.8 && pShot.clearance > shotOpt.clearance+PIECE_R*0.5){
+        if (!passOpt || pShot.clearance > passOpt.clearance){ passOpt = {piece:p, clearance:pShot.clearance}; }
+      }
+    });
+
+    var targetPoint, power;
+    if (canShoot){
+      targetPoint = shotOpt.point;
+      power = diff.smart >= 2 ? 0.9+Math.random()*0.1 : 0.8+Math.random()*0.15;
+    } else if (passOpt && diff.smart >= 1){
+      targetPoint = {x:passOpt.piece.x, y:passOpt.piece.y};
+      power = 0.55+Math.random()*0.2;
+    } else {
+      // Sin tiro limpio ni pase claro: igual empujo la pelota hacia el mejor
+      // angulo que encontre, para seguir generando peligro en vez de retroceder.
+      targetPoint = shotOpt.point;
+      power = 0.65+Math.random()*0.2;
+    }
+
+    fireWithNoise(diff, chosen, aimDirectionForTarget(chosen, targetPoint.x, targetPoint.y), power);
   }
 
   // ---------- Dibujo ----------

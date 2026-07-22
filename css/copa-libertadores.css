@@ -137,6 +137,12 @@
 .fixture-line.is-next{ color:var(--gold); font-weight:800; }
 .fixture-line.is-pending{ opacity:.7; }
 
+.liber-time{
+  font-variant-numeric:tabular-nums;
+  color:var(--ink-soft);
+  font-weight:700;
+}
+
 .liber-hud{
   display:flex;
   align-items:center;

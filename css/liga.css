@@ -1,0 +1,158 @@
+/* Estilos propios del Modo Liga: seleccion de equipo/dificultad, layout de
+   temporada (tabla a la izquierda, proximo partido y resultados a la derecha). */
+.liga-sub-view.is-hidden{ display:none; }
+.liga-sub-view{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:16px 20px;
+  min-height:420px;
+}
+.liga-select-title{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  text-align:center;
+}
+.liga-back-step{
+  align-self:flex-start;
+}
+.liga-stage-text{
+  text-align:center;
+  color:var(--ink-soft);
+  margin:0;
+}
+
+.liga-team-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:8px;
+  max-height:56vh;
+  overflow-y:auto;
+  padding:4px 2px;
+}
+.liga-team-pick-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.06);
+  color:var(--ink);
+  border-radius:12px;
+  padding:10px 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  font-family:inherit;
+  cursor:pointer;
+  text-align:center;
+}
+.liga-team-pick-btn:active{ transform:translateY(2px); }
+.liga-team-badge{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:3px solid;
+  box-shadow:0 2px 6px rgba(0,0,0,0.35);
+}
+.liga-team-pick-name{
+  font-size:11px;
+  font-weight:700;
+  line-height:1.2;
+}
+.liga-team-pick-country{
+  font-size:9px;
+  color:var(--ink-soft);
+}
+
+.liga-season-layout{
+  display:grid;
+  grid-template-columns:1.3fr 1fr;
+  gap:16px;
+  align-items:start;
+}
+@media (max-width:760px){
+  .liga-season-layout{ grid-template-columns:1fr; }
+}
+
+.liga-table-panel{
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+  padding:8px;
+  background:rgba(255,255,255,0.03);
+}
+.liga-table-scroll{
+  max-height:60vh;
+  overflow-y:auto;
+  overflow-x:auto;
+}
+.liga-table{
+  width:100%;
+  min-width:420px;
+  border-collapse:collapse;
+  font-size:12px;
+}
+.liga-table th, .liga-table td{
+  padding:5px 6px;
+  text-align:center;
+  border-bottom:1px solid var(--panel-border);
+  white-space:nowrap;
+}
+.liga-table th:nth-child(2), .liga-table td:nth-child(2){ text-align:left; }
+.liga-table tr.is-you td{ font-weight:800; color:var(--gold); }
+.liga-table tr.is-champion td:first-child::before{ content:'🏆 '; }
+
+.liga-next-panel{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+  padding:16px;
+  background:rgba(255,255,255,0.03);
+}
+.liga-next-label{
+  margin:0;
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  color:var(--ink-soft);
+}
+.liga-next-match{
+  margin:0;
+  font-size:17px;
+  font-weight:800;
+  text-align:center;
+}
+
+.liga-results{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  margin-top:6px;
+}
+.liga-results-title{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin:6px 0 2px;
+}
+.liga-result-line{
+  font-size:12px;
+  color:var(--ink-soft);
+  padding:2px 0;
+}
+.liga-result-line.is-you{
+  color:var(--gold);
+  font-weight:800;
+}
+
+.liga-final-table-wrap{
+  width:100%;
+  max-width:600px;
+  margin:0 auto;
+}

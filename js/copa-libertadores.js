@@ -23,7 +23,7 @@
   var POWER_SCALE = 5.4;
   var WALL_REST = 0.7;
   var BODY_REST = 0.88;
-  var TURNS_PER_TEAM = 10;
+  var MATCH_DURATION = 90; // segundos - sin límite de tiros, se juega a reloj
 
   var TEAMS = [
     {id:'lanus', strength:74, name:'Lanús', country:'Argentina', shirt:'#5c1730', band:'#111111', shorts:'#111111', pattern:'solid'},
@@ -123,6 +123,7 @@
   var scoreHomeEl = document.getElementById('liberScoreHome');
   var scoreAwayEl = document.getElementById('liberScoreAway');
   var turnValEl = document.getElementById('liberTurnVal');
+  var timeValEl = document.getElementById('liberTimeVal');
 
   var startOverlay = document.getElementById('liberStartOverlay');
   var startTitleEl = document.getElementById('liberStartTitle');
@@ -525,7 +526,7 @@
   var scoreHome = 0, scoreAway = 0;
   var turnTeam = 'home';
   var turnPhase = 'idle'; // 'idle' | 'aiming' | 'simulating' | 'goal' | 'over'
-  var turnsUsed = {home:0, away:0};
+  var matchTimeLeft = MATCH_DURATION;
   var settleTimer = 0;
   var goalTimer = 0;
   var lastGoalSide = null;
@@ -556,24 +557,29 @@
     ballBody.x = PITCH_CX; ballBody.y = PITCH_CY; ballBody.vx = 0; ballBody.vy = 0;
   }
 
+  function formatMatchTime(t){
+    var secs = Math.max(0, Math.ceil(t));
+    var m = Math.floor(secs/60), s = secs%60;
+    return m+':'+(s<10?'0':'')+s;
+  }
   function updateMatchHud(){
     scoreHomeEl.textContent = scoreHome;
     scoreAwayEl.textContent = scoreAway;
-    var turnsLeft = TURNS_PER_TEAM - turnsUsed[turnTeam];
     if (turnPhase === 'over'){
       turnValEl.textContent = 'Terminado';
     } else if (turnTeam === 'home'){
-      turnValEl.textContent = 'Tu turno ('+Math.max(0,turnsLeft)+')';
+      turnValEl.textContent = 'Tu turno';
     } else {
-      turnValEl.textContent = 'Rival ('+Math.max(0,turnsLeft)+')';
+      turnValEl.textContent = 'Rival';
     }
+    if (timeValEl) timeValEl.textContent = formatMatchTime(matchTimeLeft);
   }
 
   function startMatchVs(opponentId){
     homeTeamData = TEAMS_BY_ID[campaign.yourId];
     awayTeamData = TEAMS_BY_ID[opponentId];
     scoreHome = 0; scoreAway = 0;
-    turnsUsed = {home:0, away:0};
+    matchTimeLeft = MATCH_DURATION;
     turnTeam = 'home';
     turnPhase = 'idle';
     settleTimer = 0; goalTimer = 0;
@@ -635,7 +641,6 @@
 
   function launchPiece(piece, vx, vy){
     piece.vx = vx; piece.vy = vy;
-    turnsUsed[turnTeam] += 1;
     turnPhase = 'simulating';
     settleTimer = 0;
     beep(300, 0.06, 'square');
@@ -762,10 +767,7 @@
   }
 
   function concludeTurn(forceNextTeam){
-    if (turnsUsed.home >= TURNS_PER_TEAM && turnsUsed.away >= TURNS_PER_TEAM){
-      endMatch();
-      return;
-    }
+    if (turnPhase === 'over') return;
     turnTeam = forceNextTeam || (turnTeam === 'home' ? 'away' : 'home');
     turnPhase = 'aiming';
     updateMatchHud();
@@ -1172,6 +1174,12 @@
     var dt = Math.min(0.033, (ts-lastTs)/1000);
     lastTs = ts;
     updateParticles(dt);
+
+    if (turnPhase !== 'over' && turnPhase !== 'idle'){
+      matchTimeLeft = Math.max(0, matchTimeLeft-dt);
+      if (timeValEl) timeValEl.textContent = formatMatchTime(matchTimeLeft);
+      if (matchTimeLeft <= 0) endMatch();
+    }
 
     if (turnPhase === 'simulating'){
       stepPhysics(dt);

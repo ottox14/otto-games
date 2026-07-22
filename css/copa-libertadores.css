@@ -107,6 +107,36 @@
   margin:0;
 }
 
+.fixture-list{
+  width:100%;
+  max-width:460px;
+  margin:14px auto 0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.fixture-round{
+  border:1px solid var(--panel-border);
+  border-radius:10px;
+  padding:8px 10px;
+}
+.fixture-round-title{
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.02em;
+  color:var(--ink-soft);
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.fixture-line{
+  font-size:13px;
+  padding:2px 0;
+  color:var(--ink-soft);
+}
+.fixture-line.is-done{ color:var(--ink); }
+.fixture-line.is-next{ color:var(--gold); font-weight:800; }
+.fixture-line.is-pending{ opacity:.7; }
+
 .liber-hud{
   display:flex;
   align-items:center;

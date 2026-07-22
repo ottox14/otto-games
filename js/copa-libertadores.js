@@ -26,61 +26,61 @@
   var TURNS_PER_TEAM = 10;
 
   var TEAMS = [
-    {id:'lanus', name:'Lanús', country:'Argentina', shirt:'#5c1730', band:'#111111', shorts:'#111111', pattern:'solid'},
-    {id:'platense', name:'Platense', country:'Argentina', shirt:'#e3cf9c', band:'#1a1a1a', shorts:'#1a1a1a', pattern:'stripes'},
-    {id:'estudiantes', name:'Estudiantes de La Plata', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#ffffff', pattern:'sash'},
-    {id:'independiente_rivadavia', name:'Independiente Rivadavia', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#c8102e', pattern:'stripes'},
-    {id:'rosario_central', name:'Rosario Central', country:'Argentina', shirt:'#1c3f94', band:'#ffd400', shorts:'#000000', pattern:'sash'},
-    {id:'boca', name:'Boca Juniors', country:'Argentina', shirt:'#0b3f8f', band:'#ffd400', shorts:'#0b3f8f', pattern:'band'},
-    {id:'argentinos', name:'Argentinos Juniors', country:'Argentina', shirt:'#ffffff', band:'#e2001a', shorts:'#e2001a', pattern:'halves'},
-    {id:'river', name:'River Plate', country:'Argentina', shirt:'#ffffff', band:'#d61f3c', shorts:'#0b1a3a', pattern:'sash'},
+    {id:'lanus', strength:74, name:'Lanús', country:'Argentina', shirt:'#5c1730', band:'#111111', shorts:'#111111', pattern:'solid'},
+    {id:'platense', strength:65, name:'Platense', country:'Argentina', shirt:'#e3cf9c', band:'#1a1a1a', shorts:'#1a1a1a', pattern:'stripes'},
+    {id:'estudiantes', strength:76, name:'Estudiantes de La Plata', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#ffffff', pattern:'sash'},
+    {id:'independiente_rivadavia', strength:62, name:'Independiente Rivadavia', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#c8102e', pattern:'stripes'},
+    {id:'rosario_central', strength:75, name:'Rosario Central', country:'Argentina', shirt:'#1c3f94', band:'#ffd400', shorts:'#000000', pattern:'sash'},
+    {id:'boca', strength:90, name:'Boca Juniors', country:'Argentina', shirt:'#0b3f8f', band:'#ffd400', shorts:'#0b3f8f', pattern:'band'},
+    {id:'argentinos', strength:72, name:'Argentinos Juniors', country:'Argentina', shirt:'#ffffff', band:'#e2001a', shorts:'#e2001a', pattern:'halves'},
+    {id:'river', strength:92, name:'River Plate', country:'Argentina', shirt:'#ffffff', band:'#d61f3c', shorts:'#0b1a3a', pattern:'sash'},
 
-    {id:'always_ready', name:'Always Ready', country:'Bolivia', shirt:'#f5f5f5', band:'#111111', shorts:'#111111', pattern:'band'},
-    {id:'bolivar', name:'Bolívar', country:'Bolivia', shirt:'#4fb8e6', band:'#ffffff', shorts:'#4fb8e6', pattern:'band'},
-    {id:'the_strongest', name:'The Strongest', country:'Bolivia', shirt:'#ffd400', band:'#111111', shorts:'#111111', pattern:'stripes'},
-    {id:'nacional_potosi', name:'Nacional Potosí', country:'Bolivia', shirt:'#1c7a3c', band:'#ffffff', shorts:'#1c7a3c', pattern:'band'},
+    {id:'always_ready', strength:63, name:'Always Ready', country:'Bolivia', shirt:'#f5f5f5', band:'#111111', shorts:'#111111', pattern:'band'},
+    {id:'bolivar', strength:68, name:'Bolívar', country:'Bolivia', shirt:'#4fb8e6', band:'#ffffff', shorts:'#4fb8e6', pattern:'band'},
+    {id:'the_strongest', strength:66, name:'The Strongest', country:'Bolivia', shirt:'#ffd400', band:'#111111', shorts:'#111111', pattern:'stripes'},
+    {id:'nacional_potosi', strength:55, name:'Nacional Potosí', country:'Bolivia', shirt:'#1c7a3c', band:'#ffffff', shorts:'#1c7a3c', pattern:'band'},
 
-    {id:'flamengo', name:'Flamengo', country:'Brasil', shirt:'#e2001a', band:'#111111', shorts:'#111111', pattern:'stripes'},
-    {id:'corinthians', name:'Corinthians', country:'Brasil', shirt:'#ffffff', band:'#111111', shorts:'#111111', pattern:'solid'},
-    {id:'palmeiras', name:'Palmeiras', country:'Brasil', shirt:'#0a6c34', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
-    {id:'cruzeiro', name:'Cruzeiro', country:'Brasil', shirt:'#0033a0', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
-    {id:'mirassol', name:'Mirassol', country:'Brasil', shirt:'#ffd400', band:'#0a6c34', shorts:'#0a6c34', pattern:'band'},
-    {id:'fluminense', name:'Fluminense', country:'Brasil', shirt:'#5c1730', band:'#0a6c34', shorts:'#ffffff', pattern:'stripes'},
-    {id:'botafogo', name:'Botafogo', country:'Brasil', shirt:'#111111', band:'#ffffff', shorts:'#ffffff', pattern:'stripes'},
-    {id:'bahia', name:'Bahía', country:'Brasil', shirt:'#0033a0', band:'#e2001a', shorts:'#ffffff', pattern:'stripes'},
+    {id:'flamengo', strength:93, name:'Flamengo', country:'Brasil', shirt:'#e2001a', band:'#111111', shorts:'#111111', pattern:'stripes'},
+    {id:'corinthians', strength:83, name:'Corinthians', country:'Brasil', shirt:'#ffffff', band:'#111111', shorts:'#111111', pattern:'solid'},
+    {id:'palmeiras', strength:91, name:'Palmeiras', country:'Brasil', shirt:'#0a6c34', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
+    {id:'cruzeiro', strength:78, name:'Cruzeiro', country:'Brasil', shirt:'#0033a0', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
+    {id:'mirassol', strength:65, name:'Mirassol', country:'Brasil', shirt:'#ffd400', band:'#0a6c34', shorts:'#0a6c34', pattern:'band'},
+    {id:'fluminense', strength:80, name:'Fluminense', country:'Brasil', shirt:'#5c1730', band:'#0a6c34', shorts:'#ffffff', pattern:'stripes'},
+    {id:'botafogo', strength:79, name:'Botafogo', country:'Brasil', shirt:'#111111', band:'#ffffff', shorts:'#ffffff', pattern:'stripes'},
+    {id:'bahia', strength:72, name:'Bahía', country:'Brasil', shirt:'#0033a0', band:'#e2001a', shorts:'#ffffff', pattern:'stripes'},
 
-    {id:'coquimbo', name:'Coquimbo Unido', country:'Chile', shirt:'#5b2a86', band:'#111111', shorts:'#111111', pattern:'halves'},
-    {id:'ohiggins', name:"O'Higgins", country:'Chile', shirt:'#0a6c34', band:'#ffffff', shorts:'#0a6c34', pattern:'band'},
-    {id:'huachipato', name:'Huachipato', country:'Chile', shirt:'#111111', band:'#ffffff', shorts:'#111111', pattern:'stripes'},
+    {id:'coquimbo', strength:68, name:'Coquimbo Unido', country:'Chile', shirt:'#5b2a86', band:'#111111', shorts:'#111111', pattern:'halves'},
+    {id:'ohiggins', strength:65, name:"O'Higgins", country:'Chile', shirt:'#0a6c34', band:'#ffffff', shorts:'#0a6c34', pattern:'band'},
+    {id:'huachipato', strength:64, name:'Huachipato', country:'Chile', shirt:'#111111', band:'#ffffff', shorts:'#111111', pattern:'stripes'},
 
-    {id:'tolima', name:'Deportes Tolima', country:'Colombia', shirt:'#5c1730', band:'#ffd400', shorts:'#5c1730', pattern:'band'},
-    {id:'santa_fe', name:'Independiente Santa Fe', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'solid'},
-    {id:'junior', name:'Junior de Barranquilla', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'stripes'},
-    {id:'medellin', name:'Independiente Medellín', country:'Colombia', shirt:'#c8102e', band:'#111111', shorts:'#111111', pattern:'solid'},
+    {id:'tolima', strength:70, name:'Deportes Tolima', country:'Colombia', shirt:'#5c1730', band:'#ffd400', shorts:'#5c1730', pattern:'band'},
+    {id:'santa_fe', strength:73, name:'Independiente Santa Fe', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'solid'},
+    {id:'junior', strength:74, name:'Junior de Barranquilla', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'stripes'},
+    {id:'medellin', strength:75, name:'Independiente Medellín', country:'Colombia', shirt:'#c8102e', band:'#111111', shorts:'#111111', pattern:'solid'},
 
-    {id:'liga_de_quito', name:'Liga de Quito', country:'Ecuador', shirt:'#ffffff', band:'#0033a0', shorts:'#0033a0', pattern:'band'},
-    {id:'independiente_del_valle', name:'Independiente del Valle', country:'Ecuador', shirt:'#0a2a5e', band:'#e2001a', shorts:'#0a2a5e', pattern:'band'},
-    {id:'barcelona_sc', name:'Barcelona SC', country:'Ecuador', shirt:'#ffd400', band:'#111111', shorts:'#111111', pattern:'band'},
+    {id:'liga_de_quito', strength:77, name:'Liga de Quito', country:'Ecuador', shirt:'#ffffff', band:'#0033a0', shorts:'#0033a0', pattern:'band'},
+    {id:'independiente_del_valle', strength:76, name:'Independiente del Valle', country:'Ecuador', shirt:'#0a2a5e', band:'#e2001a', shorts:'#0a2a5e', pattern:'band'},
+    {id:'barcelona_sc', strength:74, name:'Barcelona SC', country:'Ecuador', shirt:'#ffd400', band:'#111111', shorts:'#111111', pattern:'band'},
 
-    {id:'cerro_porteno', name:'Cerro Porteño', country:'Paraguay', shirt:'#e2001a', band:'#0033a0', shorts:'#0033a0', pattern:'stripes'},
-    {id:'libertad', name:'Club Libertad', country:'Paraguay', shirt:'#ffffff', band:'#111111', shorts:'#111111', pattern:'band'},
-    {id:'sportivo_2_de_mayo', name:'Sportivo 2 de Mayo', country:'Paraguay', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
-    {id:'guarani', name:'Club Guaraní', country:'Paraguay', shirt:'#111111', band:'#e2001a', shorts:'#111111', pattern:'band'},
+    {id:'cerro_porteno', strength:76, name:'Cerro Porteño', country:'Paraguay', shirt:'#e2001a', band:'#0033a0', shorts:'#0033a0', pattern:'stripes'},
+    {id:'libertad', strength:74, name:'Club Libertad', country:'Paraguay', shirt:'#ffffff', band:'#111111', shorts:'#111111', pattern:'band'},
+    {id:'sportivo_2_de_mayo', strength:60, name:'Sportivo 2 de Mayo', country:'Paraguay', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
+    {id:'guarani', strength:68, name:'Club Guaraní', country:'Paraguay', shirt:'#111111', band:'#e2001a', shorts:'#111111', pattern:'band'},
 
-    {id:'cusco_fc', name:'Cusco FC', country:'Perú', shirt:'#5c1730', band:'#ffffff', shorts:'#5c1730', pattern:'band'},
-    {id:'universitario', name:'Universitario de Deportes', country:'Perú', shirt:'#f0e6c8', band:'#5c1730', shorts:'#5c1730', pattern:'band'},
-    {id:'sporting_cristal', name:'Sporting Cristal', country:'Perú', shirt:'#4fb8e6', band:'#ffffff', shorts:'#4fb8e6', pattern:'sash'},
-    {id:'alianza_lima', name:'Alianza Lima', country:'Perú', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
+    {id:'cusco_fc', strength:62, name:'Cusco FC', country:'Perú', shirt:'#5c1730', band:'#ffffff', shorts:'#5c1730', pattern:'band'},
+    {id:'universitario', strength:72, name:'Universitario de Deportes', country:'Perú', shirt:'#f0e6c8', band:'#5c1730', shorts:'#5c1730', pattern:'band'},
+    {id:'sporting_cristal', strength:70, name:'Sporting Cristal', country:'Perú', shirt:'#4fb8e6', band:'#ffffff', shorts:'#4fb8e6', pattern:'sash'},
+    {id:'alianza_lima', strength:71, name:'Alianza Lima', country:'Perú', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
 
-    {id:'nacional', name:'Club Nacional', country:'Uruguay', shirt:'#ffffff', band:'#0033a0', shorts:'#ffffff', pattern:'sash'},
-    {id:'penarol', name:'Peñarol', country:'Uruguay', shirt:'#111111', band:'#ffd400', shorts:'#111111', pattern:'stripes'},
-    {id:'liverpool_uy', name:'Liverpool FC', country:'Uruguay', shirt:'#111111', band:'#ffffff', shorts:'#111111', pattern:'band'},
-    {id:'juventud', name:'Juventud de Las Piedras', country:'Uruguay', shirt:'#0033a0', band:'#ffd400', shorts:'#0033a0', pattern:'band'},
+    {id:'nacional', strength:79, name:'Club Nacional', country:'Uruguay', shirt:'#ffffff', band:'#0033a0', shorts:'#ffffff', pattern:'sash'},
+    {id:'penarol', strength:80, name:'Peñarol', country:'Uruguay', shirt:'#111111', band:'#ffd400', shorts:'#111111', pattern:'stripes'},
+    {id:'liverpool_uy', strength:68, name:'Liverpool FC', country:'Uruguay', shirt:'#111111', band:'#ffffff', shorts:'#111111', pattern:'band'},
+    {id:'juventud', strength:60, name:'Juventud de Las Piedras', country:'Uruguay', shirt:'#0033a0', band:'#ffd400', shorts:'#0033a0', pattern:'band'},
 
-    {id:'la_guaira', name:'Deportivo La Guaira', country:'Venezuela', shirt:'#ffd400', band:'#0033a0', shorts:'#0033a0', pattern:'band'},
-    {id:'ucv', name:'UCV', country:'Venezuela', shirt:'#0033a0', band:'#ffd400', shorts:'#0033a0', pattern:'band'},
-    {id:'tachira', name:'Deportivo Táchira', country:'Venezuela', shirt:'#5c1730', band:'#ffd400', shorts:'#5c1730', pattern:'band'},
-    {id:'carabobo', name:'Carabobo FC', country:'Venezuela', shirt:'#5c1730', band:'#111111', shorts:'#111111', pattern:'band'}
+    {id:'la_guaira', strength:58, name:'Deportivo La Guaira', country:'Venezuela', shirt:'#ffd400', band:'#0033a0', shorts:'#0033a0', pattern:'band'},
+    {id:'ucv', strength:56, name:'UCV', country:'Venezuela', shirt:'#0033a0', band:'#ffd400', shorts:'#0033a0', pattern:'band'},
+    {id:'tachira', strength:65, name:'Deportivo Táchira', country:'Venezuela', shirt:'#5c1730', band:'#ffd400', shorts:'#5c1730', pattern:'band'},
+    {id:'carabobo', strength:62, name:'Carabobo FC', country:'Venezuela', shirt:'#5c1730', band:'#111111', shorts:'#111111', pattern:'band'}
   ];
   var TEAMS_BY_ID = {};
   TEAMS.forEach(function(t){ TEAMS_BY_ID[t.id] = t; });
@@ -111,6 +111,7 @@
   var groupTableBody = document.getElementById('liberGroupTableBody');
   var stageTextEl = document.getElementById('liberStageText');
   var stageContinueBtn = document.getElementById('liberStageContinueBtn');
+  var fixtureListEl = document.getElementById('liberFixtureList');
   var endView = document.getElementById('liberEndView');
   var endTitleEl = document.getElementById('liberEndTitle');
   var endTextEl = document.getElementById('liberEndText');
@@ -189,7 +190,7 @@
   // ---------- Campana (torneo) ----------
   var campaign = {
     yourId: null, difficulty: 'normal', group: [], standings: {},
-    fixtureQueue: [], fixtureIndex: 0, stage: null,
+    rounds: [], roundIndex: 0, stage: null,
     semiOpponent: null, finalOpponent: null, shootoutNote: false
   };
 
@@ -206,8 +207,29 @@
     else if (golB > golA) sb.pts += 3;
     else { sa.pts += 1; sb.pts += 1; }
   }
+  // Poisson sample (Knuth) - used so scorelines look like real football, not uniform noise.
+  function samplePoisson(mean){
+    var L = Math.exp(-mean), k = 0, p = 1;
+    do { k++; p *= Math.random(); } while (p > L);
+    return k-1;
+  }
+  function simRealisticScore(aId, bId, homeAdvantage){
+    var ta = TEAMS_BY_ID[aId], tb = TEAMS_BY_ID[bId];
+    var diff = (ta.strength - tb.strength) / 100;
+    var baseA = 1.2 + diff*0.85;
+    var baseB = 1.2 - diff*0.85;
+    if (homeAdvantage){ baseA += 0.15; baseB -= 0.1; }
+    baseA = Math.max(0.35, Math.min(2.6, baseA));
+    baseB = Math.max(0.3, Math.min(2.4, baseB));
+    var golA = Math.min(samplePoisson(baseA), 4);
+    var golB = Math.min(samplePoisson(baseB), 4);
+    if (golA - golB > 4) golA = golB + 4;
+    if (golB - golA > 4) golB = golA + 4;
+    return [golA, golB];
+  }
   function simFixtureTo(map, aId, bId){
-    applyResultTo(map, aId, bId, Math.floor(Math.random()*4), Math.floor(Math.random()*4));
+    var res = simRealisticScore(aId, bId, false);
+    applyResultTo(map, aId, bId, res[0], res[1]);
   }
   function sortStandingsMap(map, teamIds){
     return teamIds.map(function(id){ return map[id]; }).slice().sort(function(a,b){
@@ -232,8 +254,21 @@
   }
 
   function applyResult(aId, bId, golA, golB){ applyResultTo(campaign.standings, aId, bId, golA, golB); }
-  function simFixture(aId, bId){ simFixtureTo(campaign.standings, aId, bId); }
   function sortedStandings(){ return sortStandingsMap(campaign.standings, campaign.group); }
+
+  // Fixture de 3 fechas para un grupo de 4, con group[0] siempre tu equipo:
+  // fecha1: vos-1, 2-3 | fecha2: vos-2, 1-3 | fecha3: vos-3, 1-2
+  function buildRoundRobin(group){
+    var rounds = [];
+    for (var i=1; i<=3; i++){
+      var restIdx = [1,2,3].filter(function(idx){ return idx !== i; });
+      rounds.push({
+        yourOpponent: group[i], otherA: group[restIdx[0]], otherB: group[restIdx[1]],
+        yourResult: null, otherResult: null, played: false
+      });
+    }
+    return rounds;
+  }
 
   var GROUP_LETTERS = ['A','B','C','D','E','F','G','H'];
   function startCampaign(yourId, difficulty){
@@ -250,18 +285,13 @@
       if (campaign.allGroups[gi].indexOf(yourId) !== -1){ yourGroupIndex = gi; break; }
     }
     campaign.groupLetter = GROUP_LETTERS[yourGroupIndex];
-    campaign.group = campaign.allGroups[yourGroupIndex];
-    var others = campaign.group.filter(function(id){ return id !== yourId; });
+    var rawGroup = campaign.allGroups[yourGroupIndex];
+    campaign.group = [yourId].concat(rawGroup.filter(function(id){ return id !== yourId; }));
+    campaign.allGroups[yourGroupIndex] = campaign.group;
 
-    campaign.standings = {};
-    campaign.group.forEach(function(id){
-      campaign.standings[id] = {teamId:id, pts:0, gf:0, ga:0, played:0};
-    });
-    simFixture(others[0], others[1]);
-    simFixture(others[0], others[2]);
-    simFixture(others[1], others[2]);
-    campaign.fixtureQueue = shuffle(others.slice());
-    campaign.fixtureIndex = 0;
+    campaign.standings = makeStandingsMap(campaign.group);
+    campaign.rounds = buildRoundRobin(campaign.group);
+    campaign.roundIndex = 0;
     campaign.stage = 'group';
     campaign.shootoutNote = false;
 
@@ -282,11 +312,52 @@
       var tr = document.createElement('tr');
       var cls = '';
       if (s.teamId === campaign.yourId) cls += 'is-you ';
-      if (campaign.fixtureIndex >= 3 && idx < 2) cls += 'is-qualified';
+      if (campaign.roundIndex >= 3 && idx < 2) cls += 'is-qualified';
       tr.className = cls.trim();
       var gd = s.gf-s.ga;
       tr.innerHTML = '<td>'+TEAMS_BY_ID[s.teamId].name+'</td><td>'+s.pts+'</td><td>'+(gd>0?'+':'')+gd+'</td>';
       groupTableBody.appendChild(tr);
+    });
+  }
+
+  function renderFixtureList(){
+    if (!fixtureListEl) return;
+    fixtureListEl.innerHTML = '';
+    campaign.rounds.forEach(function(round, idx){
+      var block = document.createElement('div');
+      block.className = 'fixture-round';
+      var title = document.createElement('div');
+      title.className = 'fixture-round-title';
+      title.textContent = 'Fecha '+(idx+1);
+      block.appendChild(title);
+
+      var yourNameA = TEAMS_BY_ID[campaign.yourId].name;
+      var yourNameB = TEAMS_BY_ID[round.yourOpponent].name;
+      var otherNameA = TEAMS_BY_ID[round.otherA].name;
+      var otherNameB = TEAMS_BY_ID[round.otherB].name;
+
+      var yourLine = document.createElement('div');
+      var otherLine = document.createElement('div');
+
+      if (round.played){
+        yourLine.className = 'fixture-line is-done';
+        yourLine.textContent = '✅ '+yourNameA+' '+round.yourResult[0]+'-'+round.yourResult[1]+' '+yourNameB;
+        otherLine.className = 'fixture-line is-done';
+        otherLine.textContent = '✅ '+otherNameA+' '+round.otherResult[0]+'-'+round.otherResult[1]+' '+otherNameB;
+      } else if (idx === campaign.roundIndex){
+        yourLine.className = 'fixture-line is-next';
+        yourLine.textContent = '▶ '+yourNameA+' vs '+yourNameB+' (Próximo partido)';
+        otherLine.className = 'fixture-line is-pending';
+        otherLine.textContent = otherNameA+' vs '+otherNameB+' (Pendiente)';
+      } else {
+        yourLine.className = 'fixture-line is-pending';
+        yourLine.textContent = yourNameA+' vs '+yourNameB+' (Pendiente)';
+        otherLine.className = 'fixture-line is-pending';
+        otherLine.textContent = otherNameA+' vs '+otherNameB+' (Pendiente)';
+      }
+      block.appendChild(yourLine);
+      block.appendChild(otherLine);
+      fixtureListEl.appendChild(block);
     });
   }
 
@@ -303,18 +374,22 @@
     stageView.classList.remove('is-hidden');
     if (campaign.stage === 'group'){
       groupTableEl.classList.remove('is-hidden');
+      if (fixtureListEl) fixtureListEl.classList.remove('is-hidden');
       renderStandingsTable();
-      stageTitleEl.textContent = 'Grupo '+campaign.groupLetter+' · Fase de grupos ('+(campaign.fixtureIndex+1)+'/3)';
-      var opp = TEAMS_BY_ID[campaign.fixtureQueue[campaign.fixtureIndex]];
+      renderFixtureList();
+      stageTitleEl.textContent = 'Grupo '+campaign.groupLetter+' · Fecha '+(campaign.roundIndex+1)+' de 3';
+      var opp = TEAMS_BY_ID[campaign.rounds[campaign.roundIndex].yourOpponent];
       stageTextEl.textContent = 'Próximo partido: vs '+opp.name;
       stageContinueBtn.textContent = '▶ Jugar partido';
     } else if (campaign.stage === 'knockout-semi'){
       groupTableEl.classList.add('is-hidden');
+      if (fixtureListEl) fixtureListEl.classList.add('is-hidden');
       stageTitleEl.textContent = '¡Clasificaste a semifinales!';
       stageTextEl.textContent = 'Semifinal vs '+TEAMS_BY_ID[campaign.semiOpponent].name;
       stageContinueBtn.textContent = '▶ Jugar semifinal';
     } else if (campaign.stage === 'knockout-final'){
       groupTableEl.classList.add('is-hidden');
+      if (fixtureListEl) fixtureListEl.classList.add('is-hidden');
       stageTitleEl.textContent = '¡Estás en la final!';
       stageTextEl.textContent = 'Final vs '+TEAMS_BY_ID[campaign.finalOpponent].name;
       stageContinueBtn.textContent = '▶ Jugar la final';
@@ -338,7 +413,7 @@
   stageContinueBtn.addEventListener('click', function(){
     ensureAudio();
     if (campaign.stage === 'group'){
-      startMatchVs(campaign.fixtureQueue[campaign.fixtureIndex]);
+      startMatchVs(campaign.rounds[campaign.roundIndex].yourOpponent);
     } else if (campaign.stage === 'knockout-semi'){
       startMatchVs(campaign.semiOpponent);
     } else if (campaign.stage === 'knockout-final'){
@@ -385,10 +460,15 @@
   function afterMatchContinue(){
     overOverlay.classList.add('is-hidden');
     if (campaign.stage === 'group'){
-      var oppId = campaign.fixtureQueue[campaign.fixtureIndex];
-      applyResult(campaign.yourId, oppId, scoreHome, scoreAway);
-      campaign.fixtureIndex += 1;
-      if (campaign.fixtureIndex >= 3) finishGroupStage();
+      var round = campaign.rounds[campaign.roundIndex];
+      round.yourResult = [scoreHome, scoreAway];
+      applyResult(campaign.yourId, round.yourOpponent, scoreHome, scoreAway);
+      var otherScore = simRealisticScore(round.otherA, round.otherB, false);
+      round.otherResult = otherScore;
+      applyResult(round.otherA, round.otherB, otherScore[0], otherScore[1]);
+      round.played = true;
+      campaign.roundIndex += 1;
+      if (campaign.roundIndex >= 3) finishGroupStage();
       else showStageScreen();
     } else {
       resolveKnockout();

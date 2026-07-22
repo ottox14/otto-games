@@ -6892,29 +6892,29 @@
 // seguida de semifinal y final si clasificas.
 (function(){
   var CANVAS_W = 900, CANVAS_H = 560;
-  var MARGIN = 34;
+  var MARGIN = 20;
   var PITCH_L = MARGIN, PITCH_R = CANVAS_W-MARGIN, PITCH_T = MARGIN, PITCH_B = CANVAS_H-MARGIN;
   var PITCH_CX = (PITCH_L+PITCH_R)/2, PITCH_CY = (PITCH_T+PITCH_B)/2;
   var GOAL_W = 116;
-  var GOAL_DEPTH = 24;
-  var BOX_W = 92, BOX_H = 250;
-  var SIX_W = 34, SIX_H = 132;
-  var PEN_DIST = 64;
-  var CENTER_R = 52;
+  var GOAL_DEPTH = 36;
+  var BOX_W = 118, BOX_H = 260;
+  var SIX_W = 44, SIX_H = 138;
+  var PEN_DIST = 76;
+  var CENTER_R = 62;
 
-  var PIECE_R = 19;
-  var BALL_R = 11;
+  var PIECE_R = 23;
+  var BALL_R = 15;
   var PIECE_MASS = 1, BALL_MASS = 0.42;
-  var FRICTION_BASE = 0.045; // fraction of speed left after 1s
-  var REST_SPEED = 5;
+  var FRICTION_BASE = 0.15; // fraction of speed left after 1s - higher = glides longer
+  var REST_SPEED = 4;
   var MAX_DRAG = 130;
   var POWER_SCALE = 5.4;
-  var WALL_REST = 0.68;
-  var BODY_REST = 0.86;
+  var WALL_REST = 0.7;
+  var BODY_REST = 0.88;
   var TURNS_PER_TEAM = 10;
 
   var TEAMS = [
-    {id:'lanus', name:'Lanús', country:'Argentina', shirt:'#7a1f3d', band:'#111111', shorts:'#111111', pattern:'solid'},
+    {id:'lanus', name:'Lanús', country:'Argentina', shirt:'#5c1730', band:'#111111', shorts:'#111111', pattern:'solid'},
     {id:'platense', name:'Platense', country:'Argentina', shirt:'#e3cf9c', band:'#1a1a1a', shorts:'#1a1a1a', pattern:'stripes'},
     {id:'estudiantes', name:'Estudiantes de La Plata', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#ffffff', pattern:'sash'},
     {id:'independiente_rivadavia', name:'Independiente Rivadavia', country:'Argentina', shirt:'#c8102e', band:'#ffffff', shorts:'#c8102e', pattern:'stripes'},
@@ -6933,7 +6933,7 @@
     {id:'palmeiras', name:'Palmeiras', country:'Brasil', shirt:'#0a6c34', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
     {id:'cruzeiro', name:'Cruzeiro', country:'Brasil', shirt:'#0033a0', band:'#ffffff', shorts:'#ffffff', pattern:'solid'},
     {id:'mirassol', name:'Mirassol', country:'Brasil', shirt:'#ffd400', band:'#0a6c34', shorts:'#0a6c34', pattern:'band'},
-    {id:'fluminense', name:'Fluminense', country:'Brasil', shirt:'#7a1f3d', band:'#0a6c34', shorts:'#ffffff', pattern:'stripes'},
+    {id:'fluminense', name:'Fluminense', country:'Brasil', shirt:'#5c1730', band:'#0a6c34', shorts:'#ffffff', pattern:'stripes'},
     {id:'botafogo', name:'Botafogo', country:'Brasil', shirt:'#111111', band:'#ffffff', shorts:'#ffffff', pattern:'stripes'},
     {id:'bahia', name:'Bahía', country:'Brasil', shirt:'#0033a0', band:'#e2001a', shorts:'#ffffff', pattern:'stripes'},
 
@@ -6941,7 +6941,7 @@
     {id:'ohiggins', name:"O'Higgins", country:'Chile', shirt:'#0a6c34', band:'#ffffff', shorts:'#0a6c34', pattern:'band'},
     {id:'huachipato', name:'Huachipato', country:'Chile', shirt:'#111111', band:'#ffffff', shorts:'#111111', pattern:'stripes'},
 
-    {id:'tolima', name:'Deportes Tolima', country:'Colombia', shirt:'#7a1f3d', band:'#ffd400', shorts:'#7a1f3d', pattern:'band'},
+    {id:'tolima', name:'Deportes Tolima', country:'Colombia', shirt:'#5c1730', band:'#ffd400', shorts:'#5c1730', pattern:'band'},
     {id:'santa_fe', name:'Independiente Santa Fe', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'solid'},
     {id:'junior', name:'Junior de Barranquilla', country:'Colombia', shirt:'#e2001a', band:'#ffffff', shorts:'#e2001a', pattern:'stripes'},
     {id:'medellin', name:'Independiente Medellín', country:'Colombia', shirt:'#c8102e', band:'#111111', shorts:'#111111', pattern:'solid'},
@@ -6955,8 +6955,8 @@
     {id:'sportivo_2_de_mayo', name:'Sportivo 2 de Mayo', country:'Paraguay', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
     {id:'guarani', name:'Club Guaraní', country:'Paraguay', shirt:'#111111', band:'#e2001a', shorts:'#111111', pattern:'band'},
 
-    {id:'cusco_fc', name:'Cusco FC', country:'Perú', shirt:'#7a1f3d', band:'#ffffff', shorts:'#7a1f3d', pattern:'band'},
-    {id:'universitario', name:'Universitario de Deportes', country:'Perú', shirt:'#f0e6c8', band:'#7a1f3d', shorts:'#7a1f3d', pattern:'band'},
+    {id:'cusco_fc', name:'Cusco FC', country:'Perú', shirt:'#5c1730', band:'#ffffff', shorts:'#5c1730', pattern:'band'},
+    {id:'universitario', name:'Universitario de Deportes', country:'Perú', shirt:'#f0e6c8', band:'#5c1730', shorts:'#5c1730', pattern:'band'},
     {id:'sporting_cristal', name:'Sporting Cristal', country:'Perú', shirt:'#4fb8e6', band:'#ffffff', shorts:'#4fb8e6', pattern:'sash'},
     {id:'alianza_lima', name:'Alianza Lima', country:'Perú', shirt:'#0033a0', band:'#ffffff', shorts:'#0033a0', pattern:'band'},
 
@@ -6967,8 +6967,8 @@
 
     {id:'la_guaira', name:'Deportivo La Guaira', country:'Venezuela', shirt:'#ffd400', band:'#0033a0', shorts:'#0033a0', pattern:'band'},
     {id:'ucv', name:'UCV', country:'Venezuela', shirt:'#0033a0', band:'#ffd400', shorts:'#0033a0', pattern:'band'},
-    {id:'tachira', name:'Deportivo Táchira', country:'Venezuela', shirt:'#7a1f3d', band:'#ffd400', shorts:'#7a1f3d', pattern:'band'},
-    {id:'carabobo', name:'Carabobo FC', country:'Venezuela', shirt:'#7a1f3d', band:'#111111', shorts:'#111111', pattern:'band'}
+    {id:'tachira', name:'Deportivo Táchira', country:'Venezuela', shirt:'#5c1730', band:'#ffd400', shorts:'#5c1730', pattern:'band'},
+    {id:'carabobo', name:'Carabobo FC', country:'Venezuela', shirt:'#5c1730', band:'#111111', shorts:'#111111', pattern:'band'}
   ];
   var TEAMS_BY_ID = {};
   TEAMS.forEach(function(t){ TEAMS_BY_ID[t.id] = t; });
@@ -7451,6 +7451,38 @@
   }
 
   // ---------- Fisica ----------
+  // ---------- Particulas (choques y festejo de gol) ----------
+  var particles = [];
+  function spawnParticles(x, y, color, count, speed){
+    for (var i=0;i<count;i++){
+      var ang = Math.random()*Math.PI*2;
+      var spd = speed*(0.4+Math.random()*0.6);
+      particles.push({
+        x:x, y:y, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd,
+        life:0.45+Math.random()*0.3, maxLife:0.75, color:color, size:2+Math.random()*2.2
+      });
+    }
+  }
+  function updateParticles(dt){
+    for (var i=particles.length-1;i>=0;i--){
+      var pt = particles[i];
+      pt.x += pt.vx*dt; pt.y += pt.vy*dt;
+      pt.vx *= 0.9; pt.vy *= 0.9;
+      pt.life -= dt;
+      if (pt.life <= 0) particles.splice(i,1);
+    }
+  }
+  function drawParticles(){
+    var c = ctx;
+    particles.forEach(function(pt){
+      c.save();
+      c.globalAlpha = clamp(pt.life/pt.maxLife, 0, 1);
+      c.fillStyle = pt.color;
+      c.beginPath(); c.arc(pt.x, pt.y, pt.size, 0, Math.PI*2); c.fill();
+      c.restore();
+    });
+  }
+
   function resolveCollision(a, b){
     var dx = b.x-a.x, dy = b.y-a.y;
     var distAB = Math.sqrt(dx*dx+dy*dy);
@@ -7470,6 +7502,9 @@
       var ix = j*nx, iy = j*ny;
       a.vx -= ix/a.mass; a.vy -= iy/a.mass;
       b.vx += ix/b.mass; b.vy += iy/b.mass;
+      if ((a.type==='ball' || b.type==='ball') && Math.abs(j) > 25){
+        spawnParticles((a.x+b.x)/2, (a.y+b.y)/2, '#ffffff', 5, 65);
+      }
     }
   }
 
@@ -7526,6 +7561,9 @@
     turnPhase = 'goal';
     goalTimer = 1.5;
     updateMatchHud();
+    var scoringTeam = side === 'home' ? homeTeamData : awayTeamData;
+    spawnParticles(ballBody.x, ballBody.y, scoringTeam.shirt, 26, 150);
+    spawnParticles(ballBody.x, ballBody.y, scoringTeam.band, 18, 110);
     beep(700, 0.12, 'triangle');
     setTimeout(function(){ beep(950, 0.12, 'triangle'); }, 100);
     setTimeout(function(){ beep(1200, 0.18, 'triangle'); }, 220);
@@ -7661,28 +7699,28 @@
   // ---------- Dibujo ----------
   function drawPitch(){
     var c = ctx;
-    c.fillStyle = '#173a1c';
+    c.fillStyle = '#0d2410';
     c.fillRect(0,0,CANVAS_W,CANVAS_H);
 
     var grassGrad = c.createLinearGradient(0,PITCH_T,0,PITCH_B);
-    grassGrad.addColorStop(0, '#4fae4f');
+    grassGrad.addColorStop(0, '#52b352');
     grassGrad.addColorStop(1, '#2c8a3e');
     c.fillStyle = grassGrad;
     c.fillRect(PITCH_L,PITCH_T,PITCH_R-PITCH_L,PITCH_B-PITCH_T);
 
-    c.fillStyle = 'rgba(255,255,255,0.05)';
+    c.fillStyle = 'rgba(255,255,255,0.09)';
     var stripeW = 42;
     var stripeI = 0;
     for (var sx=PITCH_L; sx<PITCH_R; sx+=stripeW, stripeI++){
       if (stripeI%2===0) c.fillRect(sx, PITCH_T, Math.min(stripeW,PITCH_R-sx), PITCH_B-PITCH_T);
     }
 
-    c.strokeStyle = 'rgba(255,255,255,0.85)';
-    c.lineWidth = 2.5;
+    c.strokeStyle = 'rgba(255,255,255,0.92)';
+    c.lineWidth = 3.5;
     c.strokeRect(PITCH_L, PITCH_T, PITCH_R-PITCH_L, PITCH_B-PITCH_T);
     c.beginPath(); c.moveTo(PITCH_CX, PITCH_T); c.lineTo(PITCH_CX, PITCH_B); c.stroke();
     c.beginPath(); c.arc(PITCH_CX, PITCH_CY, CENTER_R, 0, Math.PI*2); c.stroke();
-    c.beginPath(); c.arc(PITCH_CX, PITCH_CY, 3, 0, Math.PI*2); c.fillStyle='#fff'; c.fill();
+    c.beginPath(); c.arc(PITCH_CX, PITCH_CY, 3.5, 0, Math.PI*2); c.fillStyle='#fff'; c.fill();
 
     drawGoalArea(true);
     drawGoalArea(false);
@@ -7692,56 +7730,104 @@
     var c = ctx;
     var edgeX = atLeft ? PITCH_L : PITCH_R;
     var dir = atLeft ? 1 : -1;
-    c.strokeStyle = 'rgba(255,255,255,0.85)';
-    c.lineWidth = 2.5;
+    c.strokeStyle = 'rgba(255,255,255,0.92)';
+    c.lineWidth = 3.5;
     c.strokeRect(atLeft ? edgeX : edgeX-BOX_W, PITCH_CY-BOX_H/2, BOX_W, BOX_H);
     c.strokeRect(atLeft ? edgeX : edgeX-SIX_W, PITCH_CY-SIX_H/2, SIX_W, SIX_H);
     c.beginPath();
-    c.arc(edgeX+dir*PEN_DIST, PITCH_CY, 2.4, 0, Math.PI*2);
+    c.arc(edgeX+dir*PEN_DIST, PITCH_CY, 3, 0, Math.PI*2);
     c.fillStyle = '#fff'; c.fill();
 
     var goalTop = PITCH_CY-GOAL_W/2, goalBot = PITCH_CY+GOAL_W/2;
-    var netX = edgeX-dir*GOAL_DEPTH;
+    var taper = 9;
+    var backX = edgeX-dir*GOAL_DEPTH;
+    var backTop = goalTop+taper, backBot = goalBot-taper;
+
+    var netGrad = c.createLinearGradient(edgeX,0,backX,0);
+    netGrad.addColorStop(0, 'rgba(20,30,20,0.12)');
+    netGrad.addColorStop(1, 'rgba(8,14,8,0.55)');
+    c.fillStyle = netGrad;
+    c.beginPath();
+    c.moveTo(edgeX, goalTop); c.lineTo(backX, backTop); c.lineTo(backX, backBot); c.lineTo(edgeX, goalBot);
+    c.closePath(); c.fill();
+
     c.save();
-    c.strokeStyle = 'rgba(255,255,255,0.4)';
+    c.strokeStyle = 'rgba(255,255,255,0.35)';
     c.lineWidth = 1;
     c.beginPath();
-    for (var nx=0; nx<=GOAL_DEPTH; nx+=7){ c.moveTo(edgeX-dir*nx, goalTop); c.lineTo(edgeX-dir*nx, goalBot); }
-    for (var ny=goalTop; ny<=goalBot; ny+=9){ c.moveTo(edgeX, ny); c.lineTo(netX, ny); }
+    var vSteps = 6;
+    for (var vi=0; vi<=vSteps; vi++){
+      var vf = vi/vSteps;
+      var tY = goalTop+(backTop-goalTop)*vf, bY = goalBot+(backBot-goalBot)*vf;
+      var vx = edgeX-dir*GOAL_DEPTH*vf;
+      c.moveTo(vx, tY); c.lineTo(vx, bY);
+    }
+    var hSteps = 5;
+    for (var hi=0; hi<=hSteps; hi++){
+      var hf = hi/hSteps;
+      c.moveTo(edgeX, goalTop+(goalBot-goalTop)*hf);
+      c.lineTo(backX, backTop+(backBot-backTop)*hf);
+    }
     c.stroke();
     c.restore();
 
-    c.strokeStyle = '#f5f5f5';
-    c.lineWidth = 4;
+    c.save();
+    c.shadowColor = 'rgba(0,0,0,0.4)';
+    c.shadowBlur = 5;
+    c.strokeStyle = '#f7f7f5';
+    c.lineWidth = 6;
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
     c.beginPath();
     c.moveTo(edgeX, goalTop);
-    c.lineTo(netX, goalTop);
-    c.lineTo(netX, goalBot);
+    c.lineTo(backX, backTop);
+    c.lineTo(backX, backBot);
     c.lineTo(edgeX, goalBot);
     c.stroke();
+    c.restore();
   }
 
+  function updatePieceAnims(){
+    homePieces.concat(awayPieces).forEach(function(p){
+      var target = (p === selectedPiece) ? 1.16 : 1.0;
+      var cur = p.animScale === undefined ? 1 : p.animScale;
+      p.animScale = cur + (target-cur)*0.25;
+    });
+  }
+
+  var LIGHT_SHIRTS = {'#ffffff':1,'#f5f5f5':1,'#e3cf9c':1,'#ffd400':1,'#f0e6c8':1};
   function drawPiece(p){
     var c = ctx;
     var team = p.team === 'home' ? homeTeamData : awayTeamData;
     if (!team) return;
+    var r = p.r*(p.animScale||1);
     c.save();
-    c.fillStyle = 'rgba(0,0,0,0.25)';
-    c.beginPath(); c.ellipse(p.x, p.y+3, p.r*0.9, p.r*0.55, 0, 0, Math.PI*2); c.fill();
+    c.fillStyle = 'rgba(0,0,0,0.3)';
+    c.beginPath(); c.ellipse(p.x, p.y+4, r*0.9, r*0.55, 0, 0, Math.PI*2); c.fill();
+
+    c.beginPath(); c.arc(p.x, p.y, r+2.5, 0, Math.PI*2);
+    c.fillStyle = 'rgba(0,0,0,0.4)'; c.fill();
 
     c.beginPath();
-    c.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    c.arc(p.x, p.y, r, 0, Math.PI*2);
     c.fillStyle = team.shirt;
     c.fill();
-    c.lineWidth = 3;
+    c.lineWidth = 3.5;
     c.strokeStyle = team.band;
     c.stroke();
-    c.lineWidth = 1;
-    c.strokeStyle = 'rgba(0,0,0,0.25)';
-    c.stroke();
 
-    c.fillStyle = (team.shirt === '#ffffff' || team.shirt === '#f5f5f5' || team.shirt === '#e3cf9c' || team.shirt === '#ffd400' || team.shirt === '#f0e6c8') ? '#1a1a1a' : '#ffffff';
-    c.font = '700 15px system-ui, sans-serif';
+    c.save();
+    c.beginPath(); c.arc(p.x, p.y, r, 0, Math.PI*2); c.clip();
+    var gloss = c.createRadialGradient(p.x-r*0.35, p.y-r*0.45, r*0.1, p.x-r*0.1, p.y-r*0.1, r*1.15);
+    gloss.addColorStop(0, 'rgba(255,255,255,0.55)');
+    gloss.addColorStop(0.5, 'rgba(255,255,255,0.08)');
+    gloss.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = gloss;
+    c.fillRect(p.x-r, p.y-r, r*2, r*2);
+    c.restore();
+
+    c.fillStyle = LIGHT_SHIRTS[team.shirt] ? '#1a1a1a' : '#ffffff';
+    c.font = '800 '+Math.round(r*0.82)+'px system-ui, sans-serif';
     c.textAlign = 'center';
     c.textBaseline = 'middle';
     c.fillText(String(p.number), p.x, p.y+1);
@@ -7749,11 +7835,11 @@
     if (selectedPiece === p){
       c.strokeStyle = 'rgba(255,210,63,0.9)';
       c.lineWidth = 2;
-      c.beginPath(); c.arc(p.x, p.y, p.r+4, 0, Math.PI*2); c.stroke();
+      c.beginPath(); c.arc(p.x, p.y, r+5, 0, Math.PI*2); c.stroke();
     } else if (turnPhase === 'aiming' && turnTeam === 'home' && p.team === 'home'){
-      c.strokeStyle = 'rgba(255,255,255,0.35)';
+      c.strokeStyle = 'rgba(255,255,255,0.4)';
       c.lineWidth = 1.5;
-      c.beginPath(); c.arc(p.x, p.y, p.r+3, 0, Math.PI*2); c.stroke();
+      c.beginPath(); c.arc(p.x, p.y, r+3, 0, Math.PI*2); c.stroke();
     }
     c.restore();
   }
@@ -7804,13 +7890,19 @@
     var dx = dragCurrent.x-selectedPiece.x, dy = dragCurrent.y-selectedPiece.y;
     var dragDist = Math.min(Math.hypot(dx,dy), MAX_DRAG);
     var ang = Math.atan2(dy,dx);
-    var launchX = selectedPiece.x - Math.cos(ang)*dragDist*1.6;
-    var launchY = selectedPiece.y - Math.sin(ang)*dragDist*1.6;
+    var launchDist = dragDist*1.6;
+    var launchX = selectedPiece.x - Math.cos(ang)*launchDist;
+    var launchY = selectedPiece.y - Math.sin(ang)*launchDist;
     var power = dragDist/MAX_DRAG;
 
     c.save();
+    c.strokeStyle = 'rgba(255,255,255,0.25)';
+    c.setLineDash([4,6]);
+    c.lineWidth = 1.5;
+    c.beginPath(); c.arc(selectedPiece.x, selectedPiece.y, MAX_DRAG, 0, Math.PI*2); c.stroke();
+
     c.setLineDash([5,5]);
-    c.strokeStyle = 'rgba(255,255,255,0.6)';
+    c.strokeStyle = 'rgba(255,255,255,0.7)';
     c.lineWidth = 2;
     c.beginPath();
     c.moveTo(selectedPiece.x, selectedPiece.y);
@@ -7825,8 +7917,16 @@
     c.moveTo(selectedPiece.x, selectedPiece.y);
     c.lineTo(launchX, launchY);
     c.stroke();
+
+    var headAng = ang+Math.PI;
+    var headLen = 11+power*7;
+    var tipX = launchX+Math.cos(headAng)*headLen, tipY = launchY+Math.sin(headAng)*headLen;
+    var leftX = launchX+Math.cos(headAng+2.6)*headLen*0.6, leftY = launchY+Math.sin(headAng+2.6)*headLen*0.6;
+    var rightX = launchX+Math.cos(headAng-2.6)*headLen*0.6, rightY = launchY+Math.sin(headAng-2.6)*headLen*0.6;
     c.fillStyle = powerColor;
-    c.beginPath(); c.arc(launchX, launchY, 5, 0, Math.PI*2); c.fill();
+    c.beginPath();
+    c.moveTo(tipX,tipY); c.lineTo(leftX,leftY); c.lineTo(rightX,rightY);
+    c.closePath(); c.fill();
     c.restore();
   }
 
@@ -7852,10 +7952,12 @@
   }
 
   function draw(){
+    updatePieceAnims();
     drawPitch();
     homePieces.forEach(drawPiece);
     awayPieces.forEach(drawPiece);
     drawBall();
+    drawParticles();
     drawAimLine();
     drawGoalText();
   }
@@ -7877,6 +7979,7 @@
     if (lastTs === null) lastTs = ts;
     var dt = Math.min(0.033, (ts-lastTs)/1000);
     lastTs = ts;
+    updateParticles(dt);
 
     if (turnPhase === 'simulating'){
       stepPhysics(dt);

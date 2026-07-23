@@ -259,33 +259,106 @@
         <button class="mute-btn" id="tanksMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
       </div>
 
-      <div class="tanks-hud">
-        <div class="hud-chip">🛡️ Vidas: <b id="tanksLivesVal">3</b></div>
-        <div class="hud-chip">❤️ Vida: <b id="tanksHpVal">3/3</b></div>
-        <div class="hud-chip">🎯 Enemigos: <b id="tanksEnemiesVal">0</b></div>
-        <div class="hud-chip">🏅 Nivel: <b id="tanksLevelVal">1</b></div>
+      <div class="tanks-topbar">
+        <div class="tanks-topbar-stats">
+          <div class="hud-chip tanks-topbar-chip"><span class="tanks-chip-icon">🛡️</span><span class="tanks-chip-body"><b id="tanksLivesVal">3</b><small>Vidas</small></span></div>
+          <div class="hud-chip tanks-topbar-chip tanks-chip-hp"><span class="tanks-chip-icon">💚</span><span class="tanks-chip-body"><b id="tanksHpVal">3/3</b><small>Vida</small></span></div>
+          <div class="hud-chip tanks-topbar-chip tanks-chip-enemy"><span class="tanks-chip-icon">🎯</span><span class="tanks-chip-body"><b id="tanksEnemiesVal">0</b><small>Enemigos</small></span></div>
+          <div class="hud-chip tanks-topbar-chip"><span class="tanks-chip-icon">🏅</span><span class="tanks-chip-body"><b id="tanksLevelVal">1</b><small>Nivel</small></span></div>
+          <div class="hud-chip tanks-topbar-chip"><span class="tanks-chip-icon">⏱</span><span class="tanks-chip-body"><b id="tanksTimeVal">00:00</b><small>Tiempo</small></span></div>
+        </div>
+        <div class="tanks-topbar-actions">
+          <button class="tanks-icon-btn" id="tanksMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+          <button class="tanks-icon-btn" id="tanksPauseBtn" title="Pausa" aria-label="Pausa">⏸</button>
+        </div>
       </div>
 
-      <div class="frame tanks-frame">
-        <canvas id="tanksCanvas" width="416" height="416"></canvas>
+      <div class="tanks-main-layout">
+        <aside class="tanks-side-panel tanks-panel-left">
+          <div class="tanks-panel-block">
+            <h3>🎯 Objetivos</h3>
+            <ul class="tanks-check-list">
+              <li>Defendé tu base</li>
+              <li>Eliminá a todos los enemigos</li>
+              <li>No pierdas todas tus vidas</li>
+            </ul>
+          </div>
+          <div class="tanks-panel-block">
+            <h3>🎮 Controles</h3>
+            <ul class="tanks-key-list">
+              <li><kbd>↑↓←→</kbd><span>Mover</span></li>
+              <li><kbd>Espacio</kbd><span>Disparar</span></li>
+              <li><kbd>B</kbd><span>Bomba (Nivel 4+)</span></li>
+            </ul>
+          </div>
+          <div class="tanks-panel-block">
+            <h3>ℹ️ Este nivel</h3>
+            <p class="tanks-info-line"><span>Enemigo</span><b id="tanksPanelEnemy">-</b></p>
+            <p class="tanks-info-line"><span>Terreno</span><b id="tanksPanelMap">-</b></p>
+            <p class="tanks-info-line"><span>Restantes</span><b id="tanksPanelRemaining">0</b></p>
+          </div>
+        </aside>
 
-        <div class="overlay" id="tanksStartOverlay">
-          <h2 id="tanksStartTitle">¿Listo para el Nivel 1?</h2>
-          <p id="tanksStartDesc">Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.</p>
-          <button class="big-btn" id="tanksStartBtn">▶ Empezar nivel</button>
+        <div class="frame tanks-frame">
+          <canvas id="tanksCanvas" width="416" height="416"></canvas>
+
+          <div class="overlay" id="tanksStartOverlay">
+            <h2 id="tanksStartTitle">¿Listo para el Nivel 1?</h2>
+            <p id="tanksStartDesc">Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.</p>
+            <button class="big-btn" id="tanksStartBtn">▶ Empezar nivel</button>
+          </div>
+
+          <div class="overlay is-hidden" id="tanksClearOverlay">
+            <h2 id="tanksClearTitle">¡Nivel superado!</h2>
+            <p id="tanksClearDesc"></p>
+            <button class="big-btn" id="tanksNextBtn">▶ Nivel siguiente</button>
+          </div>
+
+          <div class="overlay is-hidden" id="tanksOverOverlay">
+            <h2 id="tanksOverTitle">¡Base destruida!</h2>
+            <p>Llegaste al nivel <b id="tanksOverLevel">1</b>.</p>
+            <button class="big-btn" id="tanksRetryBtn">↻ Reintentar nivel</button>
+            <button class="text-btn" id="tanksResetBtn">🔁 Volver al Nivel 1</button>
+          </div>
+
+          <div class="overlay is-hidden" id="tanksPauseOverlay">
+            <h2>⏸ Pausa</h2>
+            <p>El juego está en pausa. Tomate tu tiempo.</p>
+            <button class="big-btn" id="tanksResumeBtn">▶ Reanudar</button>
+          </div>
         </div>
 
-        <div class="overlay is-hidden" id="tanksClearOverlay">
-          <h2 id="tanksClearTitle">¡Nivel superado!</h2>
-          <p id="tanksClearDesc"></p>
-          <button class="big-btn" id="tanksNextBtn">▶ Nivel siguiente</button>
-        </div>
+        <aside class="tanks-side-panel tanks-panel-right">
+          <div class="tanks-panel-block tanks-progress-block" id="tanksProgressBlock">
+            <h3>🏅 Progreso</h3>
+            <p class="tanks-progress-level">Nivel <b id="tanksPanelLevel">1</b></p>
+            <p class="tanks-progress-upgrade">Última mejora: <b id="tanksPanelUpgrade">Ninguna todavía</b></p>
+          </div>
+          <div class="tanks-panel-block">
+            <h3>📊 Estadísticas</h3>
+            <div class="tanks-stat-row"><span>Daño</span><div class="tanks-stat-bar"><i id="tanksStatDamage"></i></div></div>
+            <div class="tanks-stat-row"><span>Velocidad</span><div class="tanks-stat-bar"><i id="tanksStatSpeed"></i></div></div>
+            <div class="tanks-stat-row"><span>Vida</span><div class="tanks-stat-bar"><i id="tanksStatHp"></i></div></div>
+            <div class="tanks-stat-row"><span>Cadencia</span><div class="tanks-stat-bar"><i id="tanksStatFireRate"></i></div></div>
+            <div class="tanks-stat-row"><span>Blindaje</span><div class="tanks-stat-bar"><i id="tanksStatArmor"></i></div></div>
+          </div>
+          <div class="tanks-panel-block tanks-tank-preview-block">
+            <div class="tanks-tank-preview" id="tanksTankPreview"></div>
+          </div>
+        </aside>
+      </div>
 
-        <div class="overlay is-hidden" id="tanksOverOverlay">
-          <h2 id="tanksOverTitle">¡Base destruida!</h2>
-          <p>Llegaste al nivel <b id="tanksOverLevel">1</b>.</p>
-          <button class="big-btn" id="tanksRetryBtn">↻ Reintentar nivel</button>
-          <button class="text-btn" id="tanksResetBtn">🔁 Volver al Nivel 1</button>
+      <div class="tanks-bottombar">
+        <div class="tanks-ability-slot" id="tanksAbilitySlot">
+          <div class="tanks-ability-icon" id="tanksAbilityIcon">💣</div>
+          <div class="tanks-ability-info">
+            <span class="tanks-ability-label">Bomba</span>
+            <div class="tanks-cooldown-track"><i id="tanksCooldownFill"></i></div>
+          </div>
+        </div>
+        <div class="tanks-weapon-slot">
+          <span class="tanks-weapon-item">🔫 <b id="tanksWeaponVal">Disparo simple</b></span>
+          <span class="tanks-weapon-item">🔋 <b id="tanksAmmoVal">0/1</b></span>
         </div>
       </div>
 

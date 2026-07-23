@@ -31,7 +31,7 @@
   }
   .tanks-frame{
     width:100%;
-    max-width:416px;
+    max-width:640px;
     margin:0 auto;
     padding:14px;
     border-radius:16px;
@@ -59,4 +59,251 @@
     box-shadow:0 4px 0 #331f7a;
   }
   .bomb-btn:active{ box-shadow:0 1px 0 #331f7a; }
+
+  /* ---------- Barra superior ---------- */
+  .tanks-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:8px 10px;
+    border-radius:12px;
+    border:1px solid #4a5044;
+    background:linear-gradient(180deg, rgba(40,46,32,0.85), rgba(16,20,12,0.85));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.35);
+  }
+  .tanks-topbar-stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .tanks-topbar-chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    border-radius:10px;
+    padding:5px 10px;
+  }
+  .tanks-chip-icon{ font-size:15px; line-height:1; }
+  .tanks-chip-body{ display:flex; flex-direction:column; line-height:1.1; }
+  .tanks-chip-body b{ font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .tanks-chip-body small{ font-size:8px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); }
+  .tanks-chip-hp b{ color:#5cc9ff; }
+  .tanks-chip-enemy b{ color:#ff5a5a; }
+  .tanks-topbar-actions{ display:flex; gap:6px; }
+  .tanks-icon-btn{
+    appearance:none;
+    border:1px solid #4a5044;
+    background:linear-gradient(180deg,#3a4032,#22261a);
+    color:var(--ink);
+    border-radius:10px;
+    width:36px; height:36px;
+    font-size:15px;
+    cursor:pointer;
+    box-shadow:0 2px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .tanks-icon-btn:active{ transform:translateY(1px); box-shadow:0 1px 0 rgba(0,0,0,0.4); }
+  .tanks-icon-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+  @keyframes tanksChipShake{
+    0%,100%{ transform:translateX(0) rotate(0); }
+    20%{ transform:translateX(-3px) rotate(-3deg); }
+    40%{ transform:translateX(3px) rotate(3deg); }
+    60%{ transform:translateX(-2px) rotate(-2deg); }
+    80%{ transform:translateX(2px) rotate(2deg); }
+  }
+  .hud-chip.is-shaking{ animation:tanksChipShake 0.35s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .hud-chip.is-shaking{ animation:none; }
+  }
+
+  /* ---------- Layout principal: panel izq / mapa / panel der ---------- */
+  .tanks-main-layout{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+    align-items:start;
+    flex:1 1 auto;
+    min-height:0;
+  }
+  @media (min-width:840px){
+    .tanks-main-layout{ grid-template-columns:150px minmax(0,1fr) 150px; }
+  }
+  @media (min-width:980px){
+    .tanks-main-layout{ grid-template-columns:170px minmax(0,1fr) 170px; }
+  }
+
+  .tanks-side-panel{
+    display:none;
+    flex-direction:column;
+    gap:10px;
+  }
+  @media (min-width:840px){
+    .tanks-side-panel{ display:flex; }
+  }
+
+  .tanks-panel-block{
+    border-radius:12px;
+    border:1px solid #4a5044;
+    background:linear-gradient(160deg, rgba(45,51,36,0.8), rgba(16,20,12,0.85));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.3);
+    padding:10px 12px;
+  }
+  .tanks-panel-block h3{
+    margin:0 0 7px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--ink-soft);
+  }
+  .tanks-check-list, .tanks-key-list{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .tanks-check-list li{
+    font-size:11px;
+    color:var(--ink);
+    padding-left:16px;
+    position:relative;
+  }
+  .tanks-check-list li::before{
+    content:'✓';
+    position:absolute; left:0;
+    color:#5cff9d;
+    font-weight:800;
+  }
+  .tanks-key-list li{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-key-list kbd{
+    background:rgba(255,255,255,0.1);
+    border:1px solid var(--panel-border);
+    border-radius:5px;
+    padding:2px 5px;
+    font-family:inherit;
+    font-size:9.5px;
+    color:var(--ink);
+    flex:none;
+  }
+  .tanks-info-line{
+    display:flex;
+    justify-content:space-between;
+    gap:6px;
+    margin:0 0 4px;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-info-line:last-child{ margin-bottom:0; }
+  .tanks-info-line b{ color:var(--ink); font-weight:700; text-align:right; }
+
+  .tanks-progress-block{ border-color:rgba(255,210,63,0.35); }
+  .tanks-progress-level{
+    margin:0 0 3px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .tanks-progress-level b{ color:var(--gold); font-size:16px; }
+  .tanks-progress-upgrade{
+    margin:0;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-progress-upgrade b{ color:var(--gold); display:block; margin-top:1px; }
+  @keyframes tanksUpgradeGlow{
+    0%{ box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 rgba(255,210,63,0); }
+    30%{ box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 0 20px rgba(255,210,63,0.7); }
+    100%{ box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.3); }
+  }
+  .tanks-progress-block.is-glowing{ animation:tanksUpgradeGlow 2s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .tanks-progress-block.is-glowing{ animation:none; }
+  }
+
+  .tanks-stat-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:6px;
+    font-size:9.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-stat-row:last-child{ margin-bottom:0; }
+  .tanks-stat-row span{ flex:none; width:48px; }
+  .tanks-stat-bar{
+    flex:1 1 auto;
+    height:6px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.08);
+    overflow:hidden;
+  }
+  .tanks-stat-bar i{
+    display:block;
+    height:100%;
+    width:0%;
+    border-radius:4px;
+    background:linear-gradient(90deg,#5cff9d,#ffd23f);
+    transition:width 0.35s ease;
+  }
+
+  .tanks-tank-preview-block{ display:flex; align-items:center; justify-content:center; padding:12px; }
+  .tanks-tank-preview{ width:56px; height:56px; }
+  .tanks-preview-svg{ width:100%; height:100%; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.4)); }
+
+  /* ---------- Barra inferior ---------- */
+  .tanks-bottombar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+    padding:8px 12px;
+    border-radius:12px;
+    border:1px solid #4a5044;
+    background:linear-gradient(180deg, rgba(40,46,32,0.85), rgba(16,20,12,0.85));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.35);
+  }
+  .tanks-ability-slot{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .tanks-ability-icon{
+    width:36px; height:36px;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px;
+    background:linear-gradient(180deg,#7a5cff,#4a2fb0);
+    border:1px solid rgba(255,255,255,0.2);
+    filter:grayscale(0.85) opacity(0.5);
+  }
+  .tanks-ability-slot.is-unlocked .tanks-ability-icon{ filter:none; }
+  .tanks-ability-info{ display:flex; flex-direction:column; gap:3px; min-width:90px; }
+  .tanks-ability-label{ font-size:10px; color:var(--ink-soft); }
+  .tanks-cooldown-track{
+    width:100%;
+    height:6px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.1);
+    overflow:hidden;
+  }
+  .tanks-cooldown-track i{
+    display:block;
+    height:100%;
+    width:100%;
+    border-radius:4px;
+    background:linear-gradient(90deg,#7a5cff,#a892ff);
+    transition:width 0.1s linear;
+  }
+  .tanks-ability-slot.is-ready .tanks-cooldown-track i{ background:linear-gradient(90deg,#5cff9d,#2ecf7a); }
+  .tanks-weapon-slot{ display:flex; gap:14px; flex-wrap:wrap; }
+  .tanks-weapon-item{ font-size:11px; color:var(--ink-soft); display:flex; align-items:center; gap:5px; }
+  .tanks-weapon-item b{ color:var(--ink); font-size:12px; }
 

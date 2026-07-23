@@ -978,7 +978,7 @@
   }
   .tanks-frame{
     width:100%;
-    max-width:416px;
+    max-width:640px;
     margin:0 auto;
     padding:14px;
     border-radius:16px;
@@ -1006,6 +1006,253 @@
     box-shadow:0 4px 0 #331f7a;
   }
   .bomb-btn:active{ box-shadow:0 1px 0 #331f7a; }
+
+  /* ---------- Barra superior ---------- */
+  .tanks-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:8px 10px;
+    border-radius:12px;
+    border:1px solid #4a5044;
+    background:linear-gradient(180deg, rgba(40,46,32,0.85), rgba(16,20,12,0.85));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.35);
+  }
+  .tanks-topbar-stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .tanks-topbar-chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    border-radius:10px;
+    padding:5px 10px;
+  }
+  .tanks-chip-icon{ font-size:15px; line-height:1; }
+  .tanks-chip-body{ display:flex; flex-direction:column; line-height:1.1; }
+  .tanks-chip-body b{ font-size:13px; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .tanks-chip-body small{ font-size:8px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); }
+  .tanks-chip-hp b{ color:#5cc9ff; }
+  .tanks-chip-enemy b{ color:#ff5a5a; }
+  .tanks-topbar-actions{ display:flex; gap:6px; }
+  .tanks-icon-btn{
+    appearance:none;
+    border:1px solid #4a5044;
+    background:linear-gradient(180deg,#3a4032,#22261a);
+    color:var(--ink);
+    border-radius:10px;
+    width:36px; height:36px;
+    font-size:15px;
+    cursor:pointer;
+    box-shadow:0 2px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .tanks-icon-btn:active{ transform:translateY(1px); box-shadow:0 1px 0 rgba(0,0,0,0.4); }
+  .tanks-icon-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+  @keyframes tanksChipShake{
+    0%,100%{ transform:translateX(0) rotate(0); }
+    20%{ transform:translateX(-3px) rotate(-3deg); }
+    40%{ transform:translateX(3px) rotate(3deg); }
+    60%{ transform:translateX(-2px) rotate(-2deg); }
+    80%{ transform:translateX(2px) rotate(2deg); }
+  }
+  .hud-chip.is-shaking{ animation:tanksChipShake 0.35s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .hud-chip.is-shaking{ animation:none; }
+  }
+
+  /* ---------- Layout principal: panel izq / mapa / panel der ---------- */
+  .tanks-main-layout{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+    align-items:start;
+    flex:1 1 auto;
+    min-height:0;
+  }
+  @media (min-width:840px){
+    .tanks-main-layout{ grid-template-columns:150px minmax(0,1fr) 150px; }
+  }
+  @media (min-width:980px){
+    .tanks-main-layout{ grid-template-columns:170px minmax(0,1fr) 170px; }
+  }
+
+  .tanks-side-panel{
+    display:none;
+    flex-direction:column;
+    gap:10px;
+  }
+  @media (min-width:840px){
+    .tanks-side-panel{ display:flex; }
+  }
+
+  .tanks-panel-block{
+    border-radius:12px;
+    border:1px solid #4a5044;
+    background:linear-gradient(160deg, rgba(45,51,36,0.8), rgba(16,20,12,0.85));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.3);
+    padding:10px 12px;
+  }
+  .tanks-panel-block h3{
+    margin:0 0 7px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--ink-soft);
+  }
+  .tanks-check-list, .tanks-key-list{
+    list-style:none;
+    margin:0; padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .tanks-check-list li{
+    font-size:11px;
+    color:var(--ink);
+    padding-left:16px;
+    position:relative;
+  }
+  .tanks-check-list li::before{
+    content:'✓';
+    position:absolute; left:0;
+    color:#5cff9d;
+    font-weight:800;
+  }
+  .tanks-key-list li{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-key-list kbd{
+    background:rgba(255,255,255,0.1);
+    border:1px solid var(--panel-border);
+    border-radius:5px;
+    padding:2px 5px;
+    font-family:inherit;
+    font-size:9.5px;
+    color:var(--ink);
+    flex:none;
+  }
+  .tanks-info-line{
+    display:flex;
+    justify-content:space-between;
+    gap:6px;
+    margin:0 0 4px;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-info-line:last-child{ margin-bottom:0; }
+  .tanks-info-line b{ color:var(--ink); font-weight:700; text-align:right; }
+
+  .tanks-progress-block{ border-color:rgba(255,210,63,0.35); }
+  .tanks-progress-level{
+    margin:0 0 3px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .tanks-progress-level b{ color:var(--gold); font-size:16px; }
+  .tanks-progress-upgrade{
+    margin:0;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-progress-upgrade b{ color:var(--gold); display:block; margin-top:1px; }
+  @keyframes tanksUpgradeGlow{
+    0%{ box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 rgba(255,210,63,0); }
+    30%{ box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 0 20px rgba(255,210,63,0.7); }
+    100%{ box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.3); }
+  }
+  .tanks-progress-block.is-glowing{ animation:tanksUpgradeGlow 2s ease; }
+  @media (prefers-reduced-motion: reduce){
+    .tanks-progress-block.is-glowing{ animation:none; }
+  }
+
+  .tanks-stat-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:6px;
+    font-size:9.5px;
+    color:var(--ink-soft);
+  }
+  .tanks-stat-row:last-child{ margin-bottom:0; }
+  .tanks-stat-row span{ flex:none; width:48px; }
+  .tanks-stat-bar{
+    flex:1 1 auto;
+    height:6px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.08);
+    overflow:hidden;
+  }
+  .tanks-stat-bar i{
+    display:block;
+    height:100%;
+    width:0%;
+    border-radius:4px;
+    background:linear-gradient(90deg,#5cff9d,#ffd23f);
+    transition:width 0.35s ease;
+  }
+
+  .tanks-tank-preview-block{ display:flex; align-items:center; justify-content:center; padding:12px; }
+  .tanks-tank-preview{ width:56px; height:56px; }
+  .tanks-preview-svg{ width:100%; height:100%; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.4)); }
+
+  /* ---------- Barra inferior ---------- */
+  .tanks-bottombar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+    padding:8px 12px;
+    border-radius:12px;
+    border:1px solid #4a5044;
+    background:linear-gradient(180deg, rgba(40,46,32,0.85), rgba(16,20,12,0.85));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.35);
+  }
+  .tanks-ability-slot{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .tanks-ability-icon{
+    width:36px; height:36px;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px;
+    background:linear-gradient(180deg,#7a5cff,#4a2fb0);
+    border:1px solid rgba(255,255,255,0.2);
+    filter:grayscale(0.85) opacity(0.5);
+  }
+  .tanks-ability-slot.is-unlocked .tanks-ability-icon{ filter:none; }
+  .tanks-ability-info{ display:flex; flex-direction:column; gap:3px; min-width:90px; }
+  .tanks-ability-label{ font-size:10px; color:var(--ink-soft); }
+  .tanks-cooldown-track{
+    width:100%;
+    height:6px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.1);
+    overflow:hidden;
+  }
+  .tanks-cooldown-track i{
+    display:block;
+    height:100%;
+    width:100%;
+    border-radius:4px;
+    background:linear-gradient(90deg,#7a5cff,#a892ff);
+    transition:width 0.1s linear;
+  }
+  .tanks-ability-slot.is-ready .tanks-cooldown-track i{ background:linear-gradient(90deg,#5cff9d,#2ecf7a); }
+  .tanks-weapon-slot{ display:flex; gap:14px; flex-wrap:wrap; }
+  .tanks-weapon-item{ font-size:11px; color:var(--ink-soft); display:flex; align-items:center; gap:5px; }
+  .tanks-weapon-item b{ color:var(--ink); font-size:12px; }
 
 /* Tema y componentes propios de Invasión Alienígena: HUD y marco del
    campo de batalla (el joystick de movimiento es un componente compartido) */
@@ -2418,33 +2665,106 @@
         <button class="mute-btn" id="tanksMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
       </div>
 
-      <div class="tanks-hud">
-        <div class="hud-chip">🛡️ Vidas: <b id="tanksLivesVal">3</b></div>
-        <div class="hud-chip">❤️ Vida: <b id="tanksHpVal">3/3</b></div>
-        <div class="hud-chip">🎯 Enemigos: <b id="tanksEnemiesVal">0</b></div>
-        <div class="hud-chip">🏅 Nivel: <b id="tanksLevelVal">1</b></div>
+      <div class="tanks-topbar">
+        <div class="tanks-topbar-stats">
+          <div class="hud-chip tanks-topbar-chip"><span class="tanks-chip-icon">🛡️</span><span class="tanks-chip-body"><b id="tanksLivesVal">3</b><small>Vidas</small></span></div>
+          <div class="hud-chip tanks-topbar-chip tanks-chip-hp"><span class="tanks-chip-icon">💚</span><span class="tanks-chip-body"><b id="tanksHpVal">3/3</b><small>Vida</small></span></div>
+          <div class="hud-chip tanks-topbar-chip tanks-chip-enemy"><span class="tanks-chip-icon">🎯</span><span class="tanks-chip-body"><b id="tanksEnemiesVal">0</b><small>Enemigos</small></span></div>
+          <div class="hud-chip tanks-topbar-chip"><span class="tanks-chip-icon">🏅</span><span class="tanks-chip-body"><b id="tanksLevelVal">1</b><small>Nivel</small></span></div>
+          <div class="hud-chip tanks-topbar-chip"><span class="tanks-chip-icon">⏱</span><span class="tanks-chip-body"><b id="tanksTimeVal">00:00</b><small>Tiempo</small></span></div>
+        </div>
+        <div class="tanks-topbar-actions">
+          <button class="tanks-icon-btn" id="tanksMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+          <button class="tanks-icon-btn" id="tanksPauseBtn" title="Pausa" aria-label="Pausa">⏸</button>
+        </div>
       </div>
 
-      <div class="frame tanks-frame">
-        <canvas id="tanksCanvas" width="416" height="416"></canvas>
+      <div class="tanks-main-layout">
+        <aside class="tanks-side-panel tanks-panel-left">
+          <div class="tanks-panel-block">
+            <h3>🎯 Objetivos</h3>
+            <ul class="tanks-check-list">
+              <li>Defendé tu base</li>
+              <li>Eliminá a todos los enemigos</li>
+              <li>No pierdas todas tus vidas</li>
+            </ul>
+          </div>
+          <div class="tanks-panel-block">
+            <h3>🎮 Controles</h3>
+            <ul class="tanks-key-list">
+              <li><kbd>↑↓←→</kbd><span>Mover</span></li>
+              <li><kbd>Espacio</kbd><span>Disparar</span></li>
+              <li><kbd>B</kbd><span>Bomba (Nivel 4+)</span></li>
+            </ul>
+          </div>
+          <div class="tanks-panel-block">
+            <h3>ℹ️ Este nivel</h3>
+            <p class="tanks-info-line"><span>Enemigo</span><b id="tanksPanelEnemy">-</b></p>
+            <p class="tanks-info-line"><span>Terreno</span><b id="tanksPanelMap">-</b></p>
+            <p class="tanks-info-line"><span>Restantes</span><b id="tanksPanelRemaining">0</b></p>
+          </div>
+        </aside>
 
-        <div class="overlay" id="tanksStartOverlay">
-          <h2 id="tanksStartTitle">¿Listo para el Nivel 1?</h2>
-          <p id="tanksStartDesc">Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.</p>
-          <button class="big-btn" id="tanksStartBtn">▶ Empezar nivel</button>
+        <div class="frame tanks-frame">
+          <canvas id="tanksCanvas" width="416" height="416"></canvas>
+
+          <div class="overlay" id="tanksStartOverlay">
+            <h2 id="tanksStartTitle">¿Listo para el Nivel 1?</h2>
+            <p id="tanksStartDesc">Usá las flechas para mover tu tanque y Espacio para disparar. Destruí a todos los enemigos sin perder tu base ni tus vidas.</p>
+            <button class="big-btn" id="tanksStartBtn">▶ Empezar nivel</button>
+          </div>
+
+          <div class="overlay is-hidden" id="tanksClearOverlay">
+            <h2 id="tanksClearTitle">¡Nivel superado!</h2>
+            <p id="tanksClearDesc"></p>
+            <button class="big-btn" id="tanksNextBtn">▶ Nivel siguiente</button>
+          </div>
+
+          <div class="overlay is-hidden" id="tanksOverOverlay">
+            <h2 id="tanksOverTitle">¡Base destruida!</h2>
+            <p>Llegaste al nivel <b id="tanksOverLevel">1</b>.</p>
+            <button class="big-btn" id="tanksRetryBtn">↻ Reintentar nivel</button>
+            <button class="text-btn" id="tanksResetBtn">🔁 Volver al Nivel 1</button>
+          </div>
+
+          <div class="overlay is-hidden" id="tanksPauseOverlay">
+            <h2>⏸ Pausa</h2>
+            <p>El juego está en pausa. Tomate tu tiempo.</p>
+            <button class="big-btn" id="tanksResumeBtn">▶ Reanudar</button>
+          </div>
         </div>
 
-        <div class="overlay is-hidden" id="tanksClearOverlay">
-          <h2 id="tanksClearTitle">¡Nivel superado!</h2>
-          <p id="tanksClearDesc"></p>
-          <button class="big-btn" id="tanksNextBtn">▶ Nivel siguiente</button>
-        </div>
+        <aside class="tanks-side-panel tanks-panel-right">
+          <div class="tanks-panel-block tanks-progress-block" id="tanksProgressBlock">
+            <h3>🏅 Progreso</h3>
+            <p class="tanks-progress-level">Nivel <b id="tanksPanelLevel">1</b></p>
+            <p class="tanks-progress-upgrade">Última mejora: <b id="tanksPanelUpgrade">Ninguna todavía</b></p>
+          </div>
+          <div class="tanks-panel-block">
+            <h3>📊 Estadísticas</h3>
+            <div class="tanks-stat-row"><span>Daño</span><div class="tanks-stat-bar"><i id="tanksStatDamage"></i></div></div>
+            <div class="tanks-stat-row"><span>Velocidad</span><div class="tanks-stat-bar"><i id="tanksStatSpeed"></i></div></div>
+            <div class="tanks-stat-row"><span>Vida</span><div class="tanks-stat-bar"><i id="tanksStatHp"></i></div></div>
+            <div class="tanks-stat-row"><span>Cadencia</span><div class="tanks-stat-bar"><i id="tanksStatFireRate"></i></div></div>
+            <div class="tanks-stat-row"><span>Blindaje</span><div class="tanks-stat-bar"><i id="tanksStatArmor"></i></div></div>
+          </div>
+          <div class="tanks-panel-block tanks-tank-preview-block">
+            <div class="tanks-tank-preview" id="tanksTankPreview"></div>
+          </div>
+        </aside>
+      </div>
 
-        <div class="overlay is-hidden" id="tanksOverOverlay">
-          <h2 id="tanksOverTitle">¡Base destruida!</h2>
-          <p>Llegaste al nivel <b id="tanksOverLevel">1</b>.</p>
-          <button class="big-btn" id="tanksRetryBtn">↻ Reintentar nivel</button>
-          <button class="text-btn" id="tanksResetBtn">🔁 Volver al Nivel 1</button>
+      <div class="tanks-bottombar">
+        <div class="tanks-ability-slot" id="tanksAbilitySlot">
+          <div class="tanks-ability-icon" id="tanksAbilityIcon">💣</div>
+          <div class="tanks-ability-info">
+            <span class="tanks-ability-label">Bomba</span>
+            <div class="tanks-cooldown-track"><i id="tanksCooldownFill"></i></div>
+          </div>
+        </div>
+        <div class="tanks-weapon-slot">
+          <span class="tanks-weapon-item">🔫 <b id="tanksWeaponVal">Disparo simple</b></span>
+          <span class="tanks-weapon-item">🔋 <b id="tanksAmmoVal">0/1</b></span>
         </div>
       </div>
 
@@ -4421,12 +4741,33 @@
   var tFire = document.getElementById('tFire');
   var tBomb = document.getElementById('tBomb');
 
+  var timeEl = document.getElementById('tanksTimeVal');
+  var pauseBtn = document.getElementById('tanksPauseBtn');
+  var pauseOverlay = document.getElementById('tanksPauseOverlay');
+  var resumeBtn = document.getElementById('tanksResumeBtn');
+  var panelEnemyEl = document.getElementById('tanksPanelEnemy');
+  var panelMapEl = document.getElementById('tanksPanelMap');
+  var panelRemainingEl = document.getElementById('tanksPanelRemaining');
+  var panelLevelEl = document.getElementById('tanksPanelLevel');
+  var panelUpgradeEl = document.getElementById('tanksPanelUpgrade');
+  var progressBlockEl = document.getElementById('tanksProgressBlock');
+  var statDamageEl = document.getElementById('tanksStatDamage');
+  var statSpeedEl = document.getElementById('tanksStatSpeed');
+  var statHpEl = document.getElementById('tanksStatHp');
+  var statFireRateEl = document.getElementById('tanksStatFireRate');
+  var statArmorEl = document.getElementById('tanksStatArmor');
+  var tankPreviewEl = document.getElementById('tanksTankPreview');
+  var abilitySlotEl = document.getElementById('tanksAbilitySlot');
+  var cooldownFillEl = document.getElementById('tanksCooldownFill');
+  var weaponValEl = document.getElementById('tanksWeaponVal');
+  var ammoValEl = document.getElementById('tanksAmmoVal');
+
   function tanksActive(){ return !tanksView.classList.contains('is-hidden'); }
 
   playTanksBtn.addEventListener('click', function(){
     portalView.classList.add('is-hidden');
     tanksView.classList.remove('is-hidden');
-    if (gameState === 'play') startTanksLoop();
+    if (gameState === 'play' && !isPaused) startTanksLoop();
   });
   backFromTanksBtn.addEventListener('click', function(){
     tanksView.classList.add('is-hidden');
@@ -4694,6 +5035,8 @@
   var respawnTimer = 0;
   var gameState = 'start';
   var shiftTimer = 0;
+  var levelElapsed = 0;
+  var isPaused = false;
 
   function cellBlockedFor(cell, phase){
     if (cell===BRICK || cell===STEEL || cell===BASE || cell===ROCK || cell===CRATE || cell===BARREL || cell===WATER) return true;
@@ -4827,7 +5170,7 @@
   function fireBullet(tank, opts){
     opts = opts || {};
     var pattern = opts.pattern || 'single';
-    var count = pattern==='double'?2 : pattern==='spread3'?3 : pattern==='quad'?4 : 1;
+    var count = pattern==='double'?2 : (pattern==='spread3'||pattern==='triple')?3 : pattern==='quad'?4 : 1;
     if (tank.bulletCount + count > tank.maxBullets && tank.isPlayer){
       count = Math.max(0, tank.maxBullets - tank.bulletCount);
       if (count<=0) return;
@@ -4842,14 +5185,14 @@
     var w = type==='bomb'?10:(type==='laser'?7:BULLET_SIZE);
     var h = type==='bomb'?10:(type==='laser'?14:BULLET_SIZE);
     var cx = tank.x+tank.w/2, cy = tank.y+tank.h/2;
-    var spreadStep = pattern==='spread3' ? 0.26 : pattern==='quad' ? 0.42/3 : 0;
+    var spreadStep = (pattern==='spread3'||pattern==='triple') ? 0.26 : pattern==='quad' ? 0.42/3 : 0;
     for (var i=0;i<count;i++){
       var ang = baseAngle;
       if (pattern==='double'){
         var perp = baseAngle+Math.PI/2;
         var off = (i===0?-6:6);
         var bx = cx+Math.cos(perp)*off, by = cy+Math.sin(perp)*off;
-      } else if (pattern==='spread3'){
+      } else if (pattern==='spread3'||pattern==='triple'){
         ang = baseAngle + (i-1)*spreadStep;
         var bx = cx, by = cy;
       } else if (pattern==='quad'){
@@ -5085,6 +5428,7 @@
     gameState = 'clear';
     pauseTanksLoop();
     applyLevelUpgrade(currentLevelDef);
+    updateProgressPanel(true);
     var isFinal = currentLevel >= LEVELS.length;
     clearTitleEl.textContent = isFinal ? '🏆 ¡Campaña completa!' : '¡Nivel '+currentLevel+' superado!';
     clearDescEl.textContent = isFinal
@@ -5413,15 +5757,20 @@
   var KEY_DIR = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
   window.addEventListener('keydown', function(e){
     if (!tanksActive()) return;
+    if (e.code==='Escape'){
+      e.preventDefault();
+      togglePause();
+      return;
+    }
     if (KEY_DIR[e.code]){
       e.preventDefault();
       pressDir(KEY_DIR[e.code]);
     } else if (e.code==='Space'){
       e.preventDefault();
-      if (gameState==='play') playerFire();
+      if (gameState==='play' && !isPaused) playerFire();
     } else if (e.code==='KeyB'){
       e.preventDefault();
-      if (gameState==='play') throwPlayerBomb();
+      if (gameState==='play' && !isPaused) throwPlayerBomb();
     }
   });
   window.addEventListener('keyup', function(e){
@@ -5482,30 +5831,112 @@
   bindJoystick(tJoystick, ['up','down','left','right']);
   tFire.addEventListener('pointerdown', function(e){
     e.preventDefault();
-    if (gameState==='play') playerFire();
+    if (gameState==='play' && !isPaused) playerFire();
   });
   tBomb.addEventListener('pointerdown', function(e){
     e.preventDefault();
-    if (gameState==='play') throwPlayerBomb();
+    if (gameState==='play' && !isPaused) throwPlayerBomb();
   });
 
-  function pulseChip(el, newText){
+  function pulseChip(el, newText, mode){
     if (!el) return;
     if (el.textContent !== newText){
+      var prevNum = parseFloat(el.textContent);
+      var newNum = parseFloat(newText);
+      var isDrop = !isNaN(prevNum) && !isNaN(newNum) && newNum < prevNum;
       el.textContent = newText;
       var chip = el.closest ? el.closest('.hud-chip') : null;
       if (chip){
+        var cls = (mode==='shake' && isDrop) ? 'is-shaking' : 'is-pulsing';
         chip.classList.remove('is-pulsing');
+        chip.classList.remove('is-shaking');
         void chip.offsetWidth; // reinicia la animacion CSS aunque se repita el mismo valor
-        chip.classList.add('is-pulsing');
+        chip.classList.add(cls);
       }
     }
   }
   function updateHUD(){
-    pulseChip(livesEl, String(Math.max(0, lives)));
+    pulseChip(livesEl, String(Math.max(0, lives)), 'shake');
     pulseChip(enemiesEl, String(Math.max(0, totalEnemies-killedCount)));
     pulseChip(levelEl, String(currentLevel));
-    if (hpEl && player) pulseChip(hpEl, Math.max(0,player.hp)+'/'+Math.round(BASE_HP*upgrades.maxHpMult)+(player.shieldMax?(' 🛡'+player.shield):''));
+    if (hpEl && player) pulseChip(hpEl, Math.max(0,player.hp)+'/'+Math.round(BASE_HP*upgrades.maxHpMult)+(player.shieldMax?(' 🛡'+player.shield):''), 'shake');
+    updateSidePanelInfo();
+  }
+
+  function mapLabel(key){
+    var labels = {
+      open:'Campo abierto', cover:'Zona con cobertura', boxes:'Cajas de madera', rocks:'Rocas',
+      boss1:'Arena del jefe', bridges:'Puentes', maze:'Laberinto', mines:'Campo minado',
+      barrels:'Barriles explosivos', boss2:'Base militar', river:'Río con puentes', sand:'Arenal',
+      electric:'Zona electrificada', fog:'Niebla', boss3:'Fábrica', ice:'Hielo', portals:'Portales',
+      meteors:'Lluvia de meteoritos', shifting:'Paredes móviles', boss4:'Arena final'
+    };
+    return labels[key] || key;
+  }
+  function updateSidePanelInfo(){
+    if (!panelEnemyEl || !currentLevelDef) return;
+    panelEnemyEl.textContent = currentLevelDef.boss ? BOSS_DEFS[currentLevelDef.boss].label : enemyLabel(currentLevelDef.enemy);
+    panelMapEl.textContent = mapLabel(currentLevelDef.map);
+    panelRemainingEl.textContent = Math.max(0, totalEnemies-killedCount);
+  }
+
+  function setStatBar(el, value, min, max){
+    if (!el) return;
+    var pct = Math.max(4, Math.min(100, ((value-min)/(max-min))*100));
+    el.style.width = pct+'%';
+  }
+  function updateStatBars(){
+    setStatBar(statDamageEl, upgrades.damageMult, 1, 2.2);
+    setStatBar(statSpeedEl, upgrades.speedMult, 1, 2);
+    setStatBar(statHpEl, upgrades.maxHpMult, 1, 2.2);
+    setStatBar(statFireRateEl, 1/upgrades.fireRateMult, 1, 2.2);
+    setStatBar(statArmorEl, upgrades.shieldMax, 0, 3);
+  }
+  function renderTankPreview(){
+    if (!tankPreviewEl) return;
+    var color = upgrades.legendary ? '#5fae3f' : '#4a7c3f';
+    var accent = upgrades.legendary ? '#ffd23f' : '#3a6030';
+    tankPreviewEl.innerHTML =
+      '<svg viewBox="0 0 60 60" class="tanks-preview-svg" aria-hidden="true">'+
+        '<rect x="8" y="10" width="6" height="40" rx="2" fill="#1c1e22"/>'+
+        '<rect x="46" y="10" width="6" height="40" rx="2" fill="#1c1e22"/>'+
+        '<rect x="14" y="14" width="32" height="32" rx="6" fill="'+color+'"/>'+
+        '<circle cx="30" cy="30" r="11" fill="'+accent+'"/>'+
+        '<rect x="27" y="4" width="6" height="20" rx="2" fill="#20232a"/>'+
+      '</svg>';
+  }
+  function updateProgressPanel(justUnlocked){
+    if (!panelLevelEl) return;
+    panelLevelEl.textContent = currentLevel;
+    panelUpgradeEl.textContent = justUnlocked
+      ? currentLevelDef.upgrade.label
+      : (currentLevel > 1 ? levelDef(currentLevel-1).upgrade.label : 'Ninguna todavía');
+    updateStatBars();
+    renderTankPreview();
+    if (justUnlocked && progressBlockEl){
+      progressBlockEl.classList.remove('is-glowing');
+      void progressBlockEl.offsetWidth;
+      progressBlockEl.classList.add('is-glowing');
+    }
+  }
+
+  var SHOT_PATTERN_LABELS = {single:'Disparo simple', double:'Disparo doble', triple:'Disparo triple', quad:'Disparo cuádruple'};
+  function updateBottomBar(){
+    if (!cooldownFillEl) return;
+    var unlocked = currentLevel >= 4;
+    var cd = player ? Math.max(0, player.bombCooldown||0) : PLAYER_BOMB_COOLDOWN;
+    var pct = unlocked ? Math.max(0, Math.min(100, ((PLAYER_BOMB_COOLDOWN-cd)/PLAYER_BOMB_COOLDOWN)*100)) : 0;
+    cooldownFillEl.style.width = pct+'%';
+    if (abilitySlotEl){
+      abilitySlotEl.classList.toggle('is-unlocked', unlocked);
+      abilitySlotEl.classList.toggle('is-ready', unlocked && cd<=0);
+    }
+    if (weaponValEl) weaponValEl.textContent = SHOT_PATTERN_LABELS[upgrades.shotPattern] || 'Disparo simple';
+    if (ammoValEl && player) ammoValEl.textContent = player.bulletCount+'/'+player.maxBullets;
+  }
+  function formatTime(s){
+    var m = Math.floor(s/60), sec = Math.floor(s%60);
+    return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
   }
 
   function spawnEnemies(dt){
@@ -6133,6 +6564,20 @@
     tanksLoopRunning = false;
     dirStack.length = 0;
   }
+  function togglePause(){
+    if (gameState !== 'play') return;
+    if (!isPaused){
+      isPaused = true;
+      pauseTanksLoop();
+      pauseOverlay.classList.remove('is-hidden');
+    } else {
+      isPaused = false;
+      pauseOverlay.classList.add('is-hidden');
+      startTanksLoop();
+    }
+  }
+  pauseBtn.addEventListener('click', togglePause);
+  resumeBtn.addEventListener('click', togglePause);
   function loop(ts){
     if (!tanksLoopRunning) return;
     if (lastTime===null) lastTime = ts;
@@ -6143,6 +6588,11 @@
     updateVisuals(dt);
     updateParticles(dt);
     render(t);
+    if (gameState === 'play'){
+      levelElapsed += dt;
+      if (timeEl) timeEl.textContent = formatTime(levelElapsed);
+      updateBottomBar();
+    }
     requestAnimationFrame(loop);
   }
 
@@ -6174,11 +6624,15 @@
       spawnTimer = 0.6;
     }
     killedCount = 0;
+    levelElapsed = 0;
+    isPaused = false;
 
     updateHUD();
+    updateProgressPanel();
     startOverlay.classList.add('is-hidden');
     clearOverlay.classList.add('is-hidden');
     overOverlay.classList.add('is-hidden');
+    pauseOverlay.classList.add('is-hidden');
     tBomb.style.display = currentLevel>=4 ? '' : 'none';
     ensureAudio();
     startTanksLoop();

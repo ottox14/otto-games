@@ -110,12 +110,33 @@
   var tFire = document.getElementById('tFire');
   var tBomb = document.getElementById('tBomb');
 
+  var timeEl = document.getElementById('tanksTimeVal');
+  var pauseBtn = document.getElementById('tanksPauseBtn');
+  var pauseOverlay = document.getElementById('tanksPauseOverlay');
+  var resumeBtn = document.getElementById('tanksResumeBtn');
+  var panelEnemyEl = document.getElementById('tanksPanelEnemy');
+  var panelMapEl = document.getElementById('tanksPanelMap');
+  var panelRemainingEl = document.getElementById('tanksPanelRemaining');
+  var panelLevelEl = document.getElementById('tanksPanelLevel');
+  var panelUpgradeEl = document.getElementById('tanksPanelUpgrade');
+  var progressBlockEl = document.getElementById('tanksProgressBlock');
+  var statDamageEl = document.getElementById('tanksStatDamage');
+  var statSpeedEl = document.getElementById('tanksStatSpeed');
+  var statHpEl = document.getElementById('tanksStatHp');
+  var statFireRateEl = document.getElementById('tanksStatFireRate');
+  var statArmorEl = document.getElementById('tanksStatArmor');
+  var tankPreviewEl = document.getElementById('tanksTankPreview');
+  var abilitySlotEl = document.getElementById('tanksAbilitySlot');
+  var cooldownFillEl = document.getElementById('tanksCooldownFill');
+  var weaponValEl = document.getElementById('tanksWeaponVal');
+  var ammoValEl = document.getElementById('tanksAmmoVal');
+
   function tanksActive(){ return !tanksView.classList.contains('is-hidden'); }
 
   playTanksBtn.addEventListener('click', function(){
     portalView.classList.add('is-hidden');
     tanksView.classList.remove('is-hidden');
-    if (gameState === 'play') startTanksLoop();
+    if (gameState === 'play' && !isPaused) startTanksLoop();
   });
   backFromTanksBtn.addEventListener('click', function(){
     tanksView.classList.add('is-hidden');
@@ -383,6 +404,8 @@
   var respawnTimer = 0;
   var gameState = 'start';
   var shiftTimer = 0;
+  var levelElapsed = 0;
+  var isPaused = false;
 
   function cellBlockedFor(cell, phase){
     if (cell===BRICK || cell===STEEL || cell===BASE || cell===ROCK || cell===CRATE || cell===BARREL || cell===WATER) return true;
@@ -516,7 +539,7 @@
   function fireBullet(tank, opts){
     opts = opts || {};
     var pattern = opts.pattern || 'single';
-    var count = pattern==='double'?2 : pattern==='spread3'?3 : pattern==='quad'?4 : 1;
+    var count = pattern==='double'?2 : (pattern==='spread3'||pattern==='triple')?3 : pattern==='quad'?4 : 1;
     if (tank.bulletCount + count > tank.maxBullets && tank.isPlayer){
       count = Math.max(0, tank.maxBullets - tank.bulletCount);
       if (count<=0) return;
@@ -531,14 +554,14 @@
     var w = type==='bomb'?10:(type==='laser'?7:BULLET_SIZE);
     var h = type==='bomb'?10:(type==='laser'?14:BULLET_SIZE);
     var cx = tank.x+tank.w/2, cy = tank.y+tank.h/2;
-    var spreadStep = pattern==='spread3' ? 0.26 : pattern==='quad' ? 0.42/3 : 0;
+    var spreadStep = (pattern==='spread3'||pattern==='triple') ? 0.26 : pattern==='quad' ? 0.42/3 : 0;
     for (var i=0;i<count;i++){
       var ang = baseAngle;
       if (pattern==='double'){
         var perp = baseAngle+Math.PI/2;
         var off = (i===0?-6:6);
         var bx = cx+Math.cos(perp)*off, by = cy+Math.sin(perp)*off;
-      } else if (pattern==='spread3'){
+      } else if (pattern==='spread3'||pattern==='triple'){
         ang = baseAngle + (i-1)*spreadStep;
         var bx = cx, by = cy;
       } else if (pattern==='quad'){
@@ -774,6 +797,7 @@
     gameState = 'clear';
     pauseTanksLoop();
     applyLevelUpgrade(currentLevelDef);
+    updateProgressPanel(true);
     var isFinal = currentLevel >= LEVELS.length;
     clearTitleEl.textContent = isFinal ? '🏆 ¡Campaña completa!' : '¡Nivel '+currentLevel+' superado!';
     clearDescEl.textContent = isFinal
@@ -1102,15 +1126,20 @@
   var KEY_DIR = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
   window.addEventListener('keydown', function(e){
     if (!tanksActive()) return;
+    if (e.code==='Escape'){
+      e.preventDefault();
+      togglePause();
+      return;
+    }
     if (KEY_DIR[e.code]){
       e.preventDefault();
       pressDir(KEY_DIR[e.code]);
     } else if (e.code==='Space'){
       e.preventDefault();
-      if (gameState==='play') playerFire();
+      if (gameState==='play' && !isPaused) playerFire();
     } else if (e.code==='KeyB'){
       e.preventDefault();
-      if (gameState==='play') throwPlayerBomb();
+      if (gameState==='play' && !isPaused) throwPlayerBomb();
     }
   });
   window.addEventListener('keyup', function(e){
@@ -1171,30 +1200,112 @@
   bindJoystick(tJoystick, ['up','down','left','right']);
   tFire.addEventListener('pointerdown', function(e){
     e.preventDefault();
-    if (gameState==='play') playerFire();
+    if (gameState==='play' && !isPaused) playerFire();
   });
   tBomb.addEventListener('pointerdown', function(e){
     e.preventDefault();
-    if (gameState==='play') throwPlayerBomb();
+    if (gameState==='play' && !isPaused) throwPlayerBomb();
   });
 
-  function pulseChip(el, newText){
+  function pulseChip(el, newText, mode){
     if (!el) return;
     if (el.textContent !== newText){
+      var prevNum = parseFloat(el.textContent);
+      var newNum = parseFloat(newText);
+      var isDrop = !isNaN(prevNum) && !isNaN(newNum) && newNum < prevNum;
       el.textContent = newText;
       var chip = el.closest ? el.closest('.hud-chip') : null;
       if (chip){
+        var cls = (mode==='shake' && isDrop) ? 'is-shaking' : 'is-pulsing';
         chip.classList.remove('is-pulsing');
+        chip.classList.remove('is-shaking');
         void chip.offsetWidth; // reinicia la animacion CSS aunque se repita el mismo valor
-        chip.classList.add('is-pulsing');
+        chip.classList.add(cls);
       }
     }
   }
   function updateHUD(){
-    pulseChip(livesEl, String(Math.max(0, lives)));
+    pulseChip(livesEl, String(Math.max(0, lives)), 'shake');
     pulseChip(enemiesEl, String(Math.max(0, totalEnemies-killedCount)));
     pulseChip(levelEl, String(currentLevel));
-    if (hpEl && player) pulseChip(hpEl, Math.max(0,player.hp)+'/'+Math.round(BASE_HP*upgrades.maxHpMult)+(player.shieldMax?(' 🛡'+player.shield):''));
+    if (hpEl && player) pulseChip(hpEl, Math.max(0,player.hp)+'/'+Math.round(BASE_HP*upgrades.maxHpMult)+(player.shieldMax?(' 🛡'+player.shield):''), 'shake');
+    updateSidePanelInfo();
+  }
+
+  function mapLabel(key){
+    var labels = {
+      open:'Campo abierto', cover:'Zona con cobertura', boxes:'Cajas de madera', rocks:'Rocas',
+      boss1:'Arena del jefe', bridges:'Puentes', maze:'Laberinto', mines:'Campo minado',
+      barrels:'Barriles explosivos', boss2:'Base militar', river:'Río con puentes', sand:'Arenal',
+      electric:'Zona electrificada', fog:'Niebla', boss3:'Fábrica', ice:'Hielo', portals:'Portales',
+      meteors:'Lluvia de meteoritos', shifting:'Paredes móviles', boss4:'Arena final'
+    };
+    return labels[key] || key;
+  }
+  function updateSidePanelInfo(){
+    if (!panelEnemyEl || !currentLevelDef) return;
+    panelEnemyEl.textContent = currentLevelDef.boss ? BOSS_DEFS[currentLevelDef.boss].label : enemyLabel(currentLevelDef.enemy);
+    panelMapEl.textContent = mapLabel(currentLevelDef.map);
+    panelRemainingEl.textContent = Math.max(0, totalEnemies-killedCount);
+  }
+
+  function setStatBar(el, value, min, max){
+    if (!el) return;
+    var pct = Math.max(4, Math.min(100, ((value-min)/(max-min))*100));
+    el.style.width = pct+'%';
+  }
+  function updateStatBars(){
+    setStatBar(statDamageEl, upgrades.damageMult, 1, 2.2);
+    setStatBar(statSpeedEl, upgrades.speedMult, 1, 2);
+    setStatBar(statHpEl, upgrades.maxHpMult, 1, 2.2);
+    setStatBar(statFireRateEl, 1/upgrades.fireRateMult, 1, 2.2);
+    setStatBar(statArmorEl, upgrades.shieldMax, 0, 3);
+  }
+  function renderTankPreview(){
+    if (!tankPreviewEl) return;
+    var color = upgrades.legendary ? '#5fae3f' : '#4a7c3f';
+    var accent = upgrades.legendary ? '#ffd23f' : '#3a6030';
+    tankPreviewEl.innerHTML =
+      '<svg viewBox="0 0 60 60" class="tanks-preview-svg" aria-hidden="true">'+
+        '<rect x="8" y="10" width="6" height="40" rx="2" fill="#1c1e22"/>'+
+        '<rect x="46" y="10" width="6" height="40" rx="2" fill="#1c1e22"/>'+
+        '<rect x="14" y="14" width="32" height="32" rx="6" fill="'+color+'"/>'+
+        '<circle cx="30" cy="30" r="11" fill="'+accent+'"/>'+
+        '<rect x="27" y="4" width="6" height="20" rx="2" fill="#20232a"/>'+
+      '</svg>';
+  }
+  function updateProgressPanel(justUnlocked){
+    if (!panelLevelEl) return;
+    panelLevelEl.textContent = currentLevel;
+    panelUpgradeEl.textContent = justUnlocked
+      ? currentLevelDef.upgrade.label
+      : (currentLevel > 1 ? levelDef(currentLevel-1).upgrade.label : 'Ninguna todavía');
+    updateStatBars();
+    renderTankPreview();
+    if (justUnlocked && progressBlockEl){
+      progressBlockEl.classList.remove('is-glowing');
+      void progressBlockEl.offsetWidth;
+      progressBlockEl.classList.add('is-glowing');
+    }
+  }
+
+  var SHOT_PATTERN_LABELS = {single:'Disparo simple', double:'Disparo doble', triple:'Disparo triple', quad:'Disparo cuádruple'};
+  function updateBottomBar(){
+    if (!cooldownFillEl) return;
+    var unlocked = currentLevel >= 4;
+    var cd = player ? Math.max(0, player.bombCooldown||0) : PLAYER_BOMB_COOLDOWN;
+    var pct = unlocked ? Math.max(0, Math.min(100, ((PLAYER_BOMB_COOLDOWN-cd)/PLAYER_BOMB_COOLDOWN)*100)) : 0;
+    cooldownFillEl.style.width = pct+'%';
+    if (abilitySlotEl){
+      abilitySlotEl.classList.toggle('is-unlocked', unlocked);
+      abilitySlotEl.classList.toggle('is-ready', unlocked && cd<=0);
+    }
+    if (weaponValEl) weaponValEl.textContent = SHOT_PATTERN_LABELS[upgrades.shotPattern] || 'Disparo simple';
+    if (ammoValEl && player) ammoValEl.textContent = player.bulletCount+'/'+player.maxBullets;
+  }
+  function formatTime(s){
+    var m = Math.floor(s/60), sec = Math.floor(s%60);
+    return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
   }
 
   function spawnEnemies(dt){
@@ -1822,6 +1933,20 @@
     tanksLoopRunning = false;
     dirStack.length = 0;
   }
+  function togglePause(){
+    if (gameState !== 'play') return;
+    if (!isPaused){
+      isPaused = true;
+      pauseTanksLoop();
+      pauseOverlay.classList.remove('is-hidden');
+    } else {
+      isPaused = false;
+      pauseOverlay.classList.add('is-hidden');
+      startTanksLoop();
+    }
+  }
+  pauseBtn.addEventListener('click', togglePause);
+  resumeBtn.addEventListener('click', togglePause);
   function loop(ts){
     if (!tanksLoopRunning) return;
     if (lastTime===null) lastTime = ts;
@@ -1832,6 +1957,11 @@
     updateVisuals(dt);
     updateParticles(dt);
     render(t);
+    if (gameState === 'play'){
+      levelElapsed += dt;
+      if (timeEl) timeEl.textContent = formatTime(levelElapsed);
+      updateBottomBar();
+    }
     requestAnimationFrame(loop);
   }
 
@@ -1863,11 +1993,15 @@
       spawnTimer = 0.6;
     }
     killedCount = 0;
+    levelElapsed = 0;
+    isPaused = false;
 
     updateHUD();
+    updateProgressPanel();
     startOverlay.classList.add('is-hidden');
     clearOverlay.classList.add('is-hidden');
     overOverlay.classList.add('is-hidden');
+    pauseOverlay.classList.add('is-hidden');
     tBomb.style.display = currentLevel>=4 ? '' : 'none';
     ensureAudio();
     startTanksLoop();

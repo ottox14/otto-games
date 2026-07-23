@@ -1578,45 +1578,276 @@
   align-self:flex-start;
 }
 
-.team-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:8px;
-  max-height:56vh;
-  overflow-y:auto;
-  padding:4px 2px;
+@keyframes liberFadeIn{
+  from{ opacity:0; transform:translateY(6px); }
+  to{ opacity:1; transform:translateY(0); }
 }
-.team-pick-btn{
-  appearance:none;
-  border:1px solid var(--panel-border);
-  background:rgba(255,255,255,0.06);
-  color:var(--ink);
-  border-radius:12px;
-  padding:10px 8px;
+.liber-sub-view{ animation:liberFadeIn 0.35s ease; }
+@media (prefers-reduced-motion: reduce){
+  .liber-sub-view{ animation:none; }
+}
+
+#liberTeamSelectView{
+  position:relative;
+  border-radius:16px;
+  background:
+    radial-gradient(560px 280px at 12% -8%, rgba(255,210,120,0.09), transparent 60%),
+    radial-gradient(560px 280px at 88% -8%, rgba(255,210,120,0.09), transparent 60%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0 40px, rgba(0,0,0,0.015) 40px 80px);
+}
+
+.liber-select-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.liber-select-topbar .liber-select-title{
+  text-align:left;
+  margin:0;
+}
+.liber-select-counts{
+  display:flex;
+  gap:8px;
+}
+.liber-count-chip{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:6px;
+  padding:4px 12px;
+  border-radius:10px;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.05);
+  min-width:64px;
+}
+.liber-count-chip b{
+  font-size:15px;
+  font-weight:800;
+  color:var(--ink);
+}
+.liber-count-chip span{
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  color:var(--ink-soft);
+}
+.liber-count-chip.is-accent b{ color:var(--gold); }
+
+.liber-select-controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.liber-search-wrap{
+  position:relative;
+  flex:1 1 200px;
+}
+.liber-search-icon{
+  position:absolute;
+  left:10px; top:50%; transform:translateY(-50%);
+  font-size:13px;
+  opacity:0.6;
+  pointer-events:none;
+}
+.liber-search-input{
+  width:100%;
+  padding:9px 12px 9px 32px;
+  border-radius:10px;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.06);
+  color:var(--ink);
+  font-family:inherit;
+  font-size:13px;
+  transition:border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.liber-search-input:focus{
+  outline:none;
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(255,210,63,0.18);
+}
+.liber-country-filter{
+  padding:9px 12px;
+  border-radius:10px;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.06);
+  color:var(--ink);
+  font-family:inherit;
+  font-size:13px;
+  cursor:pointer;
+}
+.liber-country-filter:focus{
+  outline:none;
+  border-color:var(--gold);
+}
+
+.team-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(128px,1fr));
+  gap:10px;
+  max-height:52vh;
+  overflow-y:auto;
+  padding:6px 4px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) rgba(255,255,255,0.06);
+}
+.team-grid::-webkit-scrollbar{ width:7px; }
+.team-grid::-webkit-scrollbar-track{ background:rgba(255,255,255,0.05); border-radius:8px; }
+.team-grid::-webkit-scrollbar-thumb{ background:var(--gold); border-radius:8px; }
+
+.liber-no-results.is-hidden{ display:none; }
+.liber-no-results{
+  text-align:center;
+  color:var(--ink-soft);
+  font-size:13px;
+  padding:20px 0;
+}
+
+.team-pick-btn{
+  position:relative;
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.05);
+  color:var(--ink);
+  border-radius:14px;
+  padding:12px 8px 10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
   font-family:inherit;
   cursor:pointer;
   text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.25);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.team-pick-btn:active{ transform:translateY(2px); }
-.team-badge{
-  width:34px;
-  height:34px;
+.team-pick-btn:hover{
+  transform:translateY(-3px) scale(1.035);
+  border-color:rgba(255,210,63,0.55);
+  box-shadow:0 10px 22px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,210,63,0.25);
+  background:rgba(255,255,255,0.08);
+}
+.team-pick-btn:active{ transform:translateY(-1px) scale(1.01); }
+.team-pick-btn:focus-visible{
+  outline:2px solid var(--cyan);
+  outline-offset:2px;
+}
+.team-pick-btn.is-selected{
+  border-color:var(--gold);
+  background:rgba(255,210,63,0.10);
+  box-shadow:0 10px 24px rgba(0,0,0,0.4), 0 0 0 2px var(--gold), 0 0 18px rgba(255,210,63,0.45);
+  animation:liberSelectPulse 0.4s ease;
+}
+@keyframes liberSelectPulse{
+  0%{ transform:scale(1); }
+  40%{ transform:scale(1.08); }
+  100%{ transform:scale(1); }
+}
+.team-pick-check{
+  position:absolute;
+  top:6px; right:6px;
+  width:18px; height:18px;
   border-radius:50%;
-  border:3px solid;
-  box-shadow:0 2px 6px rgba(0,0,0,0.35);
-}
-.team-pick-name{
+  background:var(--gold);
+  color:#1b1340;
   font-size:11px;
-  font-weight:700;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transform:scale(0.4);
+  transition:opacity 0.2s ease, transform 0.2s ease;
+  box-shadow:0 2px 6px rgba(0,0,0,0.4);
+}
+.team-pick-btn.is-selected .team-pick-check{
+  opacity:1;
+  transform:scale(1);
+}
+
+.team-crest{
+  width:64px;
+  height:74px;
+  display:block;
+}
+.team-crest-svg{ width:100%; height:100%; display:block; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.4)); }
+
+.team-pick-name{
+  font-size:12px;
+  font-weight:800;
   line-height:1.2;
 }
 .team-pick-country{
-  font-size:9px;
+  font-size:9.5px;
   color:var(--ink-soft);
+}
+.team-pick-stars{
+  font-size:11px;
+  letter-spacing:1px;
+}
+.stars-on{ color:var(--gold); }
+.stars-off{ color:rgba(255,255,255,0.18); }
+
+.liber-team-detail{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid rgba(255,210,63,0.35);
+  background:linear-gradient(135deg, rgba(255,210,63,0.08), rgba(255,255,255,0.04));
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  animation:liberDetailIn 0.3s ease;
+}
+.liber-team-detail.is-hidden{ display:none; }
+@keyframes liberDetailIn{
+  from{ opacity:0; transform:translateY(10px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.liber-detail-crest{
+  width:64px;
+  height:74px;
+  flex:none;
+}
+.liber-detail-crest svg{ width:100%; height:100%; filter:drop-shadow(0 3px 6px rgba(0,0,0,0.45)); }
+.liber-detail-info{
+  flex:1 1 auto;
+  min-width:0;
+}
+.liber-detail-info h3{
+  margin:0 0 2px;
+  font-size:16px;
+  font-weight:800;
+}
+.liber-detail-country{
+  margin:0 0 6px;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+.liber-detail-colors{
+  display:flex;
+  gap:6px;
+  margin-bottom:6px;
+}
+.color-dot{
+  width:16px; height:16px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,0.35);
+  box-shadow:0 2px 4px rgba(0,0,0,0.35);
+}
+.liber-detail-desc{
+  margin:0;
+  font-size:11.5px;
+  color:var(--ink-soft);
+}
+.liber-detail-btn{
+  flex:none;
+  padding:12px 22px;
+  font-size:14px;
+}
+@media (max-width:520px){
+  .liber-team-detail{ flex-wrap:wrap; }
+  .liber-detail-btn{ width:100%; }
 }
 
 .diff-grid{
@@ -2480,8 +2711,34 @@
       </div>
 
       <div class="liber-sub-view" id="liberTeamSelectView">
-        <h2 class="liber-select-title">Elegí tu equipo</h2>
+        <div class="liber-select-topbar">
+          <h2 class="liber-select-title">Elegí tu equipo</h2>
+          <div class="liber-select-counts">
+            <div class="liber-count-chip"><b id="liberTeamCount">0</b><span>Equipos</span></div>
+            <div class="liber-count-chip is-accent"><b id="liberSelectedCount">0</b><span>Seleccionado</span></div>
+          </div>
+        </div>
+        <div class="liber-select-controls">
+          <div class="liber-search-wrap">
+            <span class="liber-search-icon">🔍</span>
+            <input type="text" id="liberTeamSearch" class="liber-search-input" placeholder="Buscar equipo..." autocomplete="off">
+          </div>
+          <select id="liberCountryFilter" class="liber-country-filter">
+            <option value="">Filtrar por país</option>
+          </select>
+        </div>
         <div class="team-grid" id="liberTeamGrid"></div>
+        <p class="liber-no-results is-hidden" id="liberNoResults">No se encontraron equipos con ese filtro.</p>
+        <div class="liber-team-detail is-hidden" id="liberTeamDetail">
+          <div class="liber-detail-crest" id="liberDetailCrest"></div>
+          <div class="liber-detail-info">
+            <h3 id="liberDetailName">Equipo</h3>
+            <p class="liber-detail-country" id="liberDetailCountry">País</p>
+            <div class="liber-detail-colors" id="liberDetailColors"></div>
+            <p class="liber-detail-desc" id="liberDetailDesc"></p>
+          </div>
+          <button class="big-btn liber-detail-btn" id="liberDetailContinueBtn">Continuar →</button>
+        </div>
       </div>
 
       <div class="liber-sub-view is-hidden" id="liberDifficultyView">
@@ -8464,6 +8721,18 @@
 
   var teamSelectView = document.getElementById('liberTeamSelectView');
   var teamGridEl = document.getElementById('liberTeamGrid');
+  var teamCountEl = document.getElementById('liberTeamCount');
+  var selectedCountEl = document.getElementById('liberSelectedCount');
+  var teamSearchEl = document.getElementById('liberTeamSearch');
+  var countryFilterEl = document.getElementById('liberCountryFilter');
+  var noResultsEl = document.getElementById('liberNoResults');
+  var teamDetailEl = document.getElementById('liberTeamDetail');
+  var detailCrestEl = document.getElementById('liberDetailCrest');
+  var detailNameEl = document.getElementById('liberDetailName');
+  var detailCountryEl = document.getElementById('liberDetailCountry');
+  var detailColorsEl = document.getElementById('liberDetailColors');
+  var detailDescEl = document.getElementById('liberDetailDesc');
+  var detailContinueBtn = document.getElementById('liberDetailContinueBtn');
   var difficultyView = document.getElementById('liberDifficultyView');
   var diffBackBtn = document.getElementById('liberDiffBackBtn');
   var drawView = document.getElementById('liberDrawView');
@@ -8979,24 +9248,134 @@
 
   // ---------- Seleccion de equipo y dificultad ----------
   var pendingTeamId = null;
+  var teamSearchQuery = '';
+  var teamCountryFilter = '';
+
+  function teamInitials(name){
+    var words = name.replace(/[()]/g,'').trim().split(/\s+/).filter(Boolean);
+    if (words.length === 1) return words[0].slice(0,3).toUpperCase();
+    return (words[0][0]+words[1][0]).toUpperCase();
+  }
+  function isLightColor(hex){
+    var num = parseInt(hex.replace('#',''),16);
+    var r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    return (0.299*r+0.587*g+0.114*b) > 170;
+  }
+  function repeatStr(ch,n){ var s=''; for (var i=0;i<n;i++) s+=ch; return s; }
+  function starsFor(team){
+    var n = Math.max(1, Math.min(5, Math.round(team.strength/20)));
+    return '<span class="stars-on">'+repeatStr('★',n)+'</span><span class="stars-off">'+repeatStr('☆',5-n)+'</span>';
+  }
+  // Escudo propio inspirado en los colores/patron real de cada club (no hay
+  // licencia para usar los escudos oficiales), con forma de blasón y las
+  // iniciales del equipo en el centro.
+  function crestSVG(team){
+    var clipId = 'shieldClip-'+team.id;
+    var shirt = team.shirt, band = team.band;
+    var fill;
+    if (team.pattern === 'stripes'){
+      var n=5, w=100/n, s='';
+      for (var i=0;i<n;i++){ s += '<rect x="'+(i*w)+'" y="0" width="'+(w+0.6)+'" height="116" fill="'+(i%2===0?shirt:band)+'"/>'; }
+      fill = s;
+    } else if (team.pattern === 'sash'){
+      fill = '<rect width="100" height="116" fill="'+shirt+'"/><rect x="-25" y="44" width="150" height="26" fill="'+band+'" transform="rotate(-30 50 57)"/>';
+    } else if (team.pattern === 'band'){
+      fill = '<rect width="100" height="116" fill="'+shirt+'"/><rect x="0" y="40" width="100" height="32" fill="'+band+'"/>';
+    } else if (team.pattern === 'halves'){
+      fill = '<rect width="50" height="116" fill="'+shirt+'"/><rect x="50" width="50" height="116" fill="'+band+'"/>';
+    } else {
+      fill = '<rect width="100" height="116" fill="'+shirt+'"/>';
+    }
+    var textColor = isLightColor(shirt) ? '#1a1a1a' : '#ffffff';
+    var shieldPath = 'M50 3 L93 15 L93 55 C93 84 74 105 50 113 C26 105 7 84 7 55 L7 15 Z';
+    return '<svg viewBox="0 0 100 116" class="team-crest-svg" aria-hidden="true">'+
+      '<defs><clipPath id="'+clipId+'"><path d="'+shieldPath+'"/></clipPath></defs>'+
+      '<g clip-path="url(#'+clipId+')">'+fill+'<rect width="100" height="40" fill="rgba(255,255,255,0.12)"/></g>'+
+      '<path d="'+shieldPath+'" fill="none" stroke="'+band+'" stroke-width="4"/>'+
+      '<path d="'+shieldPath+'" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.3"/>'+
+      '<text x="50" y="68" text-anchor="middle" font-size="32" font-weight="900" fill="'+textColor+'" font-family="Arial Black, Arial, sans-serif">'+teamInitials(team.name)+'</text>'+
+      '</svg>';
+  }
+
+  function matchesTeamFilters(team){
+    var q = teamSearchQuery.trim().toLowerCase();
+    if (q && team.name.toLowerCase().indexOf(q) === -1) return false;
+    if (teamCountryFilter && team.country !== teamCountryFilter) return false;
+    return true;
+  }
+
   function buildTeamGrid(){
     teamGridEl.innerHTML = '';
-    TEAMS.forEach(function(team){
+    var visible = TEAMS.filter(matchesTeamFilters);
+    noResultsEl.classList.toggle('is-hidden', visible.length > 0);
+    visible.forEach(function(team){
       var btn = document.createElement('button');
-      btn.className = 'team-pick-btn';
-      btn.innerHTML = '<span class="team-badge" style="background:'+team.shirt+';border-color:'+team.band+'"></span>'+
+      btn.className = 'team-pick-btn'+(team.id === pendingTeamId ? ' is-selected' : '');
+      btn.innerHTML = '<span class="team-pick-check">✓</span>'+
+        '<span class="team-crest">'+crestSVG(team)+'</span>'+
         '<span class="team-pick-name">'+team.name+'</span>'+
-        '<span class="team-pick-country">'+team.country+'</span>';
+        '<span class="team-pick-country">'+team.country+'</span>'+
+        '<span class="team-pick-stars">'+starsFor(team)+'</span>';
       btn.addEventListener('click', function(){
         ensureAudio();
-        pendingTeamId = team.id;
-        teamSelectView.classList.add('is-hidden');
-        difficultyView.classList.remove('is-hidden');
+        selectTeam(team.id, btn);
       });
       teamGridEl.appendChild(btn);
     });
+    teamCountEl.textContent = TEAMS.length;
   }
+
+  function selectTeam(id, btnEl){
+    pendingTeamId = id;
+    beep(880, 0.05, 'sine');
+    var cards = teamGridEl.querySelectorAll('.team-pick-btn');
+    for (var i=0;i<cards.length;i++){ cards[i].classList.remove('is-selected'); }
+    if (btnEl) btnEl.classList.add('is-selected');
+    selectedCountEl.textContent = '1';
+    showTeamDetail(TEAMS_BY_ID[id]);
+  }
+
+  function showTeamDetail(team){
+    detailCrestEl.innerHTML = crestSVG(team);
+    detailNameEl.textContent = team.name;
+    detailCountryEl.textContent = team.country;
+    detailColorsEl.innerHTML =
+      '<span class="color-dot" style="background:'+team.shirt+'"></span>'+
+      '<span class="color-dot" style="background:'+team.band+'"></span>'+
+      '<span class="color-dot" style="background:'+team.shorts+'"></span>';
+    var stars = Math.max(1, Math.min(5, Math.round(team.strength/20)));
+    detailDescEl.textContent = 'Representa a '+team.country+' en la Copa Libertadores. Nivel del plantel: '+stars+'/5.';
+    teamDetailEl.classList.remove('is-hidden');
+  }
+
   buildTeamGrid();
+
+  (function populateCountryFilter(){
+    var countries = [];
+    TEAMS.forEach(function(t){ if (countries.indexOf(t.country) === -1) countries.push(t.country); });
+    countries.sort();
+    countries.forEach(function(c){
+      var opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      countryFilterEl.appendChild(opt);
+    });
+  })();
+
+  teamSearchEl.addEventListener('input', function(){
+    teamSearchQuery = teamSearchEl.value;
+    buildTeamGrid();
+  });
+  countryFilterEl.addEventListener('change', function(){
+    teamCountryFilter = countryFilterEl.value;
+    buildTeamGrid();
+  });
+
+  detailContinueBtn.addEventListener('click', function(){
+    if (!pendingTeamId) return;
+    ensureAudio();
+    teamSelectView.classList.add('is-hidden');
+    difficultyView.classList.remove('is-hidden');
+  });
 
   diffBackBtn.addEventListener('click', function(){
     difficultyView.classList.add('is-hidden');

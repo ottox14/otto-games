@@ -552,8 +552,34 @@
       </div>
 
       <div class="liber-sub-view" id="liberTeamSelectView">
-        <h2 class="liber-select-title">Elegí tu equipo</h2>
+        <div class="liber-select-topbar">
+          <h2 class="liber-select-title">Elegí tu equipo</h2>
+          <div class="liber-select-counts">
+            <div class="liber-count-chip"><b id="liberTeamCount">0</b><span>Equipos</span></div>
+            <div class="liber-count-chip is-accent"><b id="liberSelectedCount">0</b><span>Seleccionado</span></div>
+          </div>
+        </div>
+        <div class="liber-select-controls">
+          <div class="liber-search-wrap">
+            <span class="liber-search-icon">🔍</span>
+            <input type="text" id="liberTeamSearch" class="liber-search-input" placeholder="Buscar equipo..." autocomplete="off">
+          </div>
+          <select id="liberCountryFilter" class="liber-country-filter">
+            <option value="">Filtrar por país</option>
+          </select>
+        </div>
         <div class="team-grid" id="liberTeamGrid"></div>
+        <p class="liber-no-results is-hidden" id="liberNoResults">No se encontraron equipos con ese filtro.</p>
+        <div class="liber-team-detail is-hidden" id="liberTeamDetail">
+          <div class="liber-detail-crest" id="liberDetailCrest"></div>
+          <div class="liber-detail-info">
+            <h3 id="liberDetailName">Equipo</h3>
+            <p class="liber-detail-country" id="liberDetailCountry">País</p>
+            <div class="liber-detail-colors" id="liberDetailColors"></div>
+            <p class="liber-detail-desc" id="liberDetailDesc"></p>
+          </div>
+          <button class="big-btn liber-detail-btn" id="liberDetailContinueBtn">Continuar →</button>
+        </div>
       </div>
 
       <div class="liber-sub-view is-hidden" id="liberDifficultyView">

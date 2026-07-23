@@ -1,0 +1,452 @@
+/* Estilos propios de Mundial Penalty Shooter: menu, seleccion de pais,
+   sorteo, tabla de grupos, cuadro eliminatorio, tanda de penales y
+   ceremonia de campeon. Reutiliza clases genericas ya definidas en
+   copa-libertadores.css (team-grid, team-pick-btn, team-crest,
+   draw-groups-grid, draw-group-box, draw-slot, group-table, fixture-list). */
+.mundial-sub-view.is-hidden{ display:none; }
+.mundial-sub-view{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:16px 20px;
+  min-height:420px;
+}
+@keyframes mundialFadeIn{
+  from{ opacity:0; transform:translateY(6px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.mundial-sub-view{ animation:mundialFadeIn 0.35s ease; }
+@media (prefers-reduced-motion: reduce){
+  .mundial-sub-view{ animation:none; }
+}
+
+.mun-section-title{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  text-align:center;
+}
+.mun-stage-text{
+  text-align:center;
+  color:var(--ink-soft);
+  margin:0;
+}
+.mun-back-step{ align-self:flex-start; }
+
+/* ---------- Menu principal ---------- */
+.mun-menu-hero{
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:6px 0 4px;
+}
+.mun-menu-trophy{
+  font-size:52px;
+  filter:drop-shadow(0 6px 14px rgba(255,210,63,0.35));
+}
+.mun-menu-tag{
+  margin:0;
+  color:var(--ink-soft);
+  font-size:14px;
+  max-width:38ch;
+}
+.mun-menu-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-width:480px;
+  width:100%;
+  margin:0 auto;
+}
+.mun-menu-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.05);
+  color:var(--ink);
+  border-radius:14px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  font-family:inherit;
+  cursor:pointer;
+  text-align:left;
+  box-shadow:0 4px 10px rgba(0,0,0,0.25);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.mun-menu-btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,210,63,0.5);
+  box-shadow:0 10px 22px rgba(0,0,0,0.35);
+}
+.mun-menu-btn:active{ transform:translateY(0); }
+.mun-menu-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+.mun-menu-btn.is-primary{
+  border-color:rgba(255,210,63,0.55);
+  background:linear-gradient(135deg, rgba(255,210,63,0.14), rgba(255,255,255,0.04));
+}
+.mun-menu-icon{ font-size:26px; flex:none; }
+.mun-menu-btn-text{ display:flex; flex-direction:column; gap:2px; }
+.mun-menu-btn-text b{ font-size:15px; font-weight:800; }
+.mun-menu-btn-text small{ font-size:12px; color:var(--ink-soft); }
+
+/* ---------- Confirmacion de seleccion elegida ---------- */
+.mun-confirm-bar.is-hidden{ display:none; }
+.mun-confirm-bar{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:12px 16px;
+  border-radius:14px;
+  border:1px solid rgba(255,210,63,0.35);
+  background:linear-gradient(135deg, rgba(255,210,63,0.08), rgba(255,255,255,0.04));
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  animation:mundialFadeIn 0.3s ease;
+}
+.mun-confirm-crest{ width:48px; height:56px; flex:none; }
+.mun-confirm-info{ flex:1 1 auto; display:flex; flex-direction:column; }
+.mun-confirm-info b{ font-size:15px; }
+.mun-confirm-info small{ color:var(--ink-soft); font-size:11.5px; }
+@media (max-width:480px){
+  .mun-confirm-bar{ flex-wrap:wrap; }
+  .mun-confirm-bar .big-btn{ width:100%; }
+}
+
+/* ---------- Torneo: hub de fase de grupos ---------- */
+.mun-hub-top{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.mun-hub-chip{
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--panel-border);
+  border-radius:999px;
+  padding:6px 14px;
+  font-size:13px;
+}
+.mun-hub-chip b{ color:var(--gold); }
+.mun-hub-next{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  padding-top:2px;
+}
+
+/* ---------- Cuadro eliminatorio ---------- */
+.mun-bracket-tree{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  padding:6px 2px 10px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--gold) rgba(255,255,255,0.06);
+}
+.mun-bracket-round{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-around;
+  gap:10px;
+  min-width:150px;
+  flex:none;
+}
+.mun-bracket-round-title{
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  color:var(--ink-soft);
+  text-align:center;
+  margin-bottom:2px;
+}
+.mun-bracket-match{
+  border:1px solid var(--panel-border);
+  border-radius:10px;
+  background:rgba(255,255,255,0.04);
+  overflow:hidden;
+}
+.mun-bracket-match.is-current{ border-color:rgba(255,210,63,0.55); box-shadow:0 0 0 1px rgba(255,210,63,0.25); }
+.mun-bracket-slot{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  padding:6px 8px;
+  font-size:11.5px;
+  font-weight:700;
+  border-bottom:1px solid var(--panel-border);
+}
+.mun-bracket-slot:last-child{ border-bottom:none; }
+.mun-bracket-slot.is-you{ color:var(--gold); }
+.mun-bracket-slot.is-winner{ color:#4caf50; }
+.mun-bracket-slot.is-pending{ color:var(--ink-soft); font-weight:500; font-style:italic; }
+
+/* ---------- Interfaz de la tanda de penales ---------- */
+.mun-match-scoreboard{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.mun-match-team{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.mun-match-team-away{ flex-direction:row-reverse; }
+.mun-match-team b{ font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:26vw; }
+.mun-scoreboard-crest{ width:30px; height:35px; flex:none; }
+.mun-match-pens{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.mun-match-score{
+  font-size:22px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  color:var(--gold);
+}
+.mun-pens-dots{ display:flex; gap:4px; }
+.mun-pen-dot{
+  width:12px; height:12px;
+  border-radius:50%;
+  border:1.5px solid var(--panel-border);
+  background:rgba(255,255,255,0.06);
+}
+.mun-pen-dot.is-made{ background:#4caf50; border-color:#4caf50; }
+.mun-pen-dot.is-missed{ background:#e2001a; border-color:#e2001a; }
+.mun-pen-dot.is-current{ border-color:var(--gold); box-shadow:0 0 0 2px rgba(255,210,63,0.3); }
+
+.mun-turn-banner{
+  text-align:center;
+  margin:0;
+  font-size:15px;
+  font-weight:800;
+  color:var(--gold);
+}
+
+.mun-frame{ background:linear-gradient(180deg,#0b3a1e,#0a2a17 70%); }
+
+.mun-controls-panel{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:12px 14px;
+  border-radius:16px;
+  border:1px solid var(--panel-border);
+  background:var(--panel);
+  backdrop-filter:blur(6px);
+}
+.mun-control-group.is-hidden{ display:none; }
+.mun-control-group{ display:flex; flex-direction:column; gap:6px; }
+.mun-controls-label{
+  margin:0;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  color:var(--ink-soft);
+}
+.mun-btn-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.mun-pick-btn{
+  appearance:none;
+  flex:1 1 0;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.05);
+  color:var(--ink);
+  border-radius:10px;
+  padding:10px 8px;
+  font-family:inherit;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  min-width:88px;
+  transition:transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.mun-pick-btn:active{ transform:translateY(2px); }
+.mun-pick-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+.mun-pick-btn.is-selected{
+  border-color:var(--gold);
+  background:rgba(255,210,63,0.18);
+  box-shadow:0 0 0 1px var(--gold);
+}
+.mun-power-track{
+  position:relative;
+  height:16px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid var(--panel-border);
+  overflow:hidden;
+}
+.mun-power-fill{
+  position:absolute;
+  inset:0;
+  width:0%;
+  background:linear-gradient(90deg,#4caf50,var(--gold) 60%,#e2001a);
+}
+.mun-action-btn{ width:100%; }
+.mun-action-btn:disabled{
+  opacity:0.45;
+  cursor:not-allowed;
+  box-shadow:none;
+  transform:none;
+}
+
+/* ---------- Ceremonia de campeon ---------- */
+.mun-ceremony{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding:40px 20px 30px;
+  text-align:center;
+  border-radius:20px;
+  overflow:hidden;
+  background:radial-gradient(circle at 50% 20%, rgba(255,210,63,0.22), transparent 65%), var(--sky-top);
+  border:1px solid var(--panel-border);
+  min-height:420px;
+  justify-content:center;
+}
+.mun-confetti{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.mun-confetti-piece{
+  position:absolute;
+  top:-10%;
+  width:8px;
+  height:14px;
+  opacity:0.9;
+  animation:mundialConfettiFall linear infinite;
+}
+@keyframes mundialConfettiFall{
+  0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+  100%{ transform:translateY(560px) rotate(540deg); opacity:0.4; }
+}
+.mun-trophy-wrap{ position:relative; z-index:1; }
+.mun-trophy{
+  font-size:76px;
+  filter:drop-shadow(0 10px 24px rgba(255,210,63,0.55));
+  animation:mundialTrophyBounce 1.4s ease-in-out infinite;
+}
+@keyframes mundialTrophyBounce{
+  0%,100%{ transform:translateY(0) scale(1); }
+  50%{ transform:translateY(-12px) scale(1.06); }
+}
+.mun-champion-title{
+  position:relative;
+  z-index:1;
+  margin:6px 0 0;
+  font-size:clamp(24px,5vw,34px);
+  font-weight:900;
+  letter-spacing:0.5px;
+  background:linear-gradient(90deg,var(--gold),#fff6d0,var(--gold));
+  background-size:220% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  animation:hueShift 3s ease-in-out infinite;
+}
+.mun-champion-team{
+  position:relative;
+  z-index:1;
+  margin:0;
+  font-size:16px;
+  color:var(--ink-soft);
+}
+.mun-ceremony .big-btn{ position:relative; z-index:1; margin-top:10px; }
+@media (prefers-reduced-motion: reduce){
+  .mun-trophy{ animation:none; }
+  .mun-champion-title{ animation:none; }
+  .mun-confetti-piece{ animation:none; opacity:0; }
+}
+
+/* ---------- Configuracion ---------- */
+.mun-config-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-width:480px;
+  width:100%;
+  margin:0 auto;
+}
+.mun-config-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.04);
+  flex-wrap:wrap;
+}
+.mun-config-label{ display:flex; flex-direction:column; gap:2px; }
+.mun-config-label small{ color:var(--ink-soft); font-size:11.5px; }
+.mun-toggle-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.08);
+  color:var(--ink);
+  border-radius:999px;
+  padding:8px 16px;
+  font-family:inherit;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+}
+.mun-diff-mini{ display:flex; gap:6px; }
+.mun-diff-chip{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.06);
+  color:var(--ink);
+  border-radius:999px;
+  padding:7px 12px;
+  font-family:inherit;
+  font-weight:700;
+  font-size:12px;
+  cursor:pointer;
+}
+.mun-diff-chip.is-active{
+  border-color:var(--gold);
+  background:rgba(255,210,63,0.2);
+  color:var(--gold);
+}
+
+/* ---------- Estadisticas ---------- */
+.mun-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+}
+.mun-stat-tile{
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.04);
+  border-radius:14px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  align-items:center;
+  text-align:center;
+}
+.mun-stat-tile b{ font-size:22px; color:var(--gold); }
+.mun-stat-tile span{ font-size:11.5px; color:var(--ink-soft); }
+
+@media (max-width:520px){
+  .mun-mundial-sub-view{ padding:12px 14px; }
+  .mun-match-team b{ max-width:22vw; font-size:12px; }
+  .mun-scoreboard-crest{ width:24px; height:28px; }
+  .mun-match-score{ font-size:18px; }
+}

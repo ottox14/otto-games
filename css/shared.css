@@ -263,14 +263,14 @@
      ocupar todo el alto disponible en la pantalla, y el canvas se acomoda
      ahí adentro manteniendo su proporción, sin recortarse ni achicarse
      más de lo necesario */
-  .cosmo-frame, .tanks-frame, .invaders-frame, .liber-frame{
+  .cosmo-frame, .tanks-frame, .invaders-frame, .liber-frame, .mun-frame{
     flex:1 1 auto;
     min-height:0;
     display:flex;
     align-items:center;
     justify-content:center;
   }
-  .cosmo-frame canvas, .tanks-frame canvas, .invaders-frame canvas, .liber-frame canvas{
+  .cosmo-frame canvas, .tanks-frame canvas, .invaders-frame canvas, .liber-frame canvas, .mun-frame canvas{
     width:auto;
     height:auto;
     max-width:100%;

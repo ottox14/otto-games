@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="css/mi-gatito.css">
 <link rel="stylesheet" href="css/copa-libertadores.css">
 <link rel="stylesheet" href="css/liga.css">
+<link rel="stylesheet" href="css/mundial-penalty.css">
 </head>
 <body>
 
@@ -95,6 +96,14 @@
         <p>Elegí tu equipo entre los 20 de la liga y jugá la temporada completa, fecha a fecha, con tabla de posiciones en tiempo real. Mismo fútbol de mesa por turnos.</p>
         <div class="tags"><span class="tag">Deportes</span><span class="tag">1 vs CPU</span></div>
         <button class="play-btn" id="playLigaBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">🏆</div>
+        <h2>Mundial Penalty Shooter</h2>
+        <p>Elegí tu selección entre 32 países y disputá el Mundial completo: sorteo, fase de grupos y eliminatorias, todo definido a puro penal. ¡Levantá la copa!</p>
+        <div class="tags"><span class="tag">Deportes</span><span class="tag">1 vs CPU</span></div>
+        <button class="play-btn" id="playMundialBtn">▶ Jugar</button>
       </article>
 
       <article class="game-card coming-soon">
@@ -814,6 +823,206 @@
     </div>
   </div>
 
+  <div class="view is-hidden" id="mundialView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromMundialBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">MUNDIAL PENALTY SHOOTER</h1>
+          <p class="subtitle" id="mundialSubtitle">Disputá el Mundial completo, todo a puro penal</p>
+        </div>
+        <button class="mute-btn" id="mundialMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="mundial-sub-view" id="munMenuView">
+        <div class="mun-menu-hero">
+          <div class="mun-menu-trophy">🏆</div>
+          <p class="mun-menu-tag">Elegí tu selección y disputá el Mundial completo, todo a puro penal.</p>
+        </div>
+        <div class="mun-menu-list">
+          <button class="mun-menu-btn is-primary" id="munPlayBtn">
+            <span class="mun-menu-icon">⚽</span>
+            <span class="mun-menu-btn-text"><b>Jugar Mundial</b><small>Elegí tu selección y buscá el título</small></span>
+          </button>
+          <button class="mun-menu-btn" id="munTrainBtn">
+            <span class="mun-menu-icon">🎯</span>
+            <span class="mun-menu-btn-text"><b>Entrenamiento</b><small>Practicá remates y atajadas sin presión</small></span>
+          </button>
+          <button class="mun-menu-btn" id="munConfigBtn">
+            <span class="mun-menu-icon">⚙️</span>
+            <span class="mun-menu-btn-text"><b>Configuración</b><small>Sonido y dificultad</small></span>
+          </button>
+          <button class="mun-menu-btn" id="munStatsBtn">
+            <span class="mun-menu-icon">📊</span>
+            <span class="mun-menu-btn-text"><b>Estadísticas</b><small>Tu historial en el Mundial</small></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munTeamSelectView">
+        <button class="text-btn mun-back-step" id="munTeamSelectBackBtn">← Menú</button>
+        <h2 class="mun-section-title">Elegí tu selección</h2>
+        <div class="team-grid" id="munTeamGrid"></div>
+        <div class="mun-confirm-bar is-hidden" id="munConfirmBar">
+          <span class="team-crest mun-confirm-crest" id="munConfirmCrest"></span>
+          <div class="mun-confirm-info"><b id="munConfirmName">-</b><small id="munConfirmCountry">-</small></div>
+          <button class="big-btn" id="munConfirmBtn">Comenzar sorteo →</button>
+        </div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munDrawView">
+        <h2 class="mun-section-title">Sorteo del Mundial</h2>
+        <p class="mun-stage-text" id="munDrawStatus">Sorteando selecciones...</p>
+        <div class="draw-groups-grid" id="munDrawGrid"></div>
+        <div class="draw-actions">
+          <button class="text-btn" id="munDrawSkipBtn">⏭ Saltar sorteo</button>
+          <button class="big-btn is-hidden" id="munDrawContinueBtn">▶ Ver mi grupo</button>
+        </div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munHubView">
+        <div class="mun-hub-top">
+          <div class="mun-hub-chip">Grupo <b id="munHubGroupLetter">A</b></div>
+          <div class="mun-hub-chip">Fecha <b id="munHubMatchday">1</b> de 3</div>
+        </div>
+        <table class="group-table" id="munHubTable">
+          <thead><tr><th>Selección</th><th>Pts</th><th>DG</th></tr></thead>
+          <tbody id="munHubTableBody"></tbody>
+        </table>
+        <div class="mun-hub-next">
+          <p class="mun-stage-text" id="munHubNextText">Próximo rival: -</p>
+          <button class="big-btn" id="munHubPlayBtn">▶ Jugar próximo partido</button>
+        </div>
+        <div class="fixture-list" id="munHubFixtureList"></div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munBracketView">
+        <h2 class="mun-section-title" id="munBracketTitle">Octavos de Final</h2>
+        <div class="mun-bracket-tree" id="munBracketTree"></div>
+        <div class="mun-hub-next">
+          <p class="mun-stage-text" id="munBracketNextText">Tu partido: vs -</p>
+          <button class="big-btn" id="munBracketPlayBtn">▶ Jugar</button>
+        </div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munMatchView">
+        <button class="text-btn mun-back-step is-hidden" id="munMatchBackBtn">← Menú</button>
+        <div class="mun-match-scoreboard" id="munMatchScoreboard">
+          <div class="mun-match-team">
+            <span class="team-crest mun-scoreboard-crest" id="munMatchHomeCrest"></span>
+            <b id="munMatchHomeName">-</b>
+          </div>
+          <div class="mun-match-pens">
+            <div class="mun-pens-dots" id="munPensHome"></div>
+            <div class="mun-match-score" id="munMatchScore">0 - 0</div>
+            <div class="mun-pens-dots" id="munPensAway"></div>
+          </div>
+          <div class="mun-match-team mun-match-team-away">
+            <b id="munMatchAwayName">-</b>
+            <span class="team-crest mun-scoreboard-crest" id="munMatchAwayCrest"></span>
+          </div>
+        </div>
+        <p class="mun-turn-banner" id="munTurnBanner">Pateás vos</p>
+
+        <div class="frame mun-frame">
+          <canvas id="munCanvas" width="900" height="480"></canvas>
+
+          <div class="overlay" id="munStartOverlay">
+            <h2 id="munStartTitle">¿Listo para la tanda?</h2>
+            <p>Van a alternar remates. Cuando patees vos, elegí dirección, altura y potencia. Cuando patee la IA, elegí dirección y altura para atajar.</p>
+            <button class="big-btn" id="munStartBtn">▶ Empezar</button>
+          </div>
+
+          <div class="overlay is-hidden" id="munShootoutOverOverlay">
+            <h2 id="munShootoutOverTitle">¡Ganaste la tanda!</h2>
+            <p id="munShootoutOverScore">4 - 2</p>
+            <button class="big-btn" id="munShootoutContinueBtn">Continuar</button>
+          </div>
+        </div>
+
+        <div class="mun-controls-panel" id="munControlsPanel">
+          <div class="mun-control-group">
+            <p class="mun-controls-label">Dirección</p>
+            <div class="mun-btn-row" id="munDirRow">
+              <button class="mun-pick-btn" data-dir="left">⬅ Izquierda</button>
+              <button class="mun-pick-btn" data-dir="center">🎯 Centro</button>
+              <button class="mun-pick-btn" data-dir="right">➡ Derecha</button>
+            </div>
+          </div>
+          <div class="mun-control-group">
+            <p class="mun-controls-label">Altura</p>
+            <div class="mun-btn-row" id="munHeightRow">
+              <button class="mun-pick-btn" data-height="high">⬆ Arriba</button>
+              <button class="mun-pick-btn" data-height="low">⬇ Abajo</button>
+            </div>
+          </div>
+          <div class="mun-control-group is-hidden" id="munPowerGroup">
+            <p class="mun-controls-label">Potencia</p>
+            <div class="mun-power-track" id="munPowerTrack"><div class="mun-power-fill" id="munPowerFill"></div></div>
+          </div>
+          <button class="big-btn mun-action-btn" id="munActionBtn" disabled>⚽ Patear</button>
+        </div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munTrainingView">
+        <button class="text-btn mun-back-step" id="munTrainingBackBtn">← Menú</button>
+        <h2 class="mun-section-title">Entrenamiento</h2>
+        <div class="mun-menu-list" id="munTrainModes">
+          <button class="mun-menu-btn" id="munTrainKickBtn">
+            <span class="mun-menu-icon">🥅</span>
+            <span class="mun-menu-btn-text"><b>Practicar remates</b><small>Pateá contra el arquero</small></span>
+          </button>
+          <button class="mun-menu-btn" id="munTrainSaveBtn">
+            <span class="mun-menu-icon">🧤</span>
+            <span class="mun-menu-btn-text"><b>Practicar atajadas</b><small>Atajá los remates de la IA</small></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munConfigView">
+        <button class="text-btn mun-back-step" id="munConfigBackBtn">← Menú</button>
+        <h2 class="mun-section-title">Configuración</h2>
+        <div class="mun-config-list">
+          <div class="mun-config-row">
+            <div class="mun-config-label"><b>Sonido</b><small>Efectos de estadio y remates</small></div>
+            <button class="mun-toggle-btn" id="munConfigSoundBtn">🔊 Activado</button>
+          </div>
+          <div class="mun-config-row">
+            <div class="mun-config-label"><b>Dificultad</b><small>Nivel del arquero y las selecciones rivales</small></div>
+            <div class="mun-diff-mini" id="munConfigDiffRow">
+              <button class="mun-diff-chip" data-diff="facil">Fácil</button>
+              <button class="mun-diff-chip" data-diff="normal">Normal</button>
+              <button class="mun-diff-chip" data-diff="dificil">Difícil</button>
+            </div>
+          </div>
+          <div class="mun-config-row">
+            <div class="mun-config-label"><b>Progreso</b><small>Reinicia tu Mundial actual y tus estadísticas</small></div>
+            <button class="text-btn" id="munConfigResetBtn">🔁 Reiniciar todo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munStatsView">
+        <button class="text-btn mun-back-step" id="munStatsBackBtn">← Menú</button>
+        <h2 class="mun-section-title">Estadísticas</h2>
+        <div class="mun-stats-grid" id="munStatsGrid"></div>
+      </div>
+
+      <div class="mundial-sub-view is-hidden" id="munCeremonyView">
+        <div class="mun-ceremony" id="munCeremony">
+          <div class="mun-confetti" id="munConfetti"></div>
+          <div class="mun-trophy-wrap"><div class="mun-trophy" id="munTrophyIcon">🏆</div></div>
+          <h2 class="mun-champion-title" id="munChampionTitle">¡CAMPEÓN DEL MUNDO!</h2>
+          <p class="mun-champion-team" id="munChampionTeam">-</p>
+          <button class="big-btn" id="munCeremonyContinueBtn">Volver al menú</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <script src="js/portal.js"></script>
@@ -825,5 +1034,6 @@
 <script src="js/mi-gatito.js"></script>
 <script src="js/copa-libertadores.js"></script>
 <script src="js/liga.js"></script>
+<script src="js/mundial-penalty.js"></script>
 </body>
 </html>

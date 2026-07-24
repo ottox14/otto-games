@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="css/mi-gatito.css">
 <link rel="stylesheet" href="css/copa-libertadores.css">
 <link rel="stylesheet" href="css/liga.css">
+<link rel="stylesheet" href="css/parkour.css">
 </head>
 <body>
 
@@ -95,6 +96,14 @@
         <p>Elegí tu equipo entre los 20 de la liga y jugá la temporada completa, fecha a fecha, con tabla de posiciones en tiempo real. Mismo fútbol de mesa por turnos.</p>
         <div class="tags"><span class="tag">Deportes</span><span class="tag">1 vs CPU</span></div>
         <button class="play-btn" id="playLigaBtn">▶ Jugar</button>
+      </article>
+
+      <article class="game-card">
+        <div class="card-art">🧗</div>
+        <h2>Parkour 2D</h2>
+        <p>Plataformas de precisión: caminá, saltá y deslizate por las paredes. 4 niveles tutorial para dominar el movimiento, con un final a pura lava.</p>
+        <div class="tags"><span class="tag">Plataformas</span><span class="tag">Precisión</span></div>
+        <button class="play-btn" id="playParkourBtn">▶ Jugar</button>
       </article>
 
       <article class="game-card coming-soon">
@@ -814,6 +823,62 @@
     </div>
   </div>
 
+  <div class="view is-hidden" id="parkourView">
+    <div class="stage">
+      <div class="game-header">
+        <button class="back-btn" id="backFromParkourBtn">← Portal</button>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1 class="game-title">PARKOUR 2D</h1>
+          <p class="subtitle" id="parkourSubtitle">Caminá, saltá y deslizate por las paredes</p>
+        </div>
+        <button class="mute-btn" id="parkourMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
+      </div>
+
+      <div class="pk-topbar">
+        <div class="hud-chip pk-level-chip">Nivel <b id="pkLevelVal">1</b> / 4</div>
+        <div class="pk-level-name" id="pkLevelName">Caminar y saltar</div>
+      </div>
+
+      <div class="frame pk-frame">
+        <canvas id="pkCanvas" width="800" height="450"></canvas>
+
+        <div class="overlay" id="pkStartOverlay">
+          <h2 id="pkStartTitle">Nivel 1</h2>
+          <p id="pkStartDesc">Movete con A/D y saltá con Espacio.</p>
+          <button class="big-btn" id="pkStartBtn">▶ Empezar</button>
+        </div>
+
+        <div class="overlay is-hidden" id="pkClearOverlay">
+          <h2 id="pkClearTitle">¡Nivel completo!</h2>
+          <button class="big-btn" id="pkNextBtn">▶ Siguiente nivel</button>
+        </div>
+
+        <div class="overlay is-hidden" id="pkDeathOverlay">
+          <h2 id="pkDeathTitle">¡Te alcanzó la lava!</h2>
+          <button class="big-btn" id="pkRetryBtn">↻ Reintentar nivel</button>
+        </div>
+
+        <div class="overlay is-hidden" id="pkTutorialDoneOverlay">
+          <h2>¡Tutorial completo!</h2>
+          <p>Superaste los 4 niveles. Pronto se van a sumar nuevas mecánicas y niveles más difíciles.</p>
+          <button class="big-btn" id="pkTutorialRetryBtn">↻ Jugar de nuevo</button>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <p class="hint">Movete con <kbd>A</kbd><kbd>D</kbd> · Saltás con <kbd>Espacio</kbd> · Pegate a una pared y saltá para el salto de pared</p>
+        <div class="action-touch-controls">
+          <div class="joystick joystick-2way" id="pkJoystick" aria-label="Mover">
+            <div class="joystick-base"><div class="joystick-thumb"></div></div>
+          </div>
+          <button class="fire-btn" id="pkJumpBtn" aria-label="Saltar">⬆</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="js/portal.js"></script>
@@ -825,5 +890,6 @@
 <script src="js/mi-gatito.js"></script>
 <script src="js/copa-libertadores.js"></script>
 <script src="js/liga.js"></script>
+<script src="js/parkour.js"></script>
 </body>
 </html>

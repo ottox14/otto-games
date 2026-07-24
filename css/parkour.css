@@ -1,0 +1,16 @@
+/* Estilos propios de Parkour 2D: barra de nivel y marco del canvas. Los
+   overlays y botones reutilizan las clases genericas de shared.css. */
+.pk-topbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.pk-level-chip b{ color:var(--gold); }
+.pk-level-name{
+  font-size:13px;
+  color:var(--ink-soft);
+}
+.pk-frame{
+  background:linear-gradient(180deg,#1b1340,#2a1d47 60%,#3a2a5e);
+}

@@ -156,36 +156,53 @@
     };
   }
   function buildLevel4(){
-    // Escalera casi recta: plataformas anchas que se superponen entre si
-    // (apenas se desplazan de lado), cada 2 tiles de altura (dentro del
-    // alcance comodo de un salto normal), asi el desafio real es la
-    // velocidad para escalar contra la lava y no la puntaria horizontal.
-    // Las paredes del pozo sirven de red de seguridad para saltos de
-    // pared si se falla un salto.
+    // Escalera vertical: plataformas chicas y medianas alternando de lado
+    // (con un leve solape en el borde de llegada, para que saltar desde
+    // ahi nunca choque contra el techo de la siguiente). Las paredes del
+    // pozo sirven de red de seguridad para saltos de pared si se falla un
+    // salto, y ademas ahi van montados los cañones.
     var cols = 10, rows = 50;
     var grid = makeGrid(cols, rows);
     fillRect(grid, 0,0, 0,rows-1);       // pared izquierda
     fillRect(grid, cols-1,cols-1, 0,rows-1); // pared derecha
     fillRect(grid, 1,cols-2, rows-1,rows-1); // piso inicial
-    // Plataformas anchas con un solo desplazamiento lateral corto entre
-    // una y otra (dejan una zona despejada del lado de llegada, para que
-    // saltar desde ahi nunca choque contra el techo de la siguiente).
-    var side = 0;
+    var side = 0, idx = 0;
     for (var row = rows-3; row >= 3; row -= 2){
-      if (side === 0) fillRect(grid, 1,5, row,row);
-      else fillRect(grid, 4,8, row,row);
+      var small = (idx % 3 === 2);
+      if (side === 0){
+        if (small) fillRect(grid, 3,5, row,row);
+        else fillRect(grid, 1,5, row,row);
+      } else {
+        if (small) fillRect(grid, 4,6, row,row);
+        else fillRect(grid, 4,8, row,row);
+      }
       side = 1-side;
+      idx++;
     }
     fillRect(grid, 3,6, 2,2); // plataforma final bajo la meta
+    // Cañones en las paredes laterales: disparan cada ~2s hacia el lado
+    // contrario. Se ubican en huecos entre plataformas (no encima de una),
+    // para que el jugador tenga que esperar el momento justo para saltar.
+    // El arranque es sin cañones para que la mecánica se introduzca de a
+    // poco, y cada uno tiene su propio desfasaje para no disparar todos
+    // juntos.
+    var cannons = [
+      {row:38, side:'left',  timer:0.4},
+      {row:30, side:'right', timer:1.1},
+      {row:22, side:'left',  timer:0.0},
+      {row:14, side:'right', timer:0.7},
+      {row:8,  side:'left',  timer:1.4}
+    ];
     return {
       // Arranca sobre la primer plataforma (no debajo de una mas alta),
       // para que el primer salto no choque contra ningun techo.
       grid: grid, cols: cols, rows: rows, vertical: true,
       spawn: {x: 3*TILE+6, y: (rows-3)*TILE},
       goal: {x: 4*TILE, y: 1*TILE, w: TILE, h: TILE},
-      title: 'Nivel 4', name: 'La lava sube',
-      desc: 'La lava sube desde abajo sin parar. Escalá rápido con plataformas y paredes: si te toca, perdés al instante.',
-      lava: true
+      title: 'Nivel 4', name: 'Escape de la lava',
+      desc: 'La lava sube sin parar y los cañones de las paredes disparan cada tanto. Escalá rápido, esquivá los disparos: si algo te toca, perdés al instante.',
+      lava: true,
+      cannons: cannons
     };
   }
   var LEVELS = [buildLevel1, buildLevel2, buildLevel3, buildLevel4];
@@ -201,6 +218,11 @@
   var lavaTopY = 0;
   var gameState = 'idle'; // idle|play|clear|dead|tutorialDone
   var lastTs = null;
+  var bullets = [];
+  var CANNON_INTERVAL = 2.0;
+  var CANNON_WARN_TIME = 0.35;
+  var BULLET_SPEED = 260;
+  var BULLET_R = 6;
 
   function isSolidTile(col, row){
     if (col < 0 || col >= level.cols) return true;
@@ -215,6 +237,7 @@
     coyoteTimer = 0; jumpBufferTimer = 0; touchWallSign = 0; isWallSliding = false;
     wallJumpLockTimer = 0; wallJumpBlockedSign = 0;
     lavaTopY = level.rows*TILE + 40;
+    bullets = [];
   }
 
   function loadLevel(idx){
@@ -435,11 +458,17 @@
     if (player.onGround && Math.abs(player.vx) > 10) player.walkT += dt*7;
   }
 
-  function updateCamera(){
+  function updateCamera(dt){
     if (level.vertical){
       camera.letterboxX = Math.max(0, (CANVAS_W - level.cols*TILE)/2);
       var maxCamY = Math.max(0, level.rows*TILE - CANVAS_H);
-      camera.y = clamp(player.y - CANVAS_H/2, 0, maxCamY);
+      var targetY = clamp(player.y - CANVAS_H/2, 0, maxCamY);
+      if (dt === undefined){
+        camera.y = targetY; // carga de nivel: centrado instantaneo, sin deslizar
+      } else {
+        var smooth = 1 - Math.pow(0.0005, dt); // suavizado independiente del framerate
+        camera.y += (targetY - camera.y) * smooth;
+      }
       camera.x = 0;
     } else {
       camera.letterboxX = 0;
@@ -479,8 +508,37 @@
     if (gameState !== 'play') return;
     gameState = 'dead';
     beep(180, 0.28, 'sawtooth');
-    deathTitleEl.textContent = kind === 'lava' ? '¡Te alcanzó la lava!' : 'Caíste al vacío';
+    deathTitleEl.textContent = kind === 'lava' ? '¡Te alcanzó la lava!' : kind === 'cannon' ? '¡Te dio un disparo!' : 'Caíste al vacío';
     deathOverlay.classList.remove('is-hidden');
+  }
+
+  // ---------- Cañones (Nivel 4) ----------
+  function fireCannon(c){
+    var y = c.row*TILE + TILE/2;
+    if (c.side === 'left') bullets.push({x: TILE*1.3, y: y, vx: BULLET_SPEED});
+    else bullets.push({x: (level.cols-1.3)*TILE, y: y, vx: -BULLET_SPEED});
+    beep(340, 0.08, 'square');
+  }
+  function updateCannons(dt){
+    if (!level.cannons) return;
+    level.cannons.forEach(function(c){
+      c.timer += dt;
+      c.charging = c.timer >= CANNON_INTERVAL - CANNON_WARN_TIME;
+      if (c.timer >= CANNON_INTERVAL){
+        c.timer = 0;
+        c.charging = false;
+        fireCannon(c);
+      }
+    });
+    for (var i=bullets.length-1;i>=0;i--){
+      var b = bullets[i];
+      b.x += b.vx*dt;
+      if (b.x < -20 || b.x > level.cols*TILE+20){ bullets.splice(i,1); continue; }
+      if (b.x+BULLET_R > player.x && b.x-BULLET_R < player.x+PLAYER_W &&
+          b.y+BULLET_R > player.y && b.y-BULLET_R < player.y+PLAYER_H){
+        triggerDeath('cannon');
+      }
+    }
   }
 
   function loop(ts){
@@ -490,10 +548,11 @@
     lastTs = ts;
     if (gameState === 'play'){
       updatePlayer(dt);
-      updateCamera();
+      updateCamera(dt);
       checkGoal();
       checkVoidDeath();
       checkLava(dt);
+      updateCannons(dt);
     }
     draw();
     requestAnimationFrame(loop);
@@ -582,6 +641,37 @@
       c.fillRect(x, by, 7, 3);
     }
   }
+  function drawCannons(){
+    if (!level.cannons) return;
+    var c = ctx;
+    level.cannons.forEach(function(cn){
+      var y = cn.row*TILE;
+      var glowT = cn.charging && !reducedMotion ? (0.55 + Math.sin(performance.now()/55)*0.35) : (cn.charging?0.7:0);
+      if (cn.side === 'left'){
+        c.fillStyle = '#3a2a2a';
+        c.fillRect(TILE-6, y+3, 20, TILE-6);
+        c.fillStyle = glowT>0 ? 'rgba(255,140,60,'+glowT.toFixed(2)+')' : '#7a5a44';
+        c.fillRect(TILE+10, y+TILE/2-5, 12, 10);
+      } else {
+        c.fillStyle = '#3a2a2a';
+        c.fillRect((level.cols-1)*TILE-14, y+3, 20, TILE-6);
+        c.fillStyle = glowT>0 ? 'rgba(255,140,60,'+glowT.toFixed(2)+')' : '#7a5a44';
+        c.fillRect((level.cols-1)*TILE-22, y+TILE/2-5, 12, 10);
+      }
+    });
+  }
+  function drawBullets(){
+    var c = ctx;
+    bullets.forEach(function(b){
+      c.save();
+      if (!reducedMotion){ c.shadowColor = '#ff8a3a'; c.shadowBlur = 10; }
+      c.fillStyle = '#ffcf6b';
+      c.beginPath(); c.arc(b.x, b.y, BULLET_R, 0, Math.PI*2); c.fill();
+      c.strokeStyle = '#ff8a3a'; c.lineWidth = 2;
+      c.beginPath(); c.arc(b.x, b.y, BULLET_R, 0, Math.PI*2); c.stroke();
+      c.restore();
+    });
+  }
   function drawPlayer(){
     var c = ctx;
     var squashY = 1 - player.squash*0.35;
@@ -623,6 +713,8 @@
     ctx.save();
     ctx.translate(-camera.x+camera.letterboxX, -camera.y);
     drawLevel();
+    drawCannons();
+    drawBullets();
     drawLava();
     drawPlayer();
     ctx.restore();

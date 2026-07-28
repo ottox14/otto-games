@@ -404,6 +404,45 @@
   margin:0;
 }
 
+.fixture-current{
+  width:100%;
+  max-width:460px;
+  margin:10px auto 0;
+  padding:12px 14px;
+  border:1px solid var(--gold);
+  border-radius:12px;
+  background:rgba(255,210,63,0.08);
+}
+.fixture-current-title{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.02em;
+  color:var(--gold);
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.fixture-current-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.fixture-current-list li{
+  font-size:14px;
+  font-weight:700;
+  color:var(--ink);
+  padding-left:16px;
+  position:relative;
+}
+.fixture-current-list li::before{
+  content:'•';
+  position:absolute;
+  left:0;
+  color:var(--gold);
+}
+
 .fixture-list{
   width:100%;
   max-width:460px;

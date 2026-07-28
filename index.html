@@ -445,7 +445,7 @@
       <div class="title-row">
         <div>
           <h1 class="game-title">PAPA MILLONARIA</h1>
-          <p class="subtitle">Tocá la papa, juntá pesos y hacete millonario</p>
+          <p class="subtitle" id="papaZoneSubtitle">Huerta Inicial</p>
         </div>
         <button class="mute-btn" id="papaMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
       </div>
@@ -454,15 +454,17 @@
         <div class="hud-chip">💰 <b id="papaMoneyVal">0</b></div>
         <div class="hud-chip">👆 <b id="papaPerClickVal">1</b>/click</div>
         <div class="hud-chip">⚙️ <b id="papaPerSecVal">0</b>/seg</div>
-        <div class="multiplier-banner">✨ x<span id="papaMultiplierVal">1.0</span></div>
-        <div class="papa-goal">
-          <span>Meta $1.000.000</span>
-          <div class="papa-goal-track"><div class="papa-goal-fill" id="papaGoalFill"></div></div>
-        </div>
+        <div class="hud-chip is-hidden" id="papaGemsChip">🌟 <b id="papaGemsVal">0</b></div>
       </div>
+      <div class="papa-goal">
+        <span id="papaZoneGoalLabel">Meta de zona: $5.000</span>
+        <div class="papa-goal-track"><div class="papa-goal-fill" id="papaGoalFill"></div></div>
+      </div>
+      <div class="papa-buffs-bar" id="papaBuffsBar"></div>
 
-      <div class="frame papa-frame">
-        <div class="papa-main">
+      <div class="frame papa-frame" id="papaFrame">
+        <div class="papa-main" id="papaMain">
+          <div class="papa-zone-scene" id="papaZoneScene"></div>
           <div class="potato-wrap">
             <button class="potato-btn" id="potatoBtn" aria-label="Golpear la papa">🥔</button>
             <svg class="potato-cracks" id="potatoCracks" viewBox="0 0 140 140" aria-hidden="true">
@@ -471,34 +473,91 @@
               <path class="crack c3" d="M98 58 L86 80 L102 100" />
               <path class="crack c4" d="M54 102 L72 90 L88 112" />
             </svg>
-            <div class="chicken" id="chickenIcon" aria-hidden="true">🐔</div>
           </div>
+          <button class="papa-event-badge is-hidden" id="papaEventBadge" aria-label="Evento especial"></button>
           <p class="papa-hint">¡Tocá la papa para ganar pesos!</p>
         </div>
 
-        <div class="upgrades-columns">
-          <section class="upgrade-col">
-            <h2 class="panel-title">👆 Mejoras de click</h2>
-            <div class="upgrade-list" id="clickUpgradeList"></div>
-            <div class="upgrade-card special" id="celestialCard">
-              <div class="upgrade-icon">🌟🥔</div>
-              <div class="upgrade-info">
-                <h3>Patatas Celestiales</h3>
-                <p id="celestialDesc">Suma +0.1 al multiplicador de TODO lo que ganás.</p>
-                <p class="upgrade-owned">Nivel: <b id="celestialLevel">0</b></p>
-              </div>
-              <button class="upgrade-buy-btn" id="celestialBuyBtn">$0</button>
-            </div>
-          </section>
-          <section class="upgrade-col">
-            <h2 class="panel-title">⚙️ Producción automática</h2>
-            <div class="upgrade-list" id="autoUpgradeList"></div>
-          </section>
+        <div class="papa-tabs" id="papaTabs">
+          <button class="papa-tab-btn is-active" data-tab="upgrades">🌳 Mejoras</button>
+          <button class="papa-tab-btn" data-tab="missions">🎯 Misiones</button>
+          <button class="papa-tab-btn" data-tab="shop">🛍️ Tienda</button>
+          <button class="papa-tab-btn" data-tab="pets">🐾 Mascotas</button>
+          <button class="papa-tab-btn" data-tab="collection">💎 Colección</button>
+          <button class="papa-tab-btn" data-tab="prestige">🚀 Prestigio</button>
+        </div>
+
+        <div class="papa-tab-panel" id="papaPanelUpgrades">
+          <div class="papa-category-tabs" id="papaCategoryTabs">
+            <button class="papa-cat-btn is-active" data-cat="click">👆 Click</button>
+            <button class="papa-cat-btn" data-cat="production">⚙ Producción</button>
+            <button class="papa-cat-btn" data-cat="economy">💰 Economía</button>
+            <button class="papa-cat-btn" data-cat="luck">🍀 Suerte</button>
+          </div>
+          <div class="upgrade-list papa-upgrade-list" id="papaUpgradeList"></div>
+        </div>
+
+        <div class="papa-tab-panel is-hidden" id="papaPanelMissions">
+          <div class="papa-mission-list" id="papaMissionList"></div>
+        </div>
+
+        <div class="papa-tab-panel is-hidden" id="papaPanelShop">
+          <div class="papa-shop-section">
+            <h3>🥔 Apariencias de papa</h3>
+            <div class="papa-shop-grid" id="papaShopSkins"></div>
+          </div>
+          <div class="papa-shop-section">
+            <h3>🌅 Fondos</h3>
+            <div class="papa-shop-grid" id="papaShopBg"></div>
+          </div>
+          <div class="papa-shop-section">
+            <h3>✨ Efectos de click</h3>
+            <div class="papa-shop-grid" id="papaShopEffects"></div>
+          </div>
+          <div class="papa-shop-section">
+            <h3>🎵 Música</h3>
+            <div class="papa-shop-grid" id="papaShopMusic"></div>
+          </div>
+        </div>
+
+        <div class="papa-tab-panel is-hidden" id="papaPanelPets">
+          <p class="papa-panel-hint">Cada mascota adoptada suma su bonificación todo el tiempo. Subilas de nivel para que rindan más.</p>
+          <div class="papa-pet-grid" id="papaPetGrid"></div>
+        </div>
+
+        <div class="papa-tab-panel is-hidden" id="papaPanelCollection">
+          <p class="papa-panel-hint">Objetos rarísimos que podés encontrar al hacer click o en eventos especiales. Cada uno da una bonificación permanente.</p>
+          <div class="papa-collect-grid" id="papaCollectGrid"></div>
+        </div>
+
+        <div class="papa-tab-panel is-hidden" id="papaPanelPrestige">
+          <div class="papa-prestige-info" id="papaPrestigeInfo"></div>
+          <button class="big-btn" id="papaPrestigeBtn">🚀 Prestigiar</button>
+          <p class="papa-panel-hint" id="papaPrestigeHint"></p>
+          <div class="upgrade-list papa-upgrade-list" id="papaPrestigeUpgradeList"></div>
+        </div>
+
+        <div class="overlay is-hidden" id="papaZoneUnlockOverlay">
+          <h2 id="papaZoneUnlockTitle">🎉 ¡Nueva zona desbloqueada!</h2>
+          <p id="papaZoneUnlockDesc">Campo de Papas</p>
+          <button class="big-btn" id="papaTravelBtn">🚀 Viajar</button>
+        </div>
+        <div class="overlay is-hidden" id="papaTravelOverlay">
+          <h2 id="papaTravelTitle">Viajando...</h2>
+          <div class="papa-travel-spinner">🥔</div>
+        </div>
+        <div class="overlay is-hidden" id="papaPrestigeConfirmOverlay">
+          <h2>¿Reiniciar tu progreso?</h2>
+          <p id="papaPrestigeConfirmDesc"></p>
+          <button class="big-btn" id="papaPrestigeConfirmBtn">Confirmar</button>
+          <button class="text-btn" id="papaPrestigeCancelBtn">Cancelar</button>
         </div>
       </div>
 
+      <div class="papa-zone-strip" id="papaZoneStrip"></div>
+
       <div class="controls-row papa-footer">
-        <button class="text-btn" id="papaResetBtn">🔁 Reiniciar partida</button>
+        <button class="text-btn" id="papaResetBtn">🔁 Reiniciar partida completa</button>
       </div>
     </div>
   </div>

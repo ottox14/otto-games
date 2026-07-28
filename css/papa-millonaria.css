@@ -1,6 +1,7 @@
 /* Tema y componentes propios de Papa Millonaria: la papa que se agrieta al
-   tocarla, las burbujas de "+pesos" y las listas de mejoras de click,
-   producción automática y la mejora especial Patatas Celestiales */
+   tocarla, las burbujas de "+pesos", las zonas con tema visual propio,
+   pestañas de mejoras/misiones/tienda/mascotas/colección/prestigio,
+   eventos aleatorios y power-ups temporales. */
 #papaView{
   --panel: rgba(40,24,10,0.6);
   --panel-border: rgba(255,200,120,0.2);
@@ -10,6 +11,9 @@
   --cyan: #7ed957;
   --magenta: #ffb347;
   --sky-top: #1a0f05;
+  --papa-accent: #8bc34a;
+  --papa-bg1: #2d1b0e;
+  --papa-bg2: #4a2f1a;
 }
 .papa-hud{
   display:flex;
@@ -24,7 +28,8 @@
   color:var(--ink-soft);
 }
 .papa-goal-track{
-  width:120px;
+  flex:1;
+  max-width:260px;
   height:8px;
   background:rgba(255,255,255,0.14);
   border-radius:999px;
@@ -33,19 +38,48 @@
 .papa-goal-fill{
   height:100%;
   width:0%;
-  background:linear-gradient(90deg,var(--cyan),var(--gold));
+  background:linear-gradient(90deg,var(--papa-accent),var(--gold));
   border-radius:999px;
-  transition:width 0.2s ease;
+  transition:width 0.3s ease;
 }
+
+/* ---------- Barra de power-ups activos ---------- */
+.papa-buffs-bar{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  min-height:0;
+}
+.papa-buff-pill{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  background:rgba(255,210,63,0.14);
+  border:1px solid rgba(255,210,63,0.4);
+  border-radius:999px;
+  padding:4px 10px 4px 8px;
+  font-size:11px;
+  font-weight:800;
+  color:var(--gold);
+  animation:papaBuffIn 0.25s ease;
+}
+@keyframes papaBuffIn{
+  from{ opacity:0; transform:scale(0.7); }
+  to{ opacity:1; transform:scale(1); }
+}
+
 .papa-frame{
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:14px;
   padding:20px;
+  transition:background 0.5s ease;
 }
 .papa-footer{
   justify-content:center;
 }
+
+/* ---------- Escena de la zona ---------- */
 .papa-main{
   position:relative;
   display:flex;
@@ -53,7 +87,29 @@
   align-items:center;
   gap:10px;
   padding:10px 0 18px;
+  border-radius:16px;
+  background:linear-gradient(180deg, var(--papa-bg1), var(--papa-bg2));
+  overflow:hidden;
+  transition:background 0.6s ease;
 }
+.papa-zone-scene{
+  display:flex;
+  gap:18px;
+  justify-content:center;
+  font-size:30px;
+  padding:8px 0 2px;
+  filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+.papa-zone-scene span{
+  animation:papaZoneBob 2.6s ease-in-out infinite;
+}
+.papa-zone-scene span:nth-child(2){ animation-delay:0.4s; }
+.papa-zone-scene span:nth-child(3){ animation-delay:0.8s; }
+@keyframes papaZoneBob{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-5px); }
+}
+
 .potato-wrap{
   position:relative;
   width:140px;
@@ -106,26 +162,6 @@
 .potato-cracks.stage-4 .c3,
 .potato-cracks.stage-4 .c4{ opacity:0.95; }
 
-.chicken{
-  position:absolute;
-  right:-8px;
-  bottom:-4px;
-  font-size:32px;
-  opacity:0;
-  pointer-events:none;
-  transform-origin:70% 90%;
-  transition:opacity 0.3s ease;
-}
-.chicken.active{
-  opacity:1;
-  animation:chickenPeck 1.8s ease-in-out infinite;
-}
-@keyframes chickenPeck{
-  0%, 78%, 100%{ transform:rotate(0deg) translate(0,0); }
-  85%{ transform:rotate(-18deg) translate(-5px,2px); }
-  92%{ transform:rotate(0deg) translate(0,0); }
-}
-
 .papa-hint{
   margin:0;
   color:var(--ink-soft);
@@ -141,6 +177,7 @@
   color:var(--cyan);
   pointer-events:none;
   animation:clickPopUp 0.85s ease-out forwards;
+  z-index:5;
 }
 .click-pop.bonus{
   color:var(--gold);
@@ -150,31 +187,98 @@
   0%{ opacity:1; transform:translate(-50%,0); }
   100%{ opacity:0; transform:translate(-50%,-42px); }
 }
-
-.multiplier-banner{
-  background:rgba(255,255,255,0.06);
-  border:1px solid var(--panel-border);
-  border-radius:999px;
-  padding:4px 14px;
-  font-size:13px;
-  font-weight:700;
-  color:var(--gold);
-  font-variant-numeric:tabular-nums;
+.papa-particle{
+  position:absolute;
+  pointer-events:none;
+  font-size:14px;
+  z-index:4;
+  animation:papaParticleFly 0.7s ease-out forwards;
+}
+@keyframes papaParticleFly{
+  0%{ opacity:1; transform:translate(0,0) scale(1); }
+  100%{ opacity:0; transform:var(--papa-particle-end, translate(0,-60px)) scale(0.4); }
 }
 
-.upgrades-columns{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
+/* ---------- Evento aleatorio ---------- */
+.papa-event-badge.is-hidden{ display:none; }
+.papa-event-badge{
+  appearance:none;
+  position:absolute;
+  top:14px;
+  right:14px;
+  border:2px solid rgba(255,255,255,0.4);
+  background:rgba(255,210,63,0.18);
+  border-radius:16px;
+  padding:8px 12px;
+  font-size:26px;
+  cursor:pointer;
+  z-index:6;
+  animation:papaEventPulse 1s ease-in-out infinite;
+  box-shadow:0 0 20px rgba(255,210,63,0.5);
 }
-@media (max-width:640px){
-  .upgrades-columns{ grid-template-columns:1fr; }
+@keyframes papaEventPulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.12); }
 }
-.upgrade-col{
+
+/* ---------- Pestañas principales ---------- */
+.papa-tabs{
   display:flex;
-  flex-direction:column;
-  gap:8px;
-  min-width:0;
+  gap:6px;
+  flex-wrap:wrap;
+  border-bottom:1px solid var(--panel-border);
+  padding-bottom:8px;
+}
+.papa-tab-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.04);
+  color:var(--ink-soft);
+  font-family:inherit;
+  font-weight:700;
+  font-size:12px;
+  border-radius:999px;
+  padding:7px 13px;
+  cursor:pointer;
+}
+.papa-tab-btn.is-active{
+  background:linear-gradient(180deg,var(--gold),#f5b400);
+  color:#2a1a06;
+  border-color:transparent;
+}
+.papa-tab-panel.is-hidden{ display:none; }
+.papa-tab-panel{ display:flex; flex-direction:column; gap:12px; }
+.papa-panel-hint{
+  margin:0;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+
+.papa-category-tabs{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.papa-cat-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.04);
+  color:var(--ink-soft);
+  font-family:inherit;
+  font-weight:700;
+  font-size:11.5px;
+  border-radius:10px;
+  padding:6px 10px;
+  cursor:pointer;
+}
+.papa-cat-btn.is-active{
+  background:rgba(126,217,87,0.2);
+  border-color:var(--cyan);
+  color:var(--ink);
+}
+
+.papa-upgrade-list{
+  max-height:360px;
 }
 .upgrade-list{
   display:flex;
@@ -196,6 +300,9 @@
 .upgrade-card.special{
   border-color:var(--gold);
   background:rgba(255,210,63,0.08);
+}
+.upgrade-card.is-maxed{
+  opacity:0.7;
 }
 .upgrade-icon{
   font-size:26px;
@@ -233,8 +340,224 @@
   box-shadow:0 1px 0 #b9860a;
 }
 
+/* ---------- Misiones ---------- */
+.papa-mission-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:380px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+.papa-mission-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+  padding:10px 12px;
+}
+.papa-mission-card.is-done{
+  border-color:var(--cyan);
+  background:rgba(126,217,87,0.1);
+}
+.papa-mission-card.is-claimed{
+  opacity:0.55;
+}
+.papa-mission-icon{ font-size:22px; flex-shrink:0; }
+.papa-mission-info{ flex:1; min-width:0; }
+.papa-mission-info p{ margin:0 0 4px; font-size:12.5px; font-weight:700; }
+.papa-mission-track{
+  height:6px;
+  background:rgba(255,255,255,0.14);
+  border-radius:999px;
+  overflow:hidden;
+}
+.papa-mission-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--gold));
+  border-radius:999px;
+}
+.papa-mission-reward{
+  font-size:11px;
+  color:var(--gold);
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.papa-mission-claim-btn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:800;
+  font-size:11.5px;
+  color:#0d3a12;
+  background:linear-gradient(180deg,var(--cyan),#4caf50);
+  padding:7px 11px;
+  border-radius:10px;
+  flex-shrink:0;
+}
+.papa-mission-claim-btn:disabled{
+  background:rgba(255,255,255,0.08);
+  color:var(--ink-soft);
+  cursor:not-allowed;
+}
+
+/* ---------- Tienda ---------- */
+.papa-shop-section h3{
+  margin:0 0 8px;
+  font-size:13px;
+  font-weight:800;
+}
+.papa-shop-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+  gap:8px;
+}
+.papa-shop-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+  padding:10px 6px;
+  cursor:pointer;
+  font-family:inherit;
+  color:var(--ink);
+  text-align:center;
+}
+.papa-shop-item .papa-shop-icon{ font-size:24px; }
+.papa-shop-item .papa-shop-name{ font-size:10.5px; font-weight:700; }
+.papa-shop-item .papa-shop-price{ font-size:10px; color:var(--gold); }
+.papa-shop-item.is-owned{ border-color:var(--cyan); }
+.papa-shop-item.is-equipped{ border-color:var(--gold); background:rgba(255,210,63,0.12); }
+.papa-shop-item:disabled{ opacity:0.5; cursor:not-allowed; }
+
+/* ---------- Mascotas ---------- */
+.papa-pet-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
+}
+.papa-pet-card{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+}
+.papa-pet-card.is-owned{ border-color:var(--cyan); }
+.papa-pet-icon{ font-size:34px; }
+.papa-pet-name{ font-size:12.5px; font-weight:800; margin:0; }
+.papa-pet-desc{ font-size:10.5px; color:var(--ink-soft); margin:0; }
+.papa-pet-level{ font-size:11px; color:var(--gold); font-weight:700; }
+.papa-pet-buy-btn{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+  font-weight:800;
+  font-size:11.5px;
+  color:#1b1340;
+  background:linear-gradient(180deg,var(--gold),#f5b400);
+  padding:7px 10px;
+  border-radius:10px;
+}
+.papa-pet-buy-btn:disabled{
+  background:rgba(255,255,255,0.08);
+  color:var(--ink-soft);
+  cursor:not-allowed;
+}
+
+/* ---------- Colección ---------- */
+.papa-collect-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+}
+.papa-collect-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:14px 8px;
+  text-align:center;
+}
+.papa-collect-card.is-found{
+  border-color:var(--gold);
+  background:rgba(255,210,63,0.1);
+}
+.papa-collect-icon{ font-size:32px; filter:grayscale(1); opacity:0.35; }
+.papa-collect-card.is-found .papa-collect-icon{ filter:none; opacity:1; }
+.papa-collect-name{ font-size:11px; font-weight:800; margin:0; }
+.papa-collect-bonus{ font-size:10px; color:var(--ink-soft); margin:0; }
+
+/* ---------- Prestigio ---------- */
+.papa-prestige-info{
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:14px;
+  font-size:13px;
+  line-height:1.6;
+}
+.papa-prestige-info b{ color:var(--gold); }
+#papaPanelPrestige .big-btn{ align-self:center; }
+
+/* ---------- Zonas: overlays y transicion ---------- */
+.papa-travel-spinner{
+  font-size:60px;
+  animation:papaTravelSpin 0.9s linear infinite;
+}
+@keyframes papaTravelSpin{
+  from{ transform:rotate(0deg) scale(1); }
+  50%{ transform:rotate(180deg) scale(1.2); }
+  to{ transform:rotate(360deg) scale(1); }
+}
+
+/* ---------- Selector de zonas ---------- */
+.papa-zone-strip{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:4px 2px;
+}
+.papa-zone-chip{
+  appearance:none;
+  flex:none;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  border:1px solid var(--panel-border);
+  background:rgba(255,255,255,0.05);
+  color:var(--ink-soft);
+  border-radius:12px;
+  padding:8px 12px;
+  cursor:pointer;
+  font-family:inherit;
+  min-width:76px;
+}
+.papa-zone-chip .papa-zone-chip-icon{ font-size:20px; }
+.papa-zone-chip .papa-zone-chip-name{ font-size:9.5px; font-weight:700; white-space:nowrap; }
+.papa-zone-chip.is-current{ border-color:var(--gold); background:rgba(255,210,63,0.14); color:var(--ink); }
+.papa-zone-chip.is-locked{ opacity:0.4; cursor:not-allowed; }
+
 @media (prefers-reduced-motion: reduce){
   .potato-btn.breaking{ animation:none; }
   .click-pop{ animation:none; opacity:0; }
-  .chicken.active{ animation:none; }
+  .papa-particle{ animation:none; opacity:0; }
+  .papa-zone-scene span{ animation:none; }
+  .papa-event-badge{ animation:none; }
+  .papa-travel-spinner{ animation:none; }
+  .papa-buff-pill{ animation:none; }
 }

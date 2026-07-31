@@ -1051,6 +1051,8 @@
 
           <div class="wc-turn-banner is-hidden" id="wcTurnBanner">Pateás vos</div>
 
+          <div class="wc-reaction-bar is-hidden" id="wcReactionBar"><div class="wc-reaction-fill" id="wcReactionFill"></div></div>
+
           <div class="overlay" id="wcStartOverlay">
             <h2 id="wcStartTitle">¿Listo para la tanda?</h2>
             <p id="wcStartDesc">5 penales por equipo. Si empatan, muerte súbita.</p>
@@ -1065,26 +1067,7 @@
         </div>
 
         <div class="wc-controls" id="wcControls">
-          <div class="wc-control-step" id="wcStepDir">
-            <p class="wc-control-label" id="wcStepDirLabel">Elegí la dirección</p>
-            <div class="wc-dir-row wc-dir-row-7">
-              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="farLeft" title="Muy izquierda">⏪</button>
-              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="left" title="Izquierda">⬅️</button>
-              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="centerLeft" title="Centro izquierda">↖️</button>
-              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="center" title="Centro">⬆️</button>
-              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="centerRight" title="Centro derecha">↗️</button>
-              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="right" title="Derecha">➡️</button>
-              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="farRight" title="Muy derecha">⏩</button>
-            </div>
-          </div>
-          <div class="wc-control-step is-hidden" id="wcStepHeight">
-            <p class="wc-control-label" id="wcStepHeightLabel">Elegí la altura</p>
-            <div class="wc-dir-row">
-              <button class="wc-choice-btn" data-height="low">⬇️</button>
-              <button class="wc-choice-btn" data-height="mid">Media</button>
-              <button class="wc-choice-btn" data-height="high">⬆️</button>
-            </div>
-          </div>
+          <p class="wc-control-label" id="wcAimHint">Movete con el mouse o las flechas · Click, Espacio o toque para confirmar</p>
           <div class="wc-control-step is-hidden" id="wcStepPower">
             <p class="wc-control-label">Hacé clic para fijar la potencia</p>
             <button class="wc-power-bar" id="wcPowerBar" aria-label="Fijar potencia">
@@ -1092,6 +1075,7 @@
               <span class="wc-power-needle" id="wcPowerNeedle"></span>
             </button>
           </div>
+          <button class="big-btn wc-dive-btn is-hidden" id="wcDiveBtn">🧤 ¡ATAJAR!</button>
           <p class="wc-training-hint is-hidden" id="wcTrainingHint">Modo entrenamiento — <button class="text-btn" id="wcTrainingExitBtn">salir</button></p>
         </div>
       </div>

@@ -1,0 +1,358 @@
+/* Mundial Penalty Shooter: menu con estadio, seleccion de selecciones,
+   sorteo, pantalla del mundial (tabla + fixture + cuadro) y pantalla de
+   penales. Reutiliza clases genericas ya definidas en shared.css y
+   copa-libertadores.css (frame, overlay, big-btn, team-grid, team-pick-btn,
+   diff-grid/diff-btn, draw-groups-grid, group-table, fixture-list,
+   liber-hud/liber-team-chip, liber-team-detail, etc.) para mantener la
+   identidad visual del arcade. */
+
+.wc-sub-view.is-hidden{ display:none; }
+.wc-sub-view{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:16px 20px;
+  min-height:420px;
+}
+@keyframes wcFadeIn{
+  from{ opacity:0; transform:translateY(6px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.wc-sub-view{ animation:wcFadeIn 0.35s ease; }
+@media (prefers-reduced-motion: reduce){
+  .wc-sub-view{ animation:none; }
+}
+
+/* ---------- Menu principal ---------- */
+.wc-menu-stadium{
+  position:relative;
+  height:200px;
+  border-radius:16px;
+  overflow:hidden;
+  background:linear-gradient(180deg, #0c1730 0%, #142449 55%, #1c8a3e 55%, #167030 100%);
+  border:1px solid var(--panel-border);
+}
+.wc-menu-lights{
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(120px 90px at 6% 0%, rgba(255,255,255,0.35), transparent 65%),
+    radial-gradient(120px 90px at 94% 0%, rgba(255,255,255,0.35), transparent 65%),
+    radial-gradient(220px 140px at 50% 110%, rgba(0,0,0,0.35), transparent 70%);
+}
+.wc-menu-pitch{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:46%;
+  background:repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 26px, rgba(0,0,0,0.05) 26px 52px);
+}
+.wc-menu-pitch::before{
+  content:'';
+  position:absolute;
+  left:50%; bottom:8px;
+  width:70px; height:70px;
+  margin-left:-35px;
+  border:2px solid rgba(255,255,255,0.55);
+  border-radius:50%;
+}
+.wc-menu-ball{
+  position:absolute;
+  left:50%; top:50%;
+  width:46px; height:46px;
+  margin:-23px 0 0 -23px;
+  border-radius:50%;
+  background:radial-gradient(circle at 32% 28%, #ffffff, #e6e6e6 55%, #b9b9b9 100%);
+  box-shadow:0 8px 16px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.15);
+  animation:wcBallSpin 5.5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce){
+  .wc-menu-ball{ animation:none; }
+}
+@keyframes wcBallSpin{
+  from{ transform:rotate(0deg); }
+  to{ transform:rotate(360deg); }
+}
+.wc-menu-ball-pentagon{
+  position:absolute;
+  width:12px; height:12px;
+  background:#1a1a1a;
+  clip-path:polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+.wc-menu-ball-pentagon.p1{ top:6px; left:17px; }
+.wc-menu-ball-pentagon.p2{ top:22px; left:4px; width:10px; height:10px; }
+.wc-menu-ball-pentagon.p3{ top:22px; left:30px; width:10px; height:10px; }
+
+.wc-menu-buttons{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  max-width:460px;
+  margin:0 auto;
+  width:100%;
+}
+.wc-menu-btn{
+  appearance:none;
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:20px 12px;
+  background:var(--panel);
+  color:var(--ink);
+  font-family:inherit;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 6px 14px rgba(0,0,0,0.25);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.wc-menu-btn:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,210,63,0.55);
+  box-shadow:0 10px 22px rgba(0,0,0,0.35);
+}
+.wc-menu-btn:active{ transform:translateY(-1px); }
+.wc-menu-btn:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+
+.wc-train-grid{ grid-template-columns:repeat(2,1fr); max-width:360px; }
+
+/* ---------- Pantalla del mundial (hub) ---------- */
+.wc-hub-layout{
+  display:grid;
+  grid-template-columns:1fr 1.15fr 1fr;
+  gap:12px;
+  align-items:start;
+}
+@media (max-width:760px){
+  .wc-hub-layout{ grid-template-columns:1fr; }
+}
+.wc-hub-table-panel, .wc-hub-center-panel, .wc-hub-bracket-panel{
+  border:1px solid var(--panel-border);
+  border-radius:14px;
+  padding:12px;
+  background:rgba(255,255,255,0.03);
+  min-height:150px;
+}
+.wc-hub-center-panel{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-align:center;
+}
+.wc-panel-label{
+  margin:0 0 6px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  text-align:center;
+}
+.wc-play-btn{ width:100%; }
+.wc-fixture-heading{ margin-top:4px; }
+
+.wc-bracket-tree{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:260px;
+  overflow-y:auto;
+}
+.wc-bracket-hint{
+  margin:0;
+  font-size:12px;
+  color:var(--ink-soft);
+  text-align:center;
+}
+.wc-bracket-round{
+  border:1px solid var(--panel-border);
+  border-radius:8px;
+  padding:6px 8px;
+}
+.wc-bracket-round-title{
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  color:var(--gold);
+  margin-bottom:3px;
+}
+.wc-bracket-match{
+  font-size:12px;
+  padding:1px 0;
+  color:var(--ink-soft);
+}
+.wc-bracket-match.is-you{ color:var(--ink); font-weight:800; }
+.wc-bracket-match.is-done{ color:var(--ink); }
+
+/* ---------- Partido de penales ---------- */
+.wc-match-hud{ margin-bottom:2px; }
+.wc-shootout-track{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  align-items:center;
+}
+.wc-shootout-row{
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.wc-shootout-row .wc-row-tag{
+  font-size:10px;
+  color:var(--ink-soft);
+  width:34px;
+  text-align:right;
+}
+.wc-shootout-dot{
+  width:14px; height:14px;
+  border-radius:50%;
+  border:2px solid var(--panel-border);
+  background:rgba(255,255,255,0.05);
+  transition:transform 0.15s ease;
+}
+.wc-shootout-dot.is-current{ border-color:var(--gold); transform:scale(1.25); }
+.wc-shootout-dot.is-hit{ background:#3fbf5f; border-color:#3fbf5f; }
+.wc-shootout-dot.is-miss{ background:#e6473f; border-color:#e6473f; }
+
+.wc-turn-banner{
+  position:absolute;
+  top:10px; left:50%;
+  transform:translateX(-50%);
+  padding:6px 16px;
+  border-radius:999px;
+  background:rgba(10,14,28,0.72);
+  border:1px solid rgba(255,255,255,0.2);
+  color:#fff;
+  font-weight:800;
+  font-size:13px;
+  letter-spacing:.02em;
+  pointer-events:none;
+}
+.wc-turn-banner.is-hidden{ display:none; }
+
+.wc-controls{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  min-height:96px;
+}
+.wc-control-step.is-hidden{ display:none; }
+.wc-control-step{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+.wc-control-label{
+  margin:0;
+  font-size:13px;
+  font-weight:700;
+  color:var(--ink-soft);
+}
+.wc-dir-row{
+  display:flex;
+  gap:10px;
+}
+.wc-choice-btn{
+  appearance:none;
+  min-width:78px;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid var(--panel-border);
+  background:var(--panel);
+  color:var(--ink);
+  font-family:inherit;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+  transition:transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+.wc-choice-btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,210,63,0.55);
+  background:rgba(255,210,63,0.08);
+}
+.wc-choice-btn:active{ transform:translateY(0); }
+.wc-choice-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+.wc-power-bar{
+  position:relative;
+  width:100%;
+  max-width:380px;
+  height:34px;
+  border-radius:999px;
+  border:1px solid var(--panel-border);
+  background:linear-gradient(90deg, #3fbf5f 0%, #ffd23f 55%, #ff5c3f 85%, #ff5c3f 100%);
+  cursor:pointer;
+  padding:0;
+  overflow:visible;
+}
+.wc-power-sweet{
+  position:absolute;
+  left:58%;
+  width:22%;
+  top:-3px; bottom:-3px;
+  border-radius:999px;
+  border:2px solid rgba(255,255,255,0.85);
+  pointer-events:none;
+}
+.wc-power-needle{
+  position:absolute;
+  top:-5px; bottom:-5px;
+  left:0%;
+  width:4px;
+  border-radius:2px;
+  background:#fff;
+  box-shadow:0 0 6px rgba(0,0,0,0.5);
+  pointer-events:none;
+}
+.wc-training-hint{
+  margin:0;
+  font-size:12px;
+  color:var(--ink-soft);
+}
+.wc-training-hint.is-hidden{ display:none; }
+
+/* ---------- Configuracion / Estadisticas ---------- */
+.wc-config-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 4px;
+  border-bottom:1px solid var(--panel-border);
+  max-width:420px;
+  margin:0 auto;
+  width:100%;
+}
+.wc-config-row:last-child{ border-bottom:none; }
+
+.wc-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+  max-width:640px;
+  margin:0 auto;
+  width:100%;
+}
+.wc-stat-tile{
+  border:1px solid var(--panel-border);
+  border-radius:12px;
+  padding:14px 10px;
+  text-align:center;
+  background:rgba(255,255,255,0.03);
+}
+.wc-stat-value{
+  display:block;
+  font-size:24px;
+  font-weight:900;
+  color:var(--gold);
+}
+.wc-stat-label{
+  display:block;
+  font-size:11px;
+  color:var(--ink-soft);
+  margin-top:2px;
+}

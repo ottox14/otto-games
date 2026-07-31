@@ -3091,6 +3091,27 @@
 }
 .wc-choice-btn:active{ transform:translateY(0); }
 .wc-choice-btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+.wc-choice-btn.is-picked{
+  border-color:var(--gold);
+  background:rgba(255,210,63,0.16);
+  box-shadow:0 0 0 2px rgba(255,210,63,0.35);
+}
+
+.wc-dir-row-7{
+  flex-wrap:wrap;
+  justify-content:center;
+  max-width:460px;
+}
+.wc-choice-btn-sm{
+  min-width:46px;
+  padding:10px 8px;
+  font-size:17px;
+  border-radius:10px;
+}
+@media (max-width:520px){
+  .wc-choice-btn-sm{ min-width:40px; padding:9px 6px; font-size:15px; }
+  .wc-dir-row-7{ gap:6px; }
+}
 
 .wc-power-bar{
   position:relative;
@@ -4219,10 +4240,14 @@
         <div class="wc-controls" id="wcControls">
           <div class="wc-control-step" id="wcStepDir">
             <p class="wc-control-label" id="wcStepDirLabel">Elegí la dirección</p>
-            <div class="wc-dir-row">
-              <button class="wc-choice-btn" data-dir="left">⬅️</button>
-              <button class="wc-choice-btn" data-dir="center">Centro</button>
-              <button class="wc-choice-btn" data-dir="right">➡️</button>
+            <div class="wc-dir-row wc-dir-row-7">
+              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="farLeft" title="Muy izquierda">⏪</button>
+              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="left" title="Izquierda">⬅️</button>
+              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="centerLeft" title="Centro izquierda">↖️</button>
+              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="center" title="Centro">⬆️</button>
+              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="centerRight" title="Centro derecha">↗️</button>
+              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="right" title="Derecha">➡️</button>
+              <button class="wc-choice-btn wc-choice-btn-sm" data-dir="farRight" title="Muy derecha">⏩</button>
             </div>
           </div>
           <div class="wc-control-step is-hidden" id="wcStepHeight">
@@ -14364,14 +14389,30 @@
   function teamAccuracy(team){ return clamp(0.45 + (team.strength-60)/130, 0.34, 0.90); }
   function teamGk(team){ return clamp(0.32 + (team.strength-60)/150, 0.18, 0.62); }
 
+  // gkGuess: probabilidad de que el arquero IA lea bien tu remate (leyenda:
+  // reflejos rapidos = adivina mas seguido). gkSkillBonus: se suma directo a
+  // la chance de atajar una vez que ya adivino cerca (reflejos al estirarse).
+  // shooterBonus: precision extra del rematador IA (nunca 100%). cornerBias:
+  // que tan seguido busca los angulos dificiles en vez del medio.
+  // hardShotChance: que tan seguido pega fuerte en vez de variar la potencia.
   var DIFFICULTIES = {
-    facil:      {label:'Fácil',      gkGuess:0.12, shooterBonus:0,    diveDur:0.62, cornerBias:0},
-    normal:     {label:'Normal',     gkGuess:0.25, shooterBonus:0,    diveDur:0.5,  cornerBias:0.15},
-    dificil:    {label:'Difícil',    gkGuess:0.42, shooterBonus:0.02, diveDur:0.42, cornerBias:0.3},
-    legendario: {label:'Legendario', gkGuess:0.55, shooterBonus:0.08, diveDur:0.34, cornerBias:0.45}
+    facil:      {label:'Fácil',      gkGuess:0.14, gkSkillBonus:0.00, shooterBonus:-0.04, diveDur:0.62, cornerBias:0.10, hardShotChance:0.15},
+    normal:     {label:'Normal',     gkGuess:0.26, gkSkillBonus:0.04, shooterBonus:0.00,  diveDur:0.5,  cornerBias:0.22, hardShotChance:0.25},
+    dificil:    {label:'Difícil',    gkGuess:0.40, gkSkillBonus:0.08, shooterBonus:0.05,  diveDur:0.42, cornerBias:0.32, hardShotChance:0.35},
+    legendario: {label:'Legendario', gkGuess:0.54, gkSkillBonus:0.13, shooterBonus:0.10,  diveDur:0.34, cornerBias:0.42, hardShotChance:0.45}
   };
   var currentDifficulty = DIFFICULTIES.normal;
   var currentDiffKey = 'normal';
+
+  // Zonas de disparo/atajada: 7 columnas x 3 alturas = 21 zonas.
+  var DIR_ZONES = ['farLeft','left','centerLeft','center','centerRight','right','farRight'];
+  var HEIGHT_ZONES = ['low','mid','high'];
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function clampIdx(n, max){ return Math.max(0, Math.min(max, n)); }
+  function driftIndex(idx, max, steps){
+    var d = (Math.random()<0.5?-1:1)*steps;
+    return clampIdx(idx+d, max);
+  }
 
   function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
   function shuffle(arr){
@@ -14382,7 +14423,6 @@
     return arr;
   }
   function repeatStr(ch,n){ var s=''; for (var i=0;i<n;i++) s+=ch; return s; }
-  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
   // ---------- DOM ----------
   var portalView = document.getElementById('portalView');
@@ -15107,8 +15147,9 @@
   }
 
   // ---------- Partido de penales (motor principal) ----------
-  var ZONES_DIR = ['left','center','right'];
-  var ZONES_HEIGHT = ['low','mid','high'];
+  // Nunca controlas los dos lados de un mismo penal: si pateas vos, la IA
+  // decide unicamente el arquero rival; si patea la IA, vos controlas
+  // unicamente tu arquero. playerKicks marca de que lado estas cada vez.
   var matchMode = 'campaign'; // 'campaign' | 'training-kick' | 'training-save'
   var homeTeamData = null, awayTeamData = null; // home = vos siempre, away = rival
   var shootout = null;
@@ -15118,10 +15159,10 @@
   function opponentGkChance(oppTeam){
     var base = currentDifficulty.gkGuess;
     var bonus = (teamGk(oppTeam)-0.4)*0.35;
-    return clamp(base+bonus, 0.05, 0.72);
+    return clamp(base+bonus, 0.05, 0.75);
   }
-  function shooterAccuracyFor(team){
-    return clamp(teamAccuracy(team)+currentDifficulty.shooterBonus, 0.3, 0.94);
+  function keeperSkillBonusFor(oppTeam){
+    return currentDifficulty.gkSkillBonus + (teamGk(oppTeam)-0.4)*0.22;
   }
 
   function newShootout(){
@@ -15214,7 +15255,7 @@
     trainingHintEl.classList.add('is-hidden');
     var firstName = shootout.order[0] === 'home' ? homeTeamData.name : awayTeamData.name;
     startTitleEl.textContent = '¿Listo para la tanda vs '+awayTeamData.name+'?';
-    startDescEl.textContent = '5 penales por equipo. Si empatan, muerte súbita. Patea primero '+firstName+'.';
+    startDescEl.textContent = 'Vos pateás y la IA ataja; cuando patea la IA, atajás vos. 5 penales por equipo, muerte súbita si empatan. Patea primero '+firstName+'.';
     resetScene();
     draw();
   }
@@ -15290,7 +15331,8 @@
     kickState = {
       side: kickerSide, playerKicks: playerKicks, kickerTeam: kickerTeam, defenderTeam: defenderTeam,
       dir: null, height: null, power: null, gkDir: null, gkHeight: null,
-      finalDir: null, finalHeight: null, wide: false, outcome: null, phase: 'decide-dir'
+      finalDir: null, finalHeight: null, finalDirIdx: null, finalHeightIdx: null,
+      wide: false, post: false, keeperTimeBonus: 0, outcome: null, phase: 'decide-dir'
     };
     turnBannerEl.classList.remove('is-hidden');
     turnBannerEl.textContent = playerKicks ? '⚽ Pateás vos' : '🧤 Atajás vos';
@@ -15324,13 +15366,21 @@
     }
   }
   stepDirEl.querySelectorAll('.wc-choice-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){ onChooseDir(btn.getAttribute('data-dir')); });
+    btn.addEventListener('click', function(){
+      stepDirEl.querySelectorAll('.wc-choice-btn').forEach(function(b){ b.classList.remove('is-picked'); });
+      btn.classList.add('is-picked');
+      onChooseDir(btn.getAttribute('data-dir'));
+    });
   });
   stepHeightEl.querySelectorAll('.wc-choice-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){ onChooseHeight(btn.getAttribute('data-height')); });
+    btn.addEventListener('click', function(){
+      stepHeightEl.querySelectorAll('.wc-choice-btn').forEach(function(b){ b.classList.remove('is-picked'); });
+      btn.classList.add('is-picked');
+      onChooseHeight(btn.getAttribute('data-height'));
+    });
   });
 
-  var POWER_PERIOD = 1.1;
+  var POWER_PERIOD = 1.3;
   var powerT = 0;
   var powerRunning = false;
   function startPowerBar(){ powerT = 0; powerRunning = true; }
@@ -15348,63 +15398,120 @@
   });
 
   // ---------- IA ----------
-  function driftOneStep(list, idx){
-    var options = [];
-    if (idx > 0) options.push(idx-1);
-    if (idx < list.length-1) options.push(idx+1);
-    if (!options.length) return idx;
-    return pick(options);
-  }
+  // Que tan bien pega segun la potencia: en el "punto dulce" el remate sale
+  // casi siempre donde apuntaste; pegarle muy suave o muy fuerte hace que se
+  // desvie mas (y aumenta la chance de mandarla afuera), pero a cambio un
+  // tiro suave le regala tiempo de reaccion al arquero y uno muy fuerte se
+  // lo saca - la potencia influye de verdad en el resultado.
   function resolvePowerTier(power){
-    if (power >= 65 && power <= 88) return {acc:0.97, wide:0};
-    if ((power >= 40 && power < 65) || (power > 88 && power <= 95)) return {acc:0.82, wide:0.02};
-    return {acc:0.55, wide:(power<12||power>99) ? 0.22 : 0.10};
+    if (power >= 60 && power <= 88) return {acc:0.95, wideChance:0.02, postChance:0.025, drift:1, keeperTimeBonus:0};
+    if ((power >= 35 && power < 60) || (power > 88 && power <= 95)){
+      var slow = power < 60;
+      return {acc:0.80, wideChance:0.03, postChance:0.03, drift:1, keeperTimeBonus: slow?0.12:-0.03};
+    }
+    var tooWeak = power < 35;
+    return {acc:0.55, wideChance: tooWeak?0.05:0.17, postChance:0.05, drift:2, keeperTimeBonus: tooWeak?0.22:-0.10};
   }
-  function resolveHumanShot(dir, height, power, teamAccVal){
+  // Resuelve un remate (de vos o de la IA): a que zona final termina yendo
+  // la pelota (puede desviarse 1 o 2 pasos si la potencia no fue buena), si
+  // sale afuera, si pega en el palo, y el bono/penalidad de tiempo de
+  // reaccion para el arquero segun que tan fuerte fue.
+  function resolveShot(dir, height, power, teamAcc, diffBonus){
     var tier = resolvePowerTier(power);
-    var placementAcc = clamp(tier.acc + (teamAccVal-0.6)*0.3, 0.25, 0.97);
-    if (Math.random() < tier.wide) return {dir:dir, height:height, wide:true};
-    if (Math.random() < placementAcc) return {dir:dir, height:height, wide:false};
-    var di = ZONES_DIR.indexOf(dir), hi = ZONES_HEIGHT.indexOf(height);
-    if (Math.random() < 0.5) di = driftOneStep(ZONES_DIR, di); else hi = driftOneStep(ZONES_HEIGHT, hi);
-    return {dir:ZONES_DIR[di], height:ZONES_HEIGHT[hi], wide:false};
+    var placementAcc = clamp(tier.acc + (teamAcc-0.6)*0.32 + (diffBonus||0), 0.15, 0.97);
+    var maxDir = DIR_ZONES.length-1, maxHeight = HEIGHT_ZONES.length-1;
+    var dirIdx = DIR_ZONES.indexOf(dir), heightIdx = HEIGHT_ZONES.indexOf(height);
+    if (Math.random() >= placementAcc){
+      dirIdx = driftIndex(dirIdx, maxDir, tier.drift);
+      if (Math.random() < 0.45) heightIdx = driftIndex(heightIdx, maxHeight, 1);
+    }
+    var wide = Math.random() < tier.wideChance;
+    var isEdge = dirIdx===0 || dirIdx===maxDir || heightIdx===maxHeight;
+    var post = !wide && isEdge && Math.random() < tier.postChance;
+    return {dirIdx:dirIdx, heightIdx:heightIdx, wide:wide, post:post, keeperTimeBonus:tier.keeperTimeBonus};
   }
-  function chooseAIShotZone(team){
-    var cornerBias = currentDifficulty.cornerBias;
-    var dir = Math.random() < cornerBias ? pick(['left','right']) : pick(ZONES_DIR);
-    var height = Math.random() < cornerBias ? pick(['low','high']) : pick(ZONES_HEIGHT);
-    return {dir:dir, height:height};
+  // El arquero rival "lee" tu remate segun la dificultad y su propio nivel:
+  // cuanto mejor, mas cerca de tu zona real adivina - nunca al azar puro,
+  // nunca infalible.
+  function aiGoalkeeperGuess(intendedDir, intendedHeight, defenderTeam){
+    var guessChance = opponentGkChance(defenderTeam);
+    var dirIdx = DIR_ZONES.indexOf(intendedDir), heightIdx = HEIGHT_ZONES.indexOf(intendedHeight);
+    if (Math.random() < guessChance){
+      if (Math.random() < 0.7) return {dirIdx:dirIdx, heightIdx:heightIdx};
+      return {dirIdx: driftIndex(dirIdx, DIR_ZONES.length-1, 1), heightIdx:heightIdx};
+    }
+    return {dirIdx: Math.floor(Math.random()*DIR_ZONES.length), heightIdx: Math.floor(Math.random()*HEIGHT_ZONES.length)};
   }
-  function resolveAIShot(team){
-    var target = chooseAIShotZone(team);
-    var placementAcc = shooterAccuracyFor(team);
-    if (Math.random() < 0.06) return {dir:target.dir, height:target.height, wide:true};
-    if (Math.random() < placementAcc) return {dir:target.dir, height:target.height, wide:false};
-    var di = ZONES_DIR.indexOf(target.dir), hi = ZONES_HEIGHT.indexOf(target.height);
-    if (Math.random() < 0.5) di = driftOneStep(ZONES_DIR, di); else hi = driftOneStep(ZONES_HEIGHT, hi);
-    return {dir:ZONES_DIR[di], height:ZONES_HEIGHT[hi], wide:false};
+  // La IA varia sus remates: a veces busca el angulo mas dificil, a veces
+  // sorprende al medio, a veces la baja pegada al piso, a veces la levanta -
+  // nunca un patron fijo. La potencia tambien varia: a veces la pega fuerte,
+  // a veces la coloca suave.
+  function aiPickShotZone(){
+    var diff = currentDifficulty;
+    var dirIdx;
+    if (Math.random() < diff.cornerBias) dirIdx = pick([0,1,5,6]);
+    else if (Math.random() < 0.22) dirIdx = 3;
+    else dirIdx = pick([1,2,3,4,5]);
+    var heightIdx;
+    var r = Math.random();
+    if (r < 0.3) heightIdx = 2;
+    else if (r < 0.55) heightIdx = 0;
+    else heightIdx = 1;
+    return {dir:DIR_ZONES[dirIdx], height:HEIGHT_ZONES[heightIdx]};
   }
-  function resolveAIGoalkeeperGuess(intendedDir, intendedHeight, oppTeam){
-    var guessChance = opponentGkChance(oppTeam);
-    if (Math.random() < guessChance) return {dir:intendedDir, height:intendedHeight};
-    var otherZones = [];
-    ZONES_DIR.forEach(function(d){ ZONES_HEIGHT.forEach(function(h){ if (!(d===intendedDir && h===intendedHeight)) otherZones.push({dir:d,height:h}); }); });
-    return pick(otherZones);
+  function aiPickPower(){
+    var diff = currentDifficulty;
+    var r = Math.random();
+    if (r < diff.hardShotChance) return 70+Math.random()*26;
+    if (r < diff.hardShotChance+0.2) return 18+Math.random()*24;
+    return 42+Math.random()*32;
+  }
+  // Chance de atajar una vez que ya se sabe a que zona se tiro el arquero:
+  // si acierta justo tiene muy buena chance, si se tira a una zona vecina
+  // todavia puede estirarse y llegar, si se tira lejos ya no llega. El bono
+  // del arquero rival (dificultad + plantel) y el de tiempo de reaccion
+  // (potencia del remate) se suman aca arriba - cuando atajas VOS, nunca se
+  // te regala nada, solo cuenta tu propia lectura de la jugada.
+  function saveChanceForDistance(dist){
+    if (dist <= 0.01) return 0.90;
+    if (dist <= 1.5) return 0.40;
+    if (dist <= 2.6) return 0.14;
+    return 0.02;
+  }
+  function resolveSave(shot, gkDirIdx, gkHeightIdx, keeperSkillBonus){
+    if (shot.wide || shot.post) return false;
+    var dirDist = Math.abs(shot.dirIdx - gkDirIdx);
+    var heightDist = Math.abs(shot.heightIdx - gkHeightIdx);
+    var dist = dirDist + heightDist*1.4;
+    var chance = clamp(saveChanceForDistance(dist) + (keeperSkillBonus||0) + shot.keeperTimeBonus, 0.01, 0.95);
+    return Math.random() < chance;
   }
 
   function resolveKick(){
     kickState.phase = 'resolving';
-    var shot;
+    var shot, gkDirIdx, gkHeightIdx, keeperSkillBonus;
     if (kickState.playerKicks){
-      shot = resolveHumanShot(kickState.dir, kickState.height, kickState.power, teamAccuracy(kickState.kickerTeam));
-      var gkGuess = resolveAIGoalkeeperGuess(kickState.dir, kickState.height, kickState.defenderTeam);
-      kickState.gkDir = gkGuess.dir; kickState.gkHeight = gkGuess.height;
+      shot = resolveShot(kickState.dir, kickState.height, kickState.power, teamAccuracy(kickState.kickerTeam), 0);
+      var gkGuess = aiGoalkeeperGuess(kickState.dir, kickState.height, kickState.defenderTeam);
+      gkDirIdx = gkGuess.dirIdx; gkHeightIdx = gkGuess.heightIdx;
+      kickState.gkDir = DIR_ZONES[gkDirIdx]; kickState.gkHeight = HEIGHT_ZONES[gkHeightIdx];
+      keeperSkillBonus = keeperSkillBonusFor(kickState.defenderTeam);
     } else {
-      shot = resolveAIShot(kickState.kickerTeam);
+      var target = aiPickShotZone();
+      var power = aiPickPower();
+      kickState.power = power;
+      shot = resolveShot(target.dir, target.height, power, teamAccuracy(kickState.kickerTeam), currentDifficulty.shooterBonus);
+      gkDirIdx = DIR_ZONES.indexOf(kickState.gkDir); gkHeightIdx = HEIGHT_ZONES.indexOf(kickState.gkHeight);
+      keeperSkillBonus = 0;
     }
-    kickState.finalDir = shot.dir; kickState.finalHeight = shot.height; kickState.wide = shot.wide;
-    if (shot.wide) kickState.outcome = 'miss';
-    else kickState.outcome = (shot.dir === kickState.gkDir && shot.height === kickState.gkHeight) ? 'save' : 'goal';
+    kickState.finalDir = DIR_ZONES[shot.dirIdx]; kickState.finalHeight = HEIGHT_ZONES[shot.heightIdx];
+    kickState.finalDirIdx = shot.dirIdx; kickState.finalHeightIdx = shot.heightIdx;
+    kickState.keeperTimeBonus = shot.keeperTimeBonus;
+    kickState.wide = shot.wide; kickState.post = shot.post;
+
+    if (shot.wide) kickState.outcome = 'wide';
+    else if (shot.post) kickState.outcome = 'post';
+    else kickState.outcome = resolveSave(shot, gkDirIdx, gkHeightIdx, keeperSkillBonus) ? 'save' : 'goal';
 
     if (matchMode === 'campaign'){
       var made = kickState.outcome === 'goal';
@@ -15432,61 +15539,89 @@
   }
 
   // ---------- Animacion (canvas) ----------
-  var ZONE_X = {left:0.24, center:0.5, right:0.76};
-  var ZONE_Y = {low:0.86, mid:0.55, high:0.18};
-  var GOAL_L = 330, GOAL_R = 570, GOAL_T = 70, GOAL_B = 168;
-  var SPOT = {x:450, y:360};
+  // Camara ~25% mas cerca que antes: el arco ocupa mas espacio en pantalla,
+  // el arquero se ve mas grande y el punto penal esta mas cerca del arco.
+  var ZONE_X = [0.07,0.20,0.34,0.5,0.66,0.80,0.93];
+  var ZONE_Y = [0.86,0.52,0.14];
+  var STAND_H = 96;
+  var GOAL_L = 300, GOAL_R = 600, GOAL_T = 112, GOAL_B = 236;
+  var SPOT = {x:450, y:378};
+  var GK_IDLE_X = 450, GK_IDLE_Y = 200;
   function zonePoint(dir, height){
-    return {x: GOAL_L+(GOAL_R-GOAL_L)*ZONE_X[dir], y: GOAL_T+(GOAL_B-GOAL_T)*ZONE_Y[height]};
+    var dirIdx = DIR_ZONES.indexOf(dir), heightIdx = HEIGHT_ZONES.indexOf(height);
+    return {x: GOAL_L+(GOAL_R-GOAL_L)*ZONE_X[dirIdx], y: GOAL_T+(GOAL_B-GOAL_T)*ZONE_Y[heightIdx]};
   }
   var scene = {
-    phase:'idle', t:0, kickerX:0, kickerY:0, ballX:SPOT.x, ballY:SPOT.y,
-    gkX:450, gkY:150, gkTargetX:450, gkTargetY:150, crowdPulse:0, confetti:[]
+    phase:'idle', t:0, idleClock:0, kickerX:0, kickerY:0, ballX:SPOT.x, ballY:SPOT.y,
+    gkX:GK_IDLE_X, gkY:GK_IDLE_Y, gkTargetX:GK_IDLE_X, gkTargetY:GK_IDLE_Y,
+    gkStretch:0, crowdPulse:0, confetti:[]
   };
   function resetScene(){
     scene.phase = 'idle'; scene.t = 0;
     scene.ballX = SPOT.x; scene.ballY = SPOT.y;
-    scene.kickerX = SPOT.x; scene.kickerY = SPOT.y+80;
-    scene.gkX = 450; scene.gkY = 150; scene.gkTargetX = 450; scene.gkTargetY = 150;
+    scene.kickerX = SPOT.x; scene.kickerY = SPOT.y+95;
+    scene.gkX = GK_IDLE_X; scene.gkY = GK_IDLE_Y; scene.gkTargetX = GK_IDLE_X; scene.gkTargetY = GK_IDLE_Y;
+    scene.gkStretch = 0;
     scene.crowdPulse = 0;
     scene.resultText = '';
   }
-  var RUN_DUR = 0.55, SHOT_DUR = 0.42, REVEAL_DUR = 1.25;
+  var RUN_DUR = 0.5, REVEAL_DUR = 1.1;
+  function shotDurationFor(power){
+    // Mas potencia = la pelota vuela mas rapido (mas sensacion de velocidad).
+    return clamp(0.58 - (power/100)*0.30, 0.26, 0.6);
+  }
   function beginAnimation(){
     scene.phase = 'run';
     scene.t = 0;
-    scene.runStartX = SPOT.x - 90; scene.runStartY = SPOT.y+90;
+    scene.runStartX = SPOT.x - 100; scene.runStartY = SPOT.y+105;
     scene.ballX = SPOT.x; scene.ballY = SPOT.y;
-    scene.gkX = 450; scene.gkY = 150;
+    scene.gkX = GK_IDLE_X; scene.gkY = GK_IDLE_Y; scene.gkStretch = 0;
     var target = zonePoint(kickState.finalDir, kickState.finalHeight);
-    scene.shotTargetX = kickState.wide ? (kickState.finalDir==='left'?GOAL_L-60:kickState.finalDir==='right'?GOAL_R+60:target.x) : target.x;
-    scene.shotTargetY = kickState.wide && kickState.finalHeight==='high' ? GOAL_T-40 : target.y;
+    if (kickState.wide){
+      var edgeOut = kickState.finalDirIdx <= 1 ? -80 : kickState.finalDirIdx >= 5 ? 80 : (Math.random()<0.5?-80:80);
+      scene.shotTargetX = target.x + edgeOut;
+      scene.shotTargetY = kickState.finalHeightIdx === HEIGHT_ZONES.length-1 ? GOAL_T-60 : target.y;
+    } else if (kickState.post){
+      scene.shotTargetX = kickState.finalDirIdx===0 ? GOAL_L : kickState.finalDirIdx===DIR_ZONES.length-1 ? GOAL_R : target.x;
+      scene.shotTargetY = kickState.finalHeightIdx===HEIGHT_ZONES.length-1 ? GOAL_T : target.y;
+    } else {
+      scene.shotTargetX = target.x; scene.shotTargetY = target.y;
+    }
     var gkTarget = zonePoint(kickState.gkDir, kickState.gkHeight);
-    scene.gkTargetX = gkTarget.x; scene.gkTargetY = clamp(gkTarget.y, 110, 160);
+    scene.gkTargetX = gkTarget.x; scene.gkTargetY = clamp(gkTarget.y, GOAL_T+55, GOAL_B-25);
+    scene.shotDur = shotDurationFor(kickState.power||55);
     beep(260, 0.05, 'square');
   }
   function advanceScene(dt){
-    if (scene.phase === 'idle') return;
+    scene.idleClock += dt;
+    if (scene.phase === 'idle'){
+      // El arquero no se queda quieto: se acomoda y se balancea antes del disparo.
+      scene.gkX = GK_IDLE_X + Math.sin(scene.idleClock*2.1)*10;
+      scene.gkY = GK_IDLE_Y + Math.sin(scene.idleClock*1.3)*3;
+      return;
+    }
     scene.t += dt;
     if (scene.phase === 'run'){
       var f = clamp(scene.t/RUN_DUR, 0, 1);
       scene.kickerX = scene.runStartX + (SPOT.x-scene.runStartX)*f;
-      scene.kickerY = scene.runStartY + (SPOT.y+30-scene.runStartY)*f;
+      scene.kickerY = scene.runStartY + (SPOT.y+35-scene.runStartY)*f;
       if (f >= 1){ scene.phase = 'shot'; scene.t = 0; beep(180, 0.1, 'triangle'); }
     } else if (scene.phase === 'shot'){
       var diveDur = currentDifficulty.diveDur;
-      var f2 = clamp(scene.t/SHOT_DUR, 0, 1);
-      scene.ballX = SPOT.x + (scene.shotTargetX-SPOT.x)*f2;
-      scene.ballY = SPOT.y + (scene.shotTargetY-SPOT.y)*f2;
+      var f2 = clamp(scene.t/scene.shotDur, 0, 1);
+      var ease = f2*f2; // acelera hacia el final - mas sensacion de velocidad
+      scene.ballX = SPOT.x + (scene.shotTargetX-SPOT.x)*ease;
+      scene.ballY = SPOT.y + (scene.shotTargetY-SPOT.y)*ease;
       var fg = clamp(scene.t/diveDur, 0, 1);
-      scene.gkX = 450 + (scene.gkTargetX-450)*fg;
-      scene.gkY = 150 + (scene.gkTargetY-150)*fg;
+      scene.gkX = GK_IDLE_X + (scene.gkTargetX-GK_IDLE_X)*fg;
+      scene.gkY = GK_IDLE_Y + (scene.gkTargetY-GK_IDLE_Y)*fg;
       if (f2 >= 1){
         scene.phase = 'reveal'; scene.t = 0;
         onKickResolved();
       }
     } else if (scene.phase === 'reveal'){
       scene.crowdPulse = Math.min(1, scene.t/0.25);
+      if (kickState.outcome === 'save') scene.gkStretch = Math.min(1, scene.t/0.22);
       updateConfetti(dt);
       if (scene.t >= REVEAL_DUR){
         scene.phase = 'idle';
@@ -15497,7 +15632,7 @@
   }
   function onKickResolved(){
     if (kickState.outcome === 'goal'){
-      scene.resultText = '¡GOL!';
+      scene.resultText = '¡GOOOL!';
       crowdRoar(true);
       beep(700, 0.12, 'triangle');
       setTimeout(function(){ beep(950, 0.12, 'triangle'); }, 90);
@@ -15505,9 +15640,14 @@
         spawnConfetti();
       }
     } else if (kickState.outcome === 'save'){
-      scene.resultText = '¡ATAJADA!';
+      scene.resultText = '¡ATAJADÓN!';
       crowdRoar(false);
       beep(200, 0.15, 'sawtooth');
+    } else if (kickState.outcome === 'post'){
+      scene.resultText = '¡AL PALO!';
+      crowdRoar(false);
+      beep(900, 0.08, 'square');
+      setTimeout(function(){ beep(500, 0.1, 'square'); }, 60);
     } else {
       scene.resultText = '¡AFUERA!';
       crowdRoar(false);
@@ -15533,81 +15673,202 @@
   }
 
   // ---------- Dibujo ----------
+  var CROWD_PALETTE = ['#ff5c7a','#ffd23f','#5cc9ff','#7ed957','#ffffff','#b892ff','#ff9f4d'];
+  var CROWD_COLS = 60, CROWD_ROWS = 3;
+  var CROWD_CELLS = (function(){
+    var cells = [];
+    for (var r=0;r<CROWD_ROWS;r++){
+      for (var i=0;i<CROWD_COLS;i++){
+        cells.push({color: pick(CROWD_PALETTE), phase: Math.random()*Math.PI*2, on: Math.random()<0.82});
+      }
+    }
+    return cells;
+  })();
+  var FLAG_DEFS = [
+    {x:70, color:'#5cc9ff'}, {x:230, color:'#ffd23f'}, {x:450, color:'#ff5c7a'},
+    {x:670, color:'#7ed957'}, {x:830, color:'#b892ff'}
+  ];
+  var animClock = 0;
+
   function drawStadium(){
     var c = ctx;
-    var skyGrad = c.createLinearGradient(0,0,0,GOAL_T+10);
-    skyGrad.addColorStop(0, '#0c1730');
-    skyGrad.addColorStop(1, '#1c2e57');
-    c.fillStyle = skyGrad;
-    c.fillRect(0,0,CANVAS_W,GOAL_T+10);
+    animClock += 1/60;
 
-    // tribuna
-    c.fillStyle = '#141b30';
-    c.fillRect(0,0,CANVAS_W,50);
-    for (var i=0;i<70;i++){
-      var cx = (i*13+ (scene.crowdPulse>0?Math.sin(i)*2:0)) % CANVAS_W;
-      var pulse = scene.crowdPulse > 0 ? (0.5+0.5*Math.sin(i*1.7+scene.t*20)) : 0.5;
-      c.fillStyle = 'rgba('+(200+Math.floor(pulse*55))+','+(200+Math.floor(pulse*55))+',255,'+(0.15+pulse*0.15)+')';
-      c.fillRect(cx, 14+ (i%3)*8, 6, 6);
+    c.fillStyle = '#070c1c';
+    c.fillRect(0,0,CANVAS_W,STAND_H);
+
+    var standGrad = c.createLinearGradient(0,0,0,STAND_H-14);
+    standGrad.addColorStop(0, '#1b2340');
+    standGrad.addColorStop(1, '#0e1428');
+    c.fillStyle = standGrad;
+    c.fillRect(0,0,CANVAS_W,STAND_H-14);
+
+    // publico, estilo pixel art
+    var cellW = CANVAS_W/CROWD_COLS;
+    var idx = 0;
+    for (var r=0;r<CROWD_ROWS;r++){
+      var rowY = 10+r*14;
+      for (var i=0;i<CROWD_COLS;i++){
+        var cell = CROWD_CELLS[idx++];
+        if (!cell.on) continue;
+        var bob = Math.sin(animClock*3+cell.phase)*1.6;
+        var pulse = scene.crowdPulse > 0 ? (0.55+0.45*Math.sin(animClock*14+cell.phase)) : 0.62;
+        c.globalAlpha = 0.5+pulse*0.5;
+        c.fillStyle = cell.color;
+        c.fillRect(i*cellW+1, rowY+bob, cellW-2, 7);
+      }
     }
-    // reflectores
-    c.fillStyle = 'rgba(255,255,255,0.5)';
-    c.beginPath(); c.arc(60,20,6,0,Math.PI*2); c.fill();
-    c.beginPath(); c.arc(CANVAS_W-60,20,6,0,Math.PI*2); c.fill();
+    c.globalAlpha = 1;
 
-    // cancha (trapecio en perspectiva)
-    var pitchGrad = c.createLinearGradient(0,50,0,CANVAS_H);
-    pitchGrad.addColorStop(0, '#1f8a3e');
-    pitchGrad.addColorStop(1, '#2fae52');
+    // banderas animadas
+    FLAG_DEFS.forEach(function(f, fi){
+      var wave = Math.sin(animClock*2.4+fi)*0.35;
+      c.save();
+      c.translate(f.x, 6);
+      c.rotate(wave*0.25);
+      c.fillStyle = f.color;
+      c.beginPath();
+      c.moveTo(0,0); c.lineTo(20,3+wave*4); c.lineTo(0,10);
+      c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,0.4)'; c.lineWidth = 1.4;
+      c.beginPath(); c.moveTo(0,-2); c.lineTo(0,12); c.stroke();
+      c.restore();
+    });
+
+    // cartel LED
+    var ledY = STAND_H-12;
+    c.fillStyle = '#050810';
+    c.fillRect(0, ledY, CANVAS_W, 12);
+    var ledText = '  OTTO-GAMES  ·  MUNDIAL PENALTY SHOOTER  ·  ';
+    c.save();
+    c.beginPath(); c.rect(0,ledY,CANVAS_W,12); c.clip();
+    c.font = '900 10px monospace';
+    c.fillStyle = '#5cff8a';
+    c.textBaseline = 'middle';
+    var scrollX = CANVAS_W - ((animClock*40) % (ledText.length*8+CANVAS_W));
+    c.fillText(ledText, scrollX, ledY+6);
+    c.fillText(ledText, scrollX+ledText.length*8, ledY+6);
+    c.restore();
+
+    // reflectores iluminando la cancha
+    [[40,4], [CANVAS_W-40,4]].forEach(function(p){
+      var glow = c.createRadialGradient(p[0],p[1],2, p[0],p[1],260);
+      glow.addColorStop(0, 'rgba(255,255,255,0.35)');
+      glow.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = glow;
+      c.beginPath(); c.arc(p[0],p[1],260,0,Math.PI*2); c.fill();
+      c.fillStyle = '#fff';
+      c.beginPath(); c.arc(p[0],p[1],4,0,Math.PI*2); c.fill();
+    });
+
+    // cancha (trapecio en perspectiva, mas profundidad que antes)
+    var pitchGrad = c.createLinearGradient(0,STAND_H,0,CANVAS_H);
+    pitchGrad.addColorStop(0, '#155e2c');
+    pitchGrad.addColorStop(0.5, '#1f8a3e');
+    pitchGrad.addColorStop(1, '#34b85a');
     c.fillStyle = pitchGrad;
     c.beginPath();
-    c.moveTo(180,50); c.lineTo(720,50); c.lineTo(900,CANVAS_H); c.lineTo(0,CANVAS_H);
+    c.moveTo(240,STAND_H); c.lineTo(660,STAND_H); c.lineTo(900,CANVAS_H); c.lineTo(0,CANVAS_H);
     c.closePath(); c.fill();
 
-    c.strokeStyle = 'rgba(255,255,255,0.5)';
-    c.lineWidth = 2;
-    c.beginPath(); c.moveTo(SPOT.x-3,SPOT.y); c.arc(SPOT.x,SPOT.y,3,0,Math.PI*2); c.stroke();
-    c.beginPath(); c.arc(SPOT.x, SPOT.y+2, 60, Math.PI*1.15, Math.PI*1.85); c.stroke();
+    // franjas de cesped
+    c.save();
+    c.beginPath();
+    c.moveTo(240,STAND_H); c.lineTo(660,STAND_H); c.lineTo(900,CANVAS_H); c.lineTo(0,CANVAS_H);
+    c.closePath(); c.clip();
+    var bands = 9;
+    for (var b=0;b<bands;b++){
+      if (b%2!==0) continue;
+      var tTop = STAND_H+(b/bands)*(CANVAS_H-STAND_H);
+      var tBot = STAND_H+((b+1)/bands)*(CANVAS_H-STAND_H);
+      c.fillStyle = 'rgba(255,255,255,0.05)';
+      c.fillRect(0, tTop, CANVAS_W, tBot-tTop);
+    }
+    c.restore();
+
+    // vineta para dar mas profundidad
+    var vign = c.createRadialGradient(450,CANVAS_H*0.55,80, 450,CANVAS_H*0.55,520);
+    vign.addColorStop(0,'rgba(0,0,0,0)');
+    vign.addColorStop(1,'rgba(0,0,0,0.28)');
+    c.fillStyle = vign;
+    c.fillRect(0,STAND_H,CANVAS_W,CANVAS_H-STAND_H);
+
+    // area y punto penal
+    c.strokeStyle = 'rgba(255,255,255,0.55)';
+    c.lineWidth = 2.4;
+    c.strokeRect(GOAL_L-70, GOAL_B, (GOAL_R-GOAL_L)+140, SPOT.y+40-GOAL_B);
+    c.fillStyle = 'rgba(255,255,255,0.6)';
+    c.beginPath(); c.arc(SPOT.x, SPOT.y, 3.5, 0, Math.PI*2); c.fill();
+    c.beginPath(); c.arc(SPOT.x, SPOT.y+4, 72, Math.PI*1.12, Math.PI*1.88); c.stroke();
 
     drawGoal();
   }
   function drawGoal(){
     var c = ctx;
-    c.strokeStyle = '#f2f2f2';
-    c.lineWidth = 6;
+    // sombra del arco sobre el cesped
+    c.fillStyle = 'rgba(0,0,0,0.22)';
+    c.beginPath();
+    c.ellipse((GOAL_L+GOAL_R)/2, GOAL_B+6, (GOAL_R-GOAL_L)/2+10, 10, 0, 0, Math.PI*2);
+    c.fill();
+
+    // red, con un leve pandeo para que no se vea plana
+    c.save();
+    c.beginPath(); c.rect(GOAL_L,GOAL_T,GOAL_R-GOAL_L,GOAL_B-GOAL_T); c.clip();
+    c.fillStyle = 'rgba(10,14,10,0.28)';
+    c.fillRect(GOAL_L,GOAL_T,GOAL_R-GOAL_L,GOAL_B-GOAL_T);
+    c.strokeStyle = 'rgba(255,255,255,0.4)';
+    c.lineWidth = 1;
+    var netWiggle = (scene.phase==='reveal' && kickState && kickState.outcome==='goal') ? Math.sin(scene.t*24)*Math.max(0,1-scene.t/0.5)*8 : 0;
+    var sag = 6;
+    for (var gx=GOAL_L; gx<=GOAL_R; gx+=11){
+      var fx = (gx-GOAL_L)/(GOAL_R-GOAL_L);
+      var bow = Math.sin(fx*Math.PI)*sag;
+      c.beginPath();
+      c.moveTo(gx+netWiggle*0.3, GOAL_T);
+      c.quadraticCurveTo(gx+bow*0.4, (GOAL_T+GOAL_B)/2, gx-netWiggle*0.3, GOAL_B);
+      c.stroke();
+    }
+    for (var gy=GOAL_T; gy<=GOAL_B; gy+=10){
+      var fy = (gy-GOAL_T)/(GOAL_B-GOAL_T);
+      var bow2 = Math.sin(fy*Math.PI)*sag*0.6;
+      c.beginPath();
+      c.moveTo(GOAL_L, gy+netWiggle+bow2);
+      c.lineTo(GOAL_R, gy-netWiggle+bow2);
+      c.stroke();
+    }
+    c.restore();
+
+    // palos, mas gruesos y con sombra
+    c.save();
+    c.shadowColor = 'rgba(0,0,0,0.4)';
+    c.shadowBlur = 4;
+    c.strokeStyle = '#f5f5f2';
+    c.lineWidth = 7;
     c.lineJoin = 'round';
+    c.lineCap = 'round';
     c.beginPath();
     c.moveTo(GOAL_L,GOAL_B); c.lineTo(GOAL_L,GOAL_T); c.lineTo(GOAL_R,GOAL_T); c.lineTo(GOAL_R,GOAL_B);
     c.stroke();
-    // red
-    c.save();
-    c.beginPath(); c.rect(GOAL_L,GOAL_T,GOAL_R-GOAL_L,GOAL_B-GOAL_T); c.clip();
-    c.strokeStyle = 'rgba(255,255,255,0.35)';
-    c.lineWidth = 1;
-    var netWiggle = (scene.phase==='reveal' && kickState && kickState.outcome==='goal') ? Math.sin(scene.t*26)*Math.max(0,1-scene.t/0.4)*6 : 0;
-    for (var gx=GOAL_L; gx<=GOAL_R; gx+=14){
-      c.beginPath(); c.moveTo(gx+netWiggle*0.3, GOAL_T); c.lineTo(gx-netWiggle*0.3, GOAL_B); c.stroke();
-    }
-    for (var gy=GOAL_T; gy<=GOAL_B; gy+=12){
-      c.beginPath(); c.moveTo(GOAL_L, gy+netWiggle); c.lineTo(GOAL_R, gy-netWiggle); c.stroke();
-    }
     c.restore();
   }
   function drawFigure(x,y,shirt,band,pose){
     var c = ctx;
     c.save();
     c.translate(x,y);
-    c.fillStyle = 'rgba(0,0,0,0.3)';
-    c.beginPath(); c.ellipse(0, 30, 16, 6, 0, 0, Math.PI*2); c.fill();
+    c.fillStyle = 'rgba(0,0,0,0.32)';
+    c.beginPath(); c.ellipse(0, 37, 20, 7, 0, 0, Math.PI*2); c.fill();
     var rot = pose && pose.rot ? pose.rot : 0;
+    var stretch = pose && pose.stretch ? pose.stretch : 0;
     c.rotate(rot);
+    c.scale(1+stretch*0.5, 1-stretch*0.3);
     c.fillStyle = shirt;
-    c.beginPath(); c.roundRect ? c.roundRect(-11,-6,22,34,8) : c.rect(-11,-6,22,34);
+    c.beginPath();
+    if (c.roundRect) c.roundRect(-14,-7,28,42,10); else c.rect(-14,-7,28,42);
     c.fill();
-    c.strokeStyle = band; c.lineWidth = 3;
+    c.strokeStyle = band; c.lineWidth = 3.5;
     c.stroke();
     c.fillStyle = '#f0c39b';
-    c.beginPath(); c.arc(0,-16,10,0,Math.PI*2); c.fill();
+    c.beginPath(); c.arc(0,-20,12.5,0,Math.PI*2); c.fill();
     c.restore();
   }
   function drawKicker(){
@@ -15618,38 +15879,52 @@
     var dt = kickState ? kickState.defenderTeam : awayTeamData;
     var rot = 0;
     if (scene.phase === 'shot' || scene.phase === 'reveal'){
-      var fg = clamp((scene.gkX-450)/120, -1, 1);
-      rot = fg*0.9;
+      var fg = clamp((scene.gkX-GK_IDLE_X)/140, -1, 1);
+      rot = fg*0.95;
     }
-    drawFigure(scene.gkX, scene.gkY, dt.shirt, '#0a0a0a', {rot:rot});
+    var stretch = (scene.phase==='reveal' && kickState && kickState.outcome==='save') ? scene.gkStretch : 0;
+    drawFigure(scene.gkX, scene.gkY, dt.shirt, '#0a0a0a', {rot:rot, stretch:stretch});
   }
   function drawBall(){
     var c = ctx;
-    if (scene.phase === 'idle' && (!kickState)) { }
     c.save();
+    if (scene.phase === 'shot'){
+      var dx = scene.ballX-SPOT.x, dy = scene.ballY-SPOT.y;
+      var d = Math.hypot(dx,dy);
+      if (d > 26 && scene.shotDur < 0.42){
+        var ux = dx/(d||1), uy = dy/(d||1);
+        c.strokeStyle = 'rgba(255,255,255,0.35)';
+        c.lineWidth = 5;
+        c.beginPath();
+        c.moveTo(scene.ballX-ux*22, scene.ballY-uy*22);
+        c.lineTo(scene.ballX, scene.ballY);
+        c.stroke();
+      }
+    }
     c.translate(scene.ballX, scene.ballY);
-    var grad = c.createRadialGradient(-4,-4,1,0,0,9);
+    var grad = c.createRadialGradient(-4,-4,1,0,0,11);
     grad.addColorStop(0,'#ffffff'); grad.addColorStop(1,'#c9c9c6');
-    c.beginPath(); c.arc(0,0,8,0,Math.PI*2); c.fillStyle = grad; c.fill();
-    c.strokeStyle = 'rgba(20,20,20,0.5)'; c.lineWidth = 0.8; c.stroke();
+    c.beginPath(); c.arc(0,0,10,0,Math.PI*2); c.fillStyle = grad; c.fill();
+    c.strokeStyle = 'rgba(20,20,20,0.5)'; c.lineWidth = 0.9; c.stroke();
     c.fillStyle = '#1c1c1c';
-    c.beginPath(); c.arc(0,0,2.6,0,Math.PI*2); c.fill();
+    c.beginPath(); c.arc(0,0,3.2,0,Math.PI*2); c.fill();
     c.restore();
   }
+  var RESULT_COLORS = {goal:'#ffd23f', save:'#5cc9ff', wide:'#ff5c7a', post:'#ff9f4d'};
   function drawResultText(){
     if (scene.phase !== 'reveal' || !scene.resultText) return;
     var c = ctx;
-    var prog = clamp(scene.t/0.3, 0, 1);
-    var alpha = scene.t > REVEAL_DUR-0.3 ? clamp((REVEAL_DUR-scene.t)/0.3,0,1) : 1;
+    var prog = clamp(scene.t/0.22, 0, 1);
+    var alpha = scene.t > REVEAL_DUR-0.25 ? clamp((REVEAL_DUR-scene.t)/0.25,0,1) : 1;
     c.save();
     c.globalAlpha = alpha;
-    c.translate(450, 230);
+    c.translate(450, 270);
     c.scale(prog, prog);
-    c.font = '900 40px system-ui, sans-serif';
+    c.font = '900 46px system-ui, sans-serif';
     c.textAlign = 'center'; c.textBaseline = 'middle';
     c.fillStyle = 'rgba(0,0,0,0.5)';
     c.fillText(scene.resultText, 3, 3);
-    c.fillStyle = kickState && kickState.outcome === 'goal' ? '#ffd23f' : (kickState && kickState.outcome==='save' ? '#5cc9ff' : '#ff5c7a');
+    c.fillStyle = (kickState && RESULT_COLORS[kickState.outcome]) || '#fff';
     c.fillText(scene.resultText, 0, 0);
     c.restore();
   }

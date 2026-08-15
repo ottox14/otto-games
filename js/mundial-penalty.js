@@ -8,38 +8,38 @@
 (function(){
   // ---------- Datos de selecciones ----------
   var TEAMS = [
-    {id:'argentina', name:'Argentina', confed:'CONMEBOL', strength:95, shirt:'#6cbfe8', band:'#ffffff', pattern:'stripes'},
-    {id:'francia', name:'Francia', confed:'UEFA', strength:93, shirt:'#0055a4', band:'#ef4135', pattern:'band'},
-    {id:'brasil', name:'Brasil', confed:'CONMEBOL', strength:92, shirt:'#ffcc29', band:'#009739', pattern:'band'},
-    {id:'espana', name:'España', confed:'UEFA', strength:90, shirt:'#c60b1e', band:'#ffc400', pattern:'band'},
-    {id:'inglaterra', name:'Inglaterra', confed:'UEFA', strength:87, shirt:'#ffffff', band:'#c8102e', pattern:'solid'},
-    {id:'portugal', name:'Portugal', confed:'UEFA', strength:86, shirt:'#d4213d', band:'#046a38', pattern:'sash'},
-    {id:'alemania', name:'Alemania', confed:'UEFA', strength:85, shirt:'#1a1a1a', band:'#ffce00', pattern:'band'},
-    {id:'belgica', name:'Bélgica', confed:'UEFA', strength:83, shirt:'#ed2939', band:'#111111', pattern:'band'},
-    {id:'paises_bajos', name:'Países Bajos', confed:'UEFA', strength:82, shirt:'#ff6a13', band:'#21468b', pattern:'solid'},
-    {id:'italia', name:'Italia', confed:'UEFA', strength:81, shirt:'#0066cc', band:'#ffffff', pattern:'solid'},
-    {id:'croacia', name:'Croacia', confed:'UEFA', strength:79, shirt:'#ff0000', band:'#ffffff', pattern:'stripes'},
-    {id:'uruguay', name:'Uruguay', confed:'CONMEBOL', strength:78, shirt:'#63a4dc', band:'#ffffff', pattern:'solid'},
-    {id:'marruecos', name:'Marruecos', confed:'CAF', strength:76, shirt:'#c1272d', band:'#006233', pattern:'band'},
-    {id:'colombia', name:'Colombia', confed:'CONMEBOL', strength:75, shirt:'#fcd116', band:'#1c3f94', pattern:'band'},
-    {id:'mexico', name:'México', confed:'CONCACAF', strength:74, shirt:'#036339', band:'#ce1126', pattern:'band'},
-    {id:'estados_unidos', name:'Estados Unidos', confed:'CONCACAF', strength:73, shirt:'#0a3161', band:'#b31942', pattern:'stripes'},
-    {id:'senegal', name:'Senegal', confed:'CAF', strength:72, shirt:'#00853f', band:'#fdef42', pattern:'band'},
-    {id:'suiza', name:'Suiza', confed:'UEFA', strength:71, shirt:'#d52b1e', band:'#ffffff', pattern:'solid'},
-    {id:'japon', name:'Japón', confed:'AFC', strength:70, shirt:'#002b5c', band:'#ffffff', pattern:'solid'},
-    {id:'corea_del_sur', name:'Corea del Sur', confed:'AFC', strength:69, shirt:'#cd2e3a', band:'#003478', pattern:'solid'},
-    {id:'dinamarca', name:'Dinamarca', confed:'UEFA', strength:68, shirt:'#c8102e', band:'#ffffff', pattern:'solid'},
-    {id:'serbia', name:'Serbia', confed:'UEFA', strength:67, shirt:'#c6363c', band:'#0c4076', pattern:'band'},
-    {id:'ecuador', name:'Ecuador', confed:'CONMEBOL', strength:66, shirt:'#ffd100', band:'#034ea2', pattern:'band'},
-    {id:'nigeria', name:'Nigeria', confed:'CAF', strength:65, shirt:'#008751', band:'#ffffff', pattern:'stripes'},
-    {id:'peru', name:'Perú', confed:'CONMEBOL', strength:64, shirt:'#d91023', band:'#ffffff', pattern:'sash'},
-    {id:'chile', name:'Chile', confed:'CONMEBOL', strength:63, shirt:'#d52b1e', band:'#0039a6', pattern:'band'},
-    {id:'polonia', name:'Polonia', confed:'UEFA', strength:62, shirt:'#ffffff', band:'#dc143c', pattern:'halves'},
-    {id:'ghana', name:'Ghana', confed:'CAF', strength:60, shirt:'#fcd116', band:'#006b3f', pattern:'band'},
-    {id:'tunez', name:'Túnez', confed:'CAF', strength:59, shirt:'#e70013', band:'#ffffff', pattern:'solid'},
-    {id:'australia', name:'Australia', confed:'AFC', strength:58, shirt:'#ffcd00', band:'#00843d', pattern:'band'},
-    {id:'costa_rica', name:'Costa Rica', confed:'CONCACAF', strength:56, shirt:'#002b7f', band:'#ce1126', pattern:'band'},
-    {id:'canada', name:'Canadá', confed:'CONCACAF', strength:55, shirt:'#ff0000', band:'#ffffff', pattern:'sash'}
+    {id:'argentina', name:'Argentina', confed:'CONMEBOL', strength:95, shirt:'#6cbfe8', band:'#ffffff', pattern:'stripes', flag:'🇦🇷', code:'ARG'},
+    {id:'francia', name:'Francia', confed:'UEFA', strength:93, shirt:'#0055a4', band:'#ef4135', pattern:'band', flag:'🇫🇷', code:'FRA'},
+    {id:'brasil', name:'Brasil', confed:'CONMEBOL', strength:92, shirt:'#ffcc29', band:'#009739', pattern:'band', flag:'🇧🇷', code:'BRA'},
+    {id:'espana', name:'España', confed:'UEFA', strength:90, shirt:'#c60b1e', band:'#ffc400', pattern:'band', flag:'🇪🇸', code:'ESP'},
+    {id:'inglaterra', name:'Inglaterra', confed:'UEFA', strength:87, shirt:'#ffffff', band:'#c8102e', pattern:'solid', flag:'🇬🇧', code:'ENG'},
+    {id:'portugal', name:'Portugal', confed:'UEFA', strength:86, shirt:'#d4213d', band:'#046a38', pattern:'sash', flag:'🇵🇹', code:'POR'},
+    {id:'alemania', name:'Alemania', confed:'UEFA', strength:85, shirt:'#1a1a1a', band:'#ffce00', pattern:'band', flag:'🇩🇪', code:'ALE'},
+    {id:'belgica', name:'Bélgica', confed:'UEFA', strength:83, shirt:'#ed2939', band:'#111111', pattern:'band', flag:'🇧🇪', code:'BEL'},
+    {id:'paises_bajos', name:'Países Bajos', confed:'UEFA', strength:82, shirt:'#ff6a13', band:'#21468b', pattern:'solid', flag:'🇳🇱', code:'NED'},
+    {id:'italia', name:'Italia', confed:'UEFA', strength:81, shirt:'#0066cc', band:'#ffffff', pattern:'solid', flag:'🇮🇹', code:'ITA'},
+    {id:'croacia', name:'Croacia', confed:'UEFA', strength:79, shirt:'#ff0000', band:'#ffffff', pattern:'stripes', flag:'🇭🇷', code:'CRO'},
+    {id:'uruguay', name:'Uruguay', confed:'CONMEBOL', strength:78, shirt:'#63a4dc', band:'#ffffff', pattern:'solid', flag:'🇺🇾', code:'URU'},
+    {id:'marruecos', name:'Marruecos', confed:'CAF', strength:76, shirt:'#c1272d', band:'#006233', pattern:'band', flag:'🇲🇦', code:'MAR'},
+    {id:'colombia', name:'Colombia', confed:'CONMEBOL', strength:75, shirt:'#fcd116', band:'#1c3f94', pattern:'band', flag:'🇨🇴', code:'COL'},
+    {id:'mexico', name:'México', confed:'CONCACAF', strength:74, shirt:'#036339', band:'#ce1126', pattern:'band', flag:'🇲🇽', code:'MEX'},
+    {id:'estados_unidos', name:'Estados Unidos', confed:'CONCACAF', strength:73, shirt:'#0a3161', band:'#b31942', pattern:'stripes', flag:'🇺🇸', code:'USA'},
+    {id:'senegal', name:'Senegal', confed:'CAF', strength:72, shirt:'#00853f', band:'#fdef42', pattern:'band', flag:'🇸🇳', code:'SEN'},
+    {id:'suiza', name:'Suiza', confed:'UEFA', strength:71, shirt:'#d52b1e', band:'#ffffff', pattern:'solid', flag:'🇨🇭', code:'SUI'},
+    {id:'japon', name:'Japón', confed:'AFC', strength:70, shirt:'#002b5c', band:'#ffffff', pattern:'solid', flag:'🇯🇵', code:'JPN'},
+    {id:'corea_del_sur', name:'Corea del Sur', confed:'AFC', strength:69, shirt:'#cd2e3a', band:'#003478', pattern:'solid', flag:'🇰🇷', code:'COR'},
+    {id:'dinamarca', name:'Dinamarca', confed:'UEFA', strength:68, shirt:'#c8102e', band:'#ffffff', pattern:'solid', flag:'🇩🇰', code:'DIN'},
+    {id:'serbia', name:'Serbia', confed:'UEFA', strength:67, shirt:'#c6363c', band:'#0c4076', pattern:'band', flag:'🇷🇸', code:'SRB'},
+    {id:'ecuador', name:'Ecuador', confed:'CONMEBOL', strength:66, shirt:'#ffd100', band:'#034ea2', pattern:'band', flag:'🇪🇨', code:'ECU'},
+    {id:'nigeria', name:'Nigeria', confed:'CAF', strength:65, shirt:'#008751', band:'#ffffff', pattern:'stripes', flag:'🇳🇬', code:'NGA'},
+    {id:'peru', name:'Perú', confed:'CONMEBOL', strength:64, shirt:'#d91023', band:'#ffffff', pattern:'sash', flag:'🇵🇪', code:'PER'},
+    {id:'chile', name:'Chile', confed:'CONMEBOL', strength:63, shirt:'#d52b1e', band:'#0039a6', pattern:'band', flag:'🇨🇱', code:'CHI'},
+    {id:'polonia', name:'Polonia', confed:'UEFA', strength:62, shirt:'#ffffff', band:'#dc143c', pattern:'halves', flag:'🇵🇱', code:'POL'},
+    {id:'ghana', name:'Ghana', confed:'CAF', strength:60, shirt:'#fcd116', band:'#006b3f', pattern:'band', flag:'🇬🇭', code:'GHA'},
+    {id:'tunez', name:'Túnez', confed:'CAF', strength:59, shirt:'#e70013', band:'#ffffff', pattern:'solid', flag:'🇹🇳', code:'TUN'},
+    {id:'australia', name:'Australia', confed:'AFC', strength:58, shirt:'#ffcd00', band:'#00843d', pattern:'band', flag:'🇦🇺', code:'AUS'},
+    {id:'costa_rica', name:'Costa Rica', confed:'CONCACAF', strength:56, shirt:'#002b7f', band:'#ce1126', pattern:'band', flag:'🇨🇷', code:'CRC'},
+    {id:'canada', name:'Canadá', confed:'CONCACAF', strength:55, shirt:'#ff0000', band:'#ffffff', pattern:'sash', flag:'🇨🇦', code:'CAN'}
   ];
   var TEAMS_BY_ID = {};
   TEAMS.forEach(function(t){ TEAMS_BY_ID[t.id] = t; });
@@ -134,11 +134,13 @@
   var statsGridEl = document.getElementById('wcStatsGrid');
 
   var matchView = document.getElementById('wcMatchView');
-  var homeBadgeEl = document.getElementById('wcHomeBadge');
-  var awayBadgeEl = document.getElementById('wcAwayBadge');
+  var homeFlagEl = document.getElementById('wcHomeFlag');
+  var homeCodeEl = document.getElementById('wcHomeCode');
+  var awayFlagEl = document.getElementById('wcAwayFlag');
+  var awayCodeEl = document.getElementById('wcAwayCode');
   var scoreHomeEl = document.getElementById('wcScoreHome');
   var scoreAwayEl = document.getElementById('wcScoreAway');
-  var roundValEl = document.getElementById('wcRoundVal');
+  var roundLabelEl = document.getElementById('wcRoundLabel');
   var shootoutTrackEl = document.getElementById('wcShootoutTrack');
   var turnBannerEl = document.getElementById('wcTurnBanner');
   var startOverlay = document.getElementById('wcStartOverlay');
@@ -150,13 +152,12 @@
   var overScoreEl = document.getElementById('wcOverScore');
   var overContinueBtn = document.getElementById('wcOverContinueBtn');
   var controlsEl = document.getElementById('wcControls');
-  var aimHintEl = document.getElementById('wcAimHint');
+  var stepDirEl = document.getElementById('wcStepDir');
+  var stepHeightEl = document.getElementById('wcStepHeight');
   var stepPowerEl = document.getElementById('wcStepPower');
+  var stepGkDirEl = document.getElementById('wcStepGkDir');
   var powerBarEl = document.getElementById('wcPowerBar');
   var powerNeedleEl = document.getElementById('wcPowerNeedle');
-  var diveBtnEl = document.getElementById('wcDiveBtn');
-  var reactionBarEl = document.getElementById('wcReactionBar');
-  var reactionFillEl = document.getElementById('wcReactionFill');
   var trainingHintEl = document.getElementById('wcTrainingHint');
   var trainingExitBtn = document.getElementById('wcTrainingExitBtn');
 
@@ -861,8 +862,14 @@
   function updateShootoutHud(){
     scoreHomeEl.textContent = shootout.scoreHome;
     scoreAwayEl.textContent = shootout.scoreAway;
-    roundValEl.textContent = shootout.suddenDeath ? ('MS '+(shootout.round-5)) : shootout.round;
+    roundLabelEl.textContent = shootout.suddenDeath ? ('MUERTE SÚBITA '+(shootout.round-5)) : ('PENAL '+shootout.round+' DE 5');
     renderShootoutTrack();
+  }
+  function setScoreboardTeams(){
+    homeFlagEl.textContent = homeTeamData.flag;
+    homeCodeEl.textContent = homeTeamData.code;
+    awayFlagEl.textContent = awayTeamData.flag;
+    awayCodeEl.textContent = awayTeamData.code;
   }
   function renderShootoutTrack(){
     shootoutTrackEl.innerHTML = '';
@@ -892,10 +899,7 @@
     homeTeamData = TEAMS_BY_ID[campaign.yourId || 'argentina'];
     awayTeamData = TEAMS_BY_ID[opponentId];
     shootout = newShootout();
-    homeBadgeEl.style.background = homeTeamData.shirt;
-    homeBadgeEl.style.borderColor = homeTeamData.band;
-    awayBadgeEl.style.background = awayTeamData.shirt;
-    awayBadgeEl.style.borderColor = awayTeamData.band;
+    setScoreboardTeams();
     updateShootoutHud();
 
     hideAllSubViews();
@@ -916,13 +920,10 @@
     homeTeamData = TEAMS_BY_ID[pendingTeamId || campaign.yourId || 'argentina'];
     awayTeamData = TEAMS_BY_ID['brasil'];
     trainStats = {attempts:0, made:0};
-    homeBadgeEl.style.background = homeTeamData.shirt;
-    homeBadgeEl.style.borderColor = homeTeamData.band;
-    awayBadgeEl.style.background = awayTeamData.shirt;
-    awayBadgeEl.style.borderColor = awayTeamData.band;
+    setScoreboardTeams();
     scoreHomeEl.textContent = '0';
     scoreAwayEl.textContent = '0';
-    roundValEl.textContent = '∞';
+    roundLabelEl.textContent = 'SIN LÍMITE DE INTENTOS';
     shootoutTrackEl.innerHTML = '';
 
     hideAllSubViews();
@@ -964,12 +965,14 @@
   });
 
   // ---------- Decision de cada penal ----------
-  // Todo el apuntado ahora es libre y continuo: u en [-1,1] (izquierda a
-  // derecha del arco), v en [0,1] (piso a travesaño). El jugador mueve un
-  // punto real con el mouse/touch/flechas, no elige entre casilleros.
-  var aimState = {u:0, v:0.42};
-  var keeperLive = {u:0, v:0.35};
-  var reactionDeadline = 1.2, reactionElapsed = 0;
+  // El apuntado es por botones, en tres pasos claros (Direccion, Altura,
+  // Potencia para vos; solo Direccion para atajar), pero cada eleccion se
+  // traduce a un punto continuo (u,v) del arco y se resuelve con el mismo
+  // motor de tiro/atajada de siempre - elegir "izquierda" no garantiza que
+  // la pelota vaya exactamente ahi, la potencia y la precision del equipo
+  // siguen metiendo variacion real.
+  var DIR_U = {left:-0.62, center:0, right:0.62};
+  var HEIGHT_V = {low:0.16, mid:0.5, high:0.82};
 
   function nextKick(){
     if (matchMode === 'campaign' && shootout.finished){
@@ -989,40 +992,57 @@
 
     kickState = {
       side: kickerSide, playerKicks: playerKicks, kickerTeam: kickerTeam, defenderTeam: defenderTeam,
-      aimU: 0, aimV: 0.42, power: null, gkU: 0, gkV: 0.35, gkReachQuality: 1,
+      aimU: 0, aimV: 0.5, power: null, gkU: 0, gkV: 0.4, gkReachQuality: 1,
       finalU: null, finalV: null, wide: false, post: false, keeperTimeBonus: 0,
-      outcome: null, phase: playerKicks ? 'aim' : 'react', diveCommitted: false
+      outcome: null, phase: playerKicks ? 'dir' : 'gkdir', diveCommitted: false
     };
     turnBannerEl.classList.remove('is-hidden');
     turnBannerEl.textContent = playerKicks ? '⚽ Pateás vos' : '🧤 Atajás vos';
+    stepDirEl.classList.add('is-hidden');
+    stepHeightEl.classList.add('is-hidden');
     stepPowerEl.classList.add('is-hidden');
-    diveBtnEl.classList.add('is-hidden');
-    reactionBarEl.classList.add('is-hidden');
+    stepGkDirEl.classList.add('is-hidden');
     resetScene();
 
-    if (playerKicks){
-      aimState.u = 0; aimState.v = 0.42;
-      aimHintEl.textContent = 'Movete con el mouse o las flechas · Click, Espacio o toque para confirmar';
-      aimHintEl.classList.remove('is-hidden');
-    } else {
-      aimHintEl.classList.add('is-hidden');
-      keeperLive.u = 0; keeperLive.v = 0.35;
-      diveBtnEl.classList.remove('is-hidden');
-      reactionBarEl.classList.remove('is-hidden');
-      reactionFillEl.style.transform = 'scaleX(1)';
+    if (playerKicks) stepDirEl.classList.remove('is-hidden');
+    else stepGkDirEl.classList.remove('is-hidden');
+  }
+
+  function chooseDir(dir){
+    if (!kickState) return;
+    if (kickState.playerKicks && kickState.phase === 'dir'){
+      kickState.aimU = DIR_U[dir];
+      kickState.phase = 'height';
+      beep(500, 0.05, 'square');
+      stepDirEl.classList.add('is-hidden');
+      stepHeightEl.classList.remove('is-hidden');
+    } else if (!kickState.playerKicks && kickState.phase === 'gkdir'){
+      kickState.gkU = DIR_U[dir];
+      kickState.gkV = 0.4;
+      kickState.diveCommitted = true;
+      beep(320, 0.06, 'square');
+      stepGkDirEl.classList.add('is-hidden');
       beginAIKick();
     }
   }
-
-  function confirmAim(){
-    if (!kickState || !kickState.playerKicks || kickState.phase !== 'aim') return;
+  function chooseHeight(height){
+    if (!kickState || !kickState.playerKicks || kickState.phase !== 'height') return;
+    kickState.aimV = HEIGHT_V[height];
     kickState.phase = 'power';
-    kickState.aimU = aimState.u; kickState.aimV = aimState.v;
     beep(500, 0.05, 'square');
-    aimHintEl.classList.add('is-hidden');
+    stepHeightEl.classList.add('is-hidden');
     stepPowerEl.classList.remove('is-hidden');
     startPowerBar();
   }
+  Array.prototype.forEach.call(stepDirEl.querySelectorAll('.wc-choice-btn'), function(btn){
+    btn.addEventListener('click', function(){ chooseDir(btn.getAttribute('data-dir')); });
+  });
+  Array.prototype.forEach.call(stepHeightEl.querySelectorAll('.wc-choice-btn'), function(btn){
+    btn.addEventListener('click', function(){ chooseHeight(btn.getAttribute('data-height')); });
+  });
+  Array.prototype.forEach.call(stepGkDirEl.querySelectorAll('.wc-choice-btn'), function(btn){
+    btn.addEventListener('click', function(){ chooseDir(btn.getAttribute('data-dir')); });
+  });
 
   var POWER_PERIOD = 1.3;
   var powerT = 0;
@@ -1151,9 +1171,9 @@
     beginAnimation();
   }
 
-  // Patea la IA: el remate se decide ya (oculto) para poder animar la
-  // pelota, pero el resultado (atajada o gol) recien se resuelve cuando vos
-  // definís tu zambullida - reaccionando en vivo, no eligiendo de antemano.
+  // Patea la IA: el rival ya sabe donde se tira tu arquero (elegiste antes,
+  // sin apuro), asi que el resultado (atajada o gol) se resuelve de una vez;
+  // la animacion solo lo muestra.
   function beginAIKick(){
     var target = aiPickShotTarget();
     var power = aiPickPower();
@@ -1161,93 +1181,13 @@
     var shot = resolveShot(target.u, target.v, power, teamAccuracy(kickState.kickerTeam), currentDifficulty.shooterBonus);
     kickState.finalU = shot.u; kickState.finalV = shot.v;
     kickState.wide = shot.wide; kickState.post = shot.post; kickState.keeperTimeBonus = shot.keeperTimeBonus;
-    // La pelota llega y, si todavia no te tiraste, se te fuerza un
-    // remate apurado en ese instante (ver finalizeGoalkeeperOutcome) - este
-    // valor es solo la referencia para la barra visual de tiempo restante,
-    // calibrada para que coincida exactamente con ese momento.
-    reactionDeadline = RUN_DUR + shotDurationFor(power);
-    reactionElapsed = 0;
-    beginAnimation();
-  }
 
-  function commitDive(forced){
-    if (!kickState || kickState.playerKicks || kickState.diveCommitted) return;
-    kickState.diveCommitted = true;
-    kickState.gkU = keeperLive.u; kickState.gkV = keeperLive.v;
-    // Cuanto antes te tires (mas tiempo te quedaba), mas completa la
-    // zambullida; si nunca llegaste a tirarte y se te forzo por la pelota
-    // ya encima, la estirada sale mucho mas corta.
-    var remFrac = clamp((reactionDeadline-reactionElapsed)/reactionDeadline, 0, 1);
-    var base = forced ? 0.12 : 0.28;
-    kickState.gkReachQuality = clamp(base+remFrac*0.7, forced ? 0.1 : 0.25, 1);
-    diveBtnEl.classList.add('is-hidden');
-    reactionBarEl.classList.add('is-hidden');
-    beep(320, 0.06, 'square');
-  }
-  diveBtnEl.addEventListener('click', function(){ commitDive(false); });
-
-  function finalizeGoalkeeperOutcome(){
-    if (!kickState.diveCommitted) commitDive(true);
-    var shot = {u:kickState.finalU, v:kickState.finalV, wide:kickState.wide, post:kickState.post, keeperTimeBonus:kickState.keeperTimeBonus};
     if (shot.wide) kickState.outcome = 'wide';
     else if (shot.post) kickState.outcome = 'post';
     else kickState.outcome = resolveSave(shot, kickState.gkU, kickState.gkV, kickState.gkReachQuality, 0) ? 'save' : 'goal';
-    recordOutcomeStats();
-  }
 
-  // ---------- Apuntado libre: mouse, touch y teclado ----------
-  function canvasPointFromEvent(e){
-    var rect = canvas.getBoundingClientRect();
-    var scaleX = CANVAS_W/rect.width, scaleY = CANVAS_H/rect.height;
-    return {x:(e.clientX-rect.left)*scaleX, y:(e.clientY-rect.top)*scaleY};
-  }
-  canvas.addEventListener('pointermove', function(e){
-    if (!kickState) return;
-    var pt = canvasPointFromEvent(e);
-    if (kickState.playerKicks && kickState.phase === 'aim'){
-      var uv = kickScreenToUV(pt.x, pt.y);
-      aimState.u = uv.u; aimState.v = uv.v;
-    } else if (!kickState.playerKicks && !kickState.diveCommitted){
-      var uv2 = gkScreenToUV(pt.x, pt.y);
-      keeperLive.u = uv2.u; keeperLive.v = uv2.v;
-    }
-  });
-  canvas.addEventListener('click', function(){
-    if (!kickState) return;
-    if (kickState.playerKicks && kickState.phase === 'aim') confirmAim();
-    else if (!kickState.playerKicks) commitDive(false);
-  });
-  var heldKeys = {};
-  var AIM_KEY_SPEED = 1.15;
-  window.addEventListener('keydown', function(e){
-    if (!liberActiveMundial()) return;
-    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','Enter'].indexOf(e.key) !== -1){
-      e.preventDefault();
-    }
-    heldKeys[e.key] = true;
-    if ((e.key === ' ' || e.key === 'Enter') && kickState){
-      if (kickState.playerKicks && kickState.phase === 'aim') confirmAim();
-      else if (kickState.playerKicks && kickState.phase === 'power') lockPower();
-      else if (!kickState.playerKicks) commitDive(false);
-    }
-  });
-  window.addEventListener('keyup', function(e){ heldKeys[e.key] = false; });
-  function liberActiveMundial(){ return matchView && !matchView.classList.contains('is-hidden'); }
-  function applyKeyboardAim(dt){
-    if (!kickState) return;
-    var dx=0, dy=0;
-    if (heldKeys['ArrowLeft']) dx -= 1;
-    if (heldKeys['ArrowRight']) dx += 1;
-    if (heldKeys['ArrowUp']) dy += 1;
-    if (heldKeys['ArrowDown']) dy -= 1;
-    if (!dx && !dy) return;
-    if (kickState.playerKicks && kickState.phase === 'aim'){
-      aimState.u = clamp(aimState.u + dx*AIM_KEY_SPEED*dt, -1, 1);
-      aimState.v = clamp(aimState.v + dy*AIM_KEY_SPEED*dt, 0, 1);
-    } else if (!kickState.playerKicks && !kickState.diveCommitted){
-      keeperLive.u = clamp(keeperLive.u + dx*AIM_KEY_SPEED*dt, -1, 1);
-      keeperLive.v = clamp(keeperLive.v + dy*AIM_KEY_SPEED*dt, 0, 1);
-    }
+    recordOutcomeStats();
+    beginAnimation();
   }
 
   function finishInteractiveShootout(){
@@ -1266,28 +1206,17 @@
   // comparten el mismo modelo continuo (u,v) del arco, solo cambia como se
   // proyecta a la pantalla.
   var STAND_H = 96;
-  var GOAL_L = 300, GOAL_R = 600, GOAL_T = 112, GOAL_B = 236;
+  var GOAL_L = 280, GOAL_R = 620, GOAL_T = 104, GOAL_B = 248;
   var SPOT = {x:450, y:378};
   function uvToKickScreen(u,v){
     return {x: GOAL_L+(GOAL_R-GOAL_L)*((u+1)/2), y: GOAL_B-(GOAL_B-GOAL_T)*v};
-  }
-  function kickScreenToUV(x,y){
-    var u = ((x-GOAL_L)/(GOAL_R-GOAL_L))*2-1;
-    var v = (GOAL_B-y)/(GOAL_B-GOAL_T);
-    return {u:clamp(u,-1,1), v:clamp(v,0,1)};
   }
   var GK_FAR = {x:450, y:126};
   var GK_STRIKE = {x:450, y:200};
   var GK_LINE_Y = 372;
   var GK_SPAN = 250;
-  var GK_CONTROL_ZONE = {x1:90, y1:250, x2:810, y2:430};
   function gkLinePoint(u,v){
     return {x: GK_FAR.x + u*GK_SPAN, y: GK_LINE_Y - v*150};
-  }
-  function gkScreenToUV(x,y){
-    var u = ((clamp(x,GK_CONTROL_ZONE.x1,GK_CONTROL_ZONE.x2)-GK_CONTROL_ZONE.x1)/(GK_CONTROL_ZONE.x2-GK_CONTROL_ZONE.x1))*2-1;
-    var v = 1-((clamp(y,GK_CONTROL_ZONE.y1,GK_CONTROL_ZONE.y2)-GK_CONTROL_ZONE.y1)/(GK_CONTROL_ZONE.y2-GK_CONTROL_ZONE.y1));
-    return {u:u, v:clamp(v,0,1)};
   }
   var scene = {
     phase:'idle', t:0, idleClock:0, runF:0, shotF:0, shotDur:0.4, wideSign:1,
@@ -1315,10 +1244,6 @@
   }
   function advanceScene(dt){
     scene.idleClock += dt;
-    if (kickState && !kickState.playerKicks && !kickState.diveCommitted && scene.phase !== 'idle'){
-      reactionElapsed += dt;
-      reactionFillEl.style.transform = 'scaleX('+clamp(1-reactionElapsed/reactionDeadline,0,1)+')';
-    }
     if (scene.phase === 'idle') return;
     scene.t += dt;
     if (scene.phase === 'run'){
@@ -1328,7 +1253,6 @@
       scene.shotF = clamp(scene.t/scene.shotDur, 0, 1);
       if (scene.shotF >= 1){
         scene.phase = 'reveal'; scene.t = 0;
-        if (!kickState.playerKicks && kickState.outcome === null) finalizeGoalkeeperOutcome();
         onKickResolved();
       }
     } else if (scene.phase === 'reveal'){
@@ -1576,7 +1500,7 @@
   }
   function drawFigure(x,y,shirt,band,pose){
     var c = ctx;
-    var scale = (pose && pose.scale) || 1;
+    var scale = ((pose && pose.scale) || 1) * 1.12;
     c.save();
     c.translate(x,y);
     c.fillStyle = 'rgba(0,0,0,0.32)';
@@ -1622,23 +1546,6 @@
     c.beginPath(); c.arc(0,0,r*0.32,0,Math.PI*2); c.fill();
     c.restore();
   }
-  function drawCrosshair(pt){
-    var c = ctx;
-    var pulse = 0.5+0.5*Math.sin(scene.idleClock*5);
-    c.save();
-    c.translate(pt.x, pt.y);
-    c.strokeStyle = 'rgba(255,210,63,0.95)';
-    c.lineWidth = 2.2;
-    c.beginPath(); c.arc(0,0,16+pulse*2,0,Math.PI*2); c.stroke();
-    c.beginPath();
-    c.moveTo(-24,0); c.lineTo(-9,0); c.moveTo(9,0); c.lineTo(24,0);
-    c.moveTo(0,-24); c.lineTo(0,-9); c.moveTo(0,9); c.lineTo(0,24);
-    c.stroke();
-    c.fillStyle = 'rgba(255,210,63,0.9)';
-    c.beginPath(); c.arc(0,0,2.6,0,Math.PI*2); c.fill();
-    c.restore();
-  }
-
   // ---------- Escena: pateas vos (camara detras del pateador) ----------
   function drawKickingScene(){
     drawStadiumBase();
@@ -1678,10 +1585,6 @@
     } else if (kickState && (scene.phase === 'shot' || scene.phase === 'reveal')){
       drawFigure(SPOT.x, SPOT.y+35, kickState.kickerTeam.shirt, kickState.kickerTeam.band, null);
     }
-
-    if (kickState && kickState.playerKicks && kickState.phase === 'aim'){
-      drawCrosshair(uvToKickScreen(aimState.u, aimState.v));
-    }
   }
 
   // ---------- Escena: ataja la IA (camara detras del arquero) ----------
@@ -1711,11 +1614,16 @@
     }
     drawBall(ballPoint.x, ballPoint.y, ballScale, false);
 
-    var ku = kickState.diveCommitted ? kickState.gkU : keeperLive.u;
-    var kv = kickState.diveCommitted ? kickState.gkV : keeperLive.v;
-    var gp = gkLinePoint(ku, kv);
-    var grot = clamp(ku,-1,1)*0.55;
-    var gstretch = kickState.diveCommitted ? clamp(scene.t/0.2,0,1)*0.5 : 0;
+    var gU, gV, grot = 0, gstretch = 0;
+    if (scene.phase === 'idle' || scene.phase === 'run'){
+      gU = Math.sin(scene.idleClock*2.1)*0.14; gV = 0.4;
+    } else {
+      var fg = clamp(scene.t/currentDifficulty.diveDur, 0, 1);
+      gU = kickState.gkU*fg; gV = 0.4+(kickState.gkV-0.4)*fg;
+      grot = clamp(gU,-1,1)*0.55;
+      gstretch = (scene.phase==='reveal' && kickState.outcome==='save') ? scene.gkStretch : 0;
+    }
+    var gp = gkLinePoint(gU, gV);
     drawFigure(gp.x, gp.y, homeTeamData.shirt, homeTeamData.band, {rot:grot, stretch:gstretch, scale:1.2});
   }
 
@@ -1774,7 +1682,6 @@
       var val = currentPowerValue();
       powerNeedleEl.style.left = val+'%';
     }
-    applyKeyboardAim(dt);
     advanceScene(dt);
     draw();
     requestAnimationFrame(loop);

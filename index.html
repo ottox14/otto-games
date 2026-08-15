@@ -961,17 +961,30 @@
         <button class="mute-btn" id="wcMuteBtn" title="Silenciar sonido" aria-label="Silenciar sonido">🔊</button>
       </div>
 
-      <div class="wc-sub-view" id="wcMenuView">
+      <div class="wc-sub-view wc-menu-shell" id="wcMenuView">
         <div class="wc-menu-stadium" aria-hidden="true">
-          <div class="wc-menu-lights"></div>
-          <div class="wc-menu-pitch"></div>
-          <div class="wc-menu-ball"><div class="wc-menu-ball-pentagon p1"></div><div class="wc-menu-ball-pentagon p2"></div><div class="wc-menu-ball-pentagon p3"></div></div>
+          <div class="wc-menu-floodlights"></div>
+          <div class="wc-menu-stands"></div>
+          <div class="wc-menu-flags">
+            <span class="wc-menu-flag f1"></span>
+            <span class="wc-menu-flag f2"></span>
+            <span class="wc-menu-flag f3"></span>
+            <span class="wc-menu-flag f4"></span>
+            <span class="wc-menu-flag f5"></span>
+          </div>
+          <div class="wc-menu-billboard"></div>
+          <div class="wc-menu-pitch">
+            <div class="wc-menu-ball"><div class="wc-menu-ball-pentagon p1"></div><div class="wc-menu-ball-pentagon p2"></div><div class="wc-menu-ball-pentagon p3"></div></div>
+          </div>
         </div>
-        <div class="wc-menu-buttons">
-          <button class="wc-menu-btn" id="wcMenuPlayBtn">🌍 Jugar Mundial</button>
-          <button class="wc-menu-btn" id="wcMenuTrainBtn">🎯 Entrenamiento</button>
-          <button class="wc-menu-btn" id="wcMenuConfigBtn">⚙️ Configuración</button>
-          <button class="wc-menu-btn" id="wcMenuStatsBtn">🏆 Estadísticas</button>
+        <div class="wc-menu-panel">
+          <p class="wc-menu-panel-title">🏆 MUNDIAL PENALTY SHOOTER</p>
+          <div class="wc-menu-buttons">
+            <button class="wc-menu-btn" id="wcMenuPlayBtn">🌍 Jugar Mundial</button>
+            <button class="wc-menu-btn" id="wcMenuTrainBtn">🎯 Entrenamiento</button>
+            <button class="wc-menu-btn" id="wcMenuConfigBtn">⚙️ Configuración</button>
+            <button class="wc-menu-btn" id="wcMenuStatsBtn">🏆 Estadísticas</button>
+          </div>
         </div>
       </div>
 
@@ -1039,19 +1052,26 @@
       </div>
 
       <div class="wc-sub-view is-hidden" id="wcMatchView">
-        <div class="liber-hud wc-match-hud">
-          <div class="hud-chip liber-team-chip" id="wcHomeChip"><span class="team-badge" id="wcHomeBadge"></span> <b id="wcScoreHome">0</b></div>
-          <div class="hud-chip" id="wcRoundChip">Penal <b id="wcRoundVal">1</b></div>
-          <div class="hud-chip liber-team-chip" id="wcAwayChip"><span class="team-badge" id="wcAwayBadge"></span> <b id="wcScoreAway">0</b></div>
+        <div class="wc-scoreboard" id="wcScoreboard">
+          <div class="wc-scoreboard-team">
+            <span class="wc-scoreboard-flag" id="wcHomeFlag">🏳️</span>
+            <span class="wc-scoreboard-code" id="wcHomeCode">VOS</span>
+          </div>
+          <div class="wc-scoreboard-score">
+            <b id="wcScoreHome">0</b><span class="wc-scoreboard-dash">—</span><b id="wcScoreAway">0</b>
+          </div>
+          <div class="wc-scoreboard-team wc-scoreboard-team-away">
+            <span class="wc-scoreboard-code" id="wcAwayCode">RIV</span>
+            <span class="wc-scoreboard-flag" id="wcAwayFlag">🏳️</span>
+          </div>
         </div>
+        <p class="wc-round-label" id="wcRoundLabel">PENAL 1 DE 5</p>
         <div class="wc-shootout-track" id="wcShootoutTrack"></div>
 
         <div class="frame wc-frame">
           <canvas id="wcCanvas" width="900" height="480"></canvas>
 
           <div class="wc-turn-banner is-hidden" id="wcTurnBanner">Pateás vos</div>
-
-          <div class="wc-reaction-bar is-hidden" id="wcReactionBar"><div class="wc-reaction-fill" id="wcReactionFill"></div></div>
 
           <div class="overlay" id="wcStartOverlay">
             <h2 id="wcStartTitle">¿Listo para la tanda?</h2>
@@ -1067,15 +1087,37 @@
         </div>
 
         <div class="wc-controls" id="wcControls">
-          <p class="wc-control-label" id="wcAimHint">Movete con el mouse o las flechas · Click, Espacio o toque para confirmar</p>
+          <div class="wc-control-step is-hidden" id="wcStepDir">
+            <p class="wc-control-label">Dirección</p>
+            <div class="wc-choice-row">
+              <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
+              <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
+              <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
+            </div>
+          </div>
+          <div class="wc-control-step is-hidden" id="wcStepHeight">
+            <p class="wc-control-label">Altura</p>
+            <div class="wc-choice-row">
+              <button class="wc-choice-btn" data-height="low">⬇️ Bajo</button>
+              <button class="wc-choice-btn" data-height="mid">➡️ Medio</button>
+              <button class="wc-choice-btn" data-height="high">⬆️ Alto</button>
+            </div>
+          </div>
           <div class="wc-control-step is-hidden" id="wcStepPower">
-            <p class="wc-control-label">Hacé clic para fijar la potencia</p>
+            <p class="wc-control-label">Potencia — hacé clic para fijarla</p>
             <button class="wc-power-bar" id="wcPowerBar" aria-label="Fijar potencia">
               <span class="wc-power-sweet" aria-hidden="true"></span>
               <span class="wc-power-needle" id="wcPowerNeedle"></span>
             </button>
           </div>
-          <button class="big-btn wc-dive-btn is-hidden" id="wcDiveBtn">🧤 ¡ATAJAR!</button>
+          <div class="wc-control-step is-hidden" id="wcStepGkDir">
+            <p class="wc-control-label">¿Hacia dónde te tirás?</p>
+            <div class="wc-choice-row">
+              <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
+              <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
+              <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
+            </div>
+          </div>
           <p class="wc-training-hint is-hidden" id="wcTrainingHint">Modo entrenamiento — <button class="text-btn" id="wcTrainingExitBtn">salir</button></p>
         </div>
       </div>

@@ -989,8 +989,30 @@
       </div>
 
       <div class="wc-sub-view is-hidden" id="wcTeamSelectView">
-        <h2 class="liber-select-title">Elegí tu selección</h2>
-        <div class="team-grid" id="wcTeamGrid"></div>
+        <div class="wc-select-layout">
+          <nav class="wc-side-nav" id="wcSideNav">
+            <button class="wc-side-btn wc-side-btn-primary" data-nav="jugar">🏆 JUGAR</button>
+            <button class="wc-side-btn" data-nav="torneo">🌍 TORNEO</button>
+            <button class="wc-side-btn is-active" data-nav="selecciones">🚩 SELECCIONES</button>
+            <button class="wc-side-btn" data-nav="estadisticas">📊 ESTADÍSTICAS</button>
+            <button class="wc-side-btn" data-nav="ranking">🥇 RANKING</button>
+            <button class="wc-side-btn" data-nav="config">⚙️ CONFIGURACIÓN</button>
+            <button class="wc-side-btn" data-nav="creditos">ℹ️ CRÉDITOS</button>
+          </nav>
+          <div class="wc-select-main">
+            <h2 class="liber-select-title">Elegí tu selección</h2>
+            <div class="team-grid wc-team-carousel" id="wcTeamGrid"></div>
+          </div>
+          <aside class="wc-info-panel">
+            <p class="wc-panel-label">🏆 Info Torneo</p>
+            <ul class="wc-info-list">
+              <li><span>Formato</span><b>Tanda de penales</b></li>
+              <li><span>Equipos</span><b>32</b></li>
+              <li><span>Dificultad</span><b id="wcInfoDifficulty">Normal</b></li>
+              <li><span>Premio</span><b>🏆 Ganar el Mundial</b></li>
+            </ul>
+          </aside>
+        </div>
         <div class="liber-team-detail is-hidden" id="wcTeamDetail">
           <div class="liber-detail-crest" id="wcDetailCrest"></div>
           <div class="liber-detail-info">
@@ -1001,6 +1023,19 @@
           </div>
           <button class="big-btn liber-detail-btn" id="wcDetailContinueBtn">Continuar →</button>
         </div>
+      </div>
+
+      <div class="wc-sub-view is-hidden" id="wcRankingView">
+        <button class="text-btn liber-back-step" id="wcRankingBackBtn">← Menú</button>
+        <h2 class="liber-select-title">Ranking</h2>
+        <p class="liber-stage-text">Tu mejor marca en este dispositivo.</p>
+        <div class="wc-stats-grid" id="wcRankingGrid"></div>
+      </div>
+
+      <div class="wc-sub-view is-hidden" id="wcCreditsView">
+        <button class="text-btn liber-back-step" id="wcCreditsBackBtn">← Menú</button>
+        <h2 class="liber-select-title">Créditos</h2>
+        <p class="liber-stage-text">Mundial Penalty Shooter — Otto Games.<br>Diseño, código y arte hechos para el arcade de Otto.</p>
       </div>
 
       <div class="wc-sub-view is-hidden" id="wcDifficultyView">
@@ -1068,44 +1103,46 @@
         <p class="wc-round-label" id="wcRoundLabel">PENAL 1 DE 5</p>
         <div class="wc-shootout-track" id="wcShootoutTrack"></div>
 
-        <div class="frame wc-frame">
-          <canvas id="wcCanvas" width="900" height="480"></canvas>
+        <div class="wc-match-body">
+          <div class="frame wc-frame">
+            <canvas id="wcCanvas" width="900" height="480"></canvas>
 
-          <div class="wc-turn-banner is-hidden" id="wcTurnBanner">Pateás vos</div>
+            <div class="wc-turn-banner is-hidden" id="wcTurnBanner">Pateás vos</div>
 
-          <div class="overlay" id="wcStartOverlay">
-            <h2 id="wcStartTitle">¿Listo para la tanda?</h2>
-            <p id="wcStartDesc">5 penales por equipo. Si empatan, muerte súbita.</p>
-            <button class="big-btn" id="wcStartBtn">▶ Empezar</button>
-          </div>
-
-          <div class="overlay is-hidden" id="wcOverOverlay">
-            <h2 id="wcOverTitle">¡Ganaste la tanda!</h2>
-            <p id="wcOverScore">River 5 - 3 Brasil</p>
-            <button class="big-btn" id="wcOverContinueBtn">Continuar</button>
-          </div>
-        </div>
-
-        <div class="wc-controls" id="wcControls">
-          <p class="wc-control-label" id="wcAimHint">Movete con el mouse, el dedo o las flechas · Tocá, hacé clic o presioná Espacio para confirmar la dirección</p>
-          <div class="wc-control-step is-hidden" id="wcStepPower">
-            <p class="wc-control-label">Potencia — hacé clic para fijarla</p>
-            <button class="wc-power-bar" id="wcPowerBar" aria-label="Fijar potencia">
-              <span class="wc-power-sweet" aria-hidden="true"></span>
-              <span class="wc-power-needle" id="wcPowerNeedle"></span>
-            </button>
-          </div>
-          <div class="wc-control-step is-hidden" id="wcStepGkDir">
-            <p class="wc-control-label">¿Hacia dónde te tirás?</p>
-            <div class="wc-choice-row">
-              <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
-              <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
-              <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
-              <button class="wc-choice-btn" data-dir="top">🥅 Travesaño</button>
+            <div class="overlay" id="wcStartOverlay">
+              <h2 id="wcStartTitle">¿Listo para la tanda?</h2>
+              <p id="wcStartDesc">5 penales por equipo. Si empatan, muerte súbita.</p>
+              <button class="big-btn" id="wcStartBtn">▶ Empezar</button>
             </div>
-            <button class="big-btn wc-ready-btn is-hidden" id="wcGkReadyBtn" disabled>¡Estoy listo!</button>
+
+            <div class="overlay is-hidden" id="wcOverOverlay">
+              <h2 id="wcOverTitle">¡Ganaste la tanda!</h2>
+              <p id="wcOverScore">River 5 - 3 Brasil</p>
+              <button class="big-btn" id="wcOverContinueBtn">Continuar</button>
+            </div>
           </div>
-          <p class="wc-training-hint is-hidden" id="wcTrainingHint">Modo entrenamiento — <button class="text-btn" id="wcTrainingExitBtn">salir</button></p>
+
+          <div class="wc-controls" id="wcControls">
+            <p class="wc-control-label" id="wcAimHint">Movete con el mouse, el dedo o las flechas · Tocá, hacé clic o presioná Espacio para confirmar la dirección</p>
+            <div class="wc-control-step is-hidden" id="wcStepPower">
+              <p class="wc-control-label">Potencia — hacé clic para fijarla</p>
+              <button class="wc-power-bar" id="wcPowerBar" aria-label="Fijar potencia">
+                <span class="wc-power-sweet" aria-hidden="true"></span>
+                <span class="wc-power-needle" id="wcPowerNeedle"></span>
+              </button>
+            </div>
+            <div class="wc-control-step is-hidden" id="wcStepGkDir">
+              <p class="wc-control-label">¿Hacia dónde te tirás?</p>
+              <div class="wc-choice-row">
+                <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
+                <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
+                <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
+                <button class="wc-choice-btn" data-dir="top">🥅 Travesaño</button>
+              </div>
+              <button class="big-btn wc-ready-btn is-hidden" id="wcGkReadyBtn" disabled>¡Estoy listo!</button>
+            </div>
+            <p class="wc-training-hint is-hidden" id="wcTrainingHint">Modo entrenamiento — <button class="text-btn" id="wcTrainingExitBtn">salir</button></p>
+          </div>
         </div>
       </div>
 

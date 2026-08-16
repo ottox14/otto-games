@@ -2821,6 +2821,10 @@
    liber-hud/liber-team-chip, liber-team-detail, etc.) para mantener la
    identidad visual del arcade. */
 
+/* Acento dorado propio de este juego, sin tocar --gold global (no afecta
+   a los demas juegos del arcade). */
+#mundialView{ --gold:#FFC107; }
+
 .wc-sub-view.is-hidden{ display:none; }
 .wc-sub-view{
   display:flex;
@@ -3017,6 +3021,96 @@
 
 .wc-train-grid{ grid-template-columns:repeat(2,1fr); max-width:360px; }
 
+/* ---------- Seleccion de selecciones: sidebar + carrusel + info torneo ---------- */
+.wc-select-layout{
+  display:grid;
+  grid-template-columns:180px 1fr 220px;
+  gap:14px;
+  align-items:start;
+}
+@media (max-width:820px){
+  .wc-select-layout{ grid-template-columns:1fr; }
+}
+.wc-side-nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(13,9,32,0.55);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--panel-border);
+}
+.wc-side-btn{
+  appearance:none;
+  border:1px solid transparent;
+  border-radius:10px;
+  padding:11px 10px;
+  background:transparent;
+  color:var(--ink-soft);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.02em;
+  text-align:left;
+  cursor:pointer;
+  transition:background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.wc-side-btn:hover{ background:rgba(255,255,255,0.06); color:var(--ink); }
+.wc-side-btn.is-active{ background:rgba(255,255,255,0.08); color:var(--ink); border-color:var(--panel-border); }
+.wc-side-btn-primary{
+  background:linear-gradient(180deg, var(--gold), #f5a300);
+  color:#241a06;
+  box-shadow:0 6px 14px rgba(255,193,7,0.35);
+}
+.wc-side-btn-primary:hover{ background:linear-gradient(180deg, var(--gold), #f5a300); color:#241a06; transform:translateY(-1px); }
+.wc-select-main{
+  min-width:0;
+  border-radius:16px;
+  padding:14px;
+  background:rgba(13,9,32,0.4);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--panel-border);
+}
+.wc-team-carousel{
+  display:flex;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  scroll-snap-type:x proximity;
+  gap:12px;
+  padding-bottom:6px;
+}
+.wc-team-carousel .team-pick-btn{
+  scroll-snap-align:start;
+  flex:0 0 150px;
+}
+.wc-info-panel{
+  border-radius:16px;
+  padding:14px;
+  background:rgba(13,9,32,0.55);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--panel-border);
+}
+.wc-info-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.wc-info-list li{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  font-size:13px;
+}
+.wc-info-list span{ color:var(--ink-soft); font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+.wc-info-list b{ color:var(--gold); font-size:15px; }
+
 /* ---------- Pantalla del mundial (hub) ---------- */
 .wc-hub-layout{
   display:grid;
@@ -3171,12 +3265,33 @@
 }
 .wc-turn-banner.is-hidden{ display:none; }
 
+.wc-match-body{
+  display:flex;
+  gap:16px;
+  align-items:stretch;
+  min-height:0;
+  flex:1 1 auto;
+}
+@media (max-width:760px){
+  .wc-match-body{ flex-direction:column; }
+}
 .wc-controls{
   display:flex;
   flex-direction:column;
   align-items:center;
+  justify-content:center;
   gap:10px;
   min-height:96px;
+  flex:0 0 230px;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(13,9,32,0.5);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--panel-border);
+}
+@media (max-width:760px){
+  .wc-controls{ flex:0 0 auto; width:100%; }
 }
 .wc-control-step.is-hidden{ display:none; }
 .wc-control-step{
@@ -4279,8 +4394,30 @@
       </div>
 
       <div class="wc-sub-view is-hidden" id="wcTeamSelectView">
-        <h2 class="liber-select-title">Elegí tu selección</h2>
-        <div class="team-grid" id="wcTeamGrid"></div>
+        <div class="wc-select-layout">
+          <nav class="wc-side-nav" id="wcSideNav">
+            <button class="wc-side-btn wc-side-btn-primary" data-nav="jugar">🏆 JUGAR</button>
+            <button class="wc-side-btn" data-nav="torneo">🌍 TORNEO</button>
+            <button class="wc-side-btn is-active" data-nav="selecciones">🚩 SELECCIONES</button>
+            <button class="wc-side-btn" data-nav="estadisticas">📊 ESTADÍSTICAS</button>
+            <button class="wc-side-btn" data-nav="ranking">🥇 RANKING</button>
+            <button class="wc-side-btn" data-nav="config">⚙️ CONFIGURACIÓN</button>
+            <button class="wc-side-btn" data-nav="creditos">ℹ️ CRÉDITOS</button>
+          </nav>
+          <div class="wc-select-main">
+            <h2 class="liber-select-title">Elegí tu selección</h2>
+            <div class="team-grid wc-team-carousel" id="wcTeamGrid"></div>
+          </div>
+          <aside class="wc-info-panel">
+            <p class="wc-panel-label">🏆 Info Torneo</p>
+            <ul class="wc-info-list">
+              <li><span>Formato</span><b>Tanda de penales</b></li>
+              <li><span>Equipos</span><b>32</b></li>
+              <li><span>Dificultad</span><b id="wcInfoDifficulty">Normal</b></li>
+              <li><span>Premio</span><b>🏆 Ganar el Mundial</b></li>
+            </ul>
+          </aside>
+        </div>
         <div class="liber-team-detail is-hidden" id="wcTeamDetail">
           <div class="liber-detail-crest" id="wcDetailCrest"></div>
           <div class="liber-detail-info">
@@ -4291,6 +4428,19 @@
           </div>
           <button class="big-btn liber-detail-btn" id="wcDetailContinueBtn">Continuar →</button>
         </div>
+      </div>
+
+      <div class="wc-sub-view is-hidden" id="wcRankingView">
+        <button class="text-btn liber-back-step" id="wcRankingBackBtn">← Menú</button>
+        <h2 class="liber-select-title">Ranking</h2>
+        <p class="liber-stage-text">Tu mejor marca en este dispositivo.</p>
+        <div class="wc-stats-grid" id="wcRankingGrid"></div>
+      </div>
+
+      <div class="wc-sub-view is-hidden" id="wcCreditsView">
+        <button class="text-btn liber-back-step" id="wcCreditsBackBtn">← Menú</button>
+        <h2 class="liber-select-title">Créditos</h2>
+        <p class="liber-stage-text">Mundial Penalty Shooter — Otto Games.<br>Diseño, código y arte hechos para el arcade de Otto.</p>
       </div>
 
       <div class="wc-sub-view is-hidden" id="wcDifficultyView">
@@ -4358,44 +4508,46 @@
         <p class="wc-round-label" id="wcRoundLabel">PENAL 1 DE 5</p>
         <div class="wc-shootout-track" id="wcShootoutTrack"></div>
 
-        <div class="frame wc-frame">
-          <canvas id="wcCanvas" width="900" height="480"></canvas>
+        <div class="wc-match-body">
+          <div class="frame wc-frame">
+            <canvas id="wcCanvas" width="900" height="480"></canvas>
 
-          <div class="wc-turn-banner is-hidden" id="wcTurnBanner">Pateás vos</div>
+            <div class="wc-turn-banner is-hidden" id="wcTurnBanner">Pateás vos</div>
 
-          <div class="overlay" id="wcStartOverlay">
-            <h2 id="wcStartTitle">¿Listo para la tanda?</h2>
-            <p id="wcStartDesc">5 penales por equipo. Si empatan, muerte súbita.</p>
-            <button class="big-btn" id="wcStartBtn">▶ Empezar</button>
-          </div>
-
-          <div class="overlay is-hidden" id="wcOverOverlay">
-            <h2 id="wcOverTitle">¡Ganaste la tanda!</h2>
-            <p id="wcOverScore">River 5 - 3 Brasil</p>
-            <button class="big-btn" id="wcOverContinueBtn">Continuar</button>
-          </div>
-        </div>
-
-        <div class="wc-controls" id="wcControls">
-          <p class="wc-control-label" id="wcAimHint">Movete con el mouse, el dedo o las flechas · Tocá, hacé clic o presioná Espacio para confirmar la dirección</p>
-          <div class="wc-control-step is-hidden" id="wcStepPower">
-            <p class="wc-control-label">Potencia — hacé clic para fijarla</p>
-            <button class="wc-power-bar" id="wcPowerBar" aria-label="Fijar potencia">
-              <span class="wc-power-sweet" aria-hidden="true"></span>
-              <span class="wc-power-needle" id="wcPowerNeedle"></span>
-            </button>
-          </div>
-          <div class="wc-control-step is-hidden" id="wcStepGkDir">
-            <p class="wc-control-label">¿Hacia dónde te tirás?</p>
-            <div class="wc-choice-row">
-              <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
-              <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
-              <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
-              <button class="wc-choice-btn" data-dir="top">🥅 Travesaño</button>
+            <div class="overlay" id="wcStartOverlay">
+              <h2 id="wcStartTitle">¿Listo para la tanda?</h2>
+              <p id="wcStartDesc">5 penales por equipo. Si empatan, muerte súbita.</p>
+              <button class="big-btn" id="wcStartBtn">▶ Empezar</button>
             </div>
-            <button class="big-btn wc-ready-btn is-hidden" id="wcGkReadyBtn" disabled>¡Estoy listo!</button>
+
+            <div class="overlay is-hidden" id="wcOverOverlay">
+              <h2 id="wcOverTitle">¡Ganaste la tanda!</h2>
+              <p id="wcOverScore">River 5 - 3 Brasil</p>
+              <button class="big-btn" id="wcOverContinueBtn">Continuar</button>
+            </div>
           </div>
-          <p class="wc-training-hint is-hidden" id="wcTrainingHint">Modo entrenamiento — <button class="text-btn" id="wcTrainingExitBtn">salir</button></p>
+
+          <div class="wc-controls" id="wcControls">
+            <p class="wc-control-label" id="wcAimHint">Movete con el mouse, el dedo o las flechas · Tocá, hacé clic o presioná Espacio para confirmar la dirección</p>
+            <div class="wc-control-step is-hidden" id="wcStepPower">
+              <p class="wc-control-label">Potencia — hacé clic para fijarla</p>
+              <button class="wc-power-bar" id="wcPowerBar" aria-label="Fijar potencia">
+                <span class="wc-power-sweet" aria-hidden="true"></span>
+                <span class="wc-power-needle" id="wcPowerNeedle"></span>
+              </button>
+            </div>
+            <div class="wc-control-step is-hidden" id="wcStepGkDir">
+              <p class="wc-control-label">¿Hacia dónde te tirás?</p>
+              <div class="wc-choice-row">
+                <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
+                <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
+                <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
+                <button class="wc-choice-btn" data-dir="top">🥅 Travesaño</button>
+              </div>
+              <button class="big-btn wc-ready-btn is-hidden" id="wcGkReadyBtn" disabled>¡Estoy listo!</button>
+            </div>
+            <p class="wc-training-hint is-hidden" id="wcTrainingHint">Modo entrenamiento — <button class="text-btn" id="wcTrainingExitBtn">salir</button></p>
+          </div>
         </div>
       </div>
 
@@ -14566,6 +14718,13 @@
   var detailColorsEl = document.getElementById('wcDetailColors');
   var detailDescEl = document.getElementById('wcDetailDesc');
   var detailContinueBtn = document.getElementById('wcDetailContinueBtn');
+  var infoDifficultyEl = document.getElementById('wcInfoDifficulty');
+
+  var rankingView = document.getElementById('wcRankingView');
+  var rankingBackBtn = document.getElementById('wcRankingBackBtn');
+  var rankingGridEl = document.getElementById('wcRankingGrid');
+  var creditsView = document.getElementById('wcCreditsView');
+  var creditsBackBtn = document.getElementById('wcCreditsBackBtn');
 
   var difficultyView = document.getElementById('wcDifficultyView');
   var diffBackBtn = document.getElementById('wcDiffBackBtn');
@@ -14734,6 +14893,20 @@
       statsGridEl.appendChild(d);
     });
   }
+  function renderRanking(){
+    rankingGridEl.innerHTML = '';
+    var tiles = [
+      [stats.bestResult || 'Sin datos', 'Mejor resultado'],
+      [stats.won, 'Mundiales ganados'],
+      [stats.played, 'Mundiales jugados']
+    ];
+    tiles.forEach(function(t){
+      var d = document.createElement('div');
+      d.className = 'wc-stat-tile';
+      d.innerHTML = '<span class="wc-stat-value">'+t[0]+'</span><span class="wc-stat-label">'+t[1]+'</span>';
+      rankingGridEl.appendChild(d);
+    });
+  }
 
   // ---------- Crest (escudo propio, sin licencia oficial) ----------
   function teamInitials(name){
@@ -14787,7 +14960,7 @@
       btn.className = 'team-pick-btn';
       btn.innerHTML = '<span class="team-pick-check">✓</span>'+
         '<span class="team-crest">'+crestSVG(team)+'</span>'+
-        '<span class="team-pick-name">'+team.name+'</span>'+
+        '<span class="team-pick-name">'+team.flag+' '+team.name+'</span>'+
         '<span class="team-pick-country">'+team.confed+'</span>'+
         '<span class="team-pick-stars">'+starsFor(team)+'</span>';
       btn.addEventListener('click', function(){
@@ -15145,6 +15318,8 @@
     trainingSelectView.classList.add('is-hidden');
     configView.classList.add('is-hidden');
     statsView.classList.add('is-hidden');
+    rankingView.classList.add('is-hidden');
+    creditsView.classList.add('is-hidden');
   }
   function showHubScreen(){
     hideAllSubViews();
@@ -16247,10 +16422,14 @@
     hideAllSubViews();
     menuView.classList.remove('is-hidden');
   }
+  function openTeamSelect(){
+    hideAllSubViews();
+    infoDifficultyEl.textContent = (DIFFICULTIES[currentDiffKey] || DIFFICULTIES.normal).label;
+    teamSelectView.classList.remove('is-hidden');
+  }
   document.getElementById('wcMenuPlayBtn').addEventListener('click', function(){
     ensureAudio();
-    hideAllSubViews();
-    teamSelectView.classList.remove('is-hidden');
+    openTeamSelect();
   });
   document.getElementById('wcMenuTrainBtn').addEventListener('click', function(){
     ensureAudio();
@@ -16270,6 +16449,39 @@
   trainingBackBtn.addEventListener('click', showMenu);
   configBackBtn.addEventListener('click', showMenu);
   statsBackBtn.addEventListener('click', showMenu);
+  rankingBackBtn.addEventListener('click', showMenu);
+  creditsBackBtn.addEventListener('click', showMenu);
+
+  // ---------- Barra lateral de Selecciones ----------
+  Array.prototype.forEach.call(document.querySelectorAll('#wcSideNav .wc-side-btn'), function(btn){
+    btn.addEventListener('click', function(){
+      ensureAudio();
+      var nav = btn.getAttribute('data-nav');
+      if (nav === 'jugar'){
+        if (!pendingTeamId) selectTeam(TEAMS[0].id, teamGridEl.querySelector('.team-pick-btn'));
+        detailContinueBtn.click();
+      } else if (nav === 'torneo'){
+        if (campaign && campaign.group && campaign.group.length) showHubScreen();
+      } else if (nav === 'selecciones'){
+        openTeamSelect();
+      } else if (nav === 'estadisticas'){
+        hideAllSubViews();
+        renderStats();
+        statsView.classList.remove('is-hidden');
+      } else if (nav === 'ranking'){
+        hideAllSubViews();
+        renderRanking();
+        rankingView.classList.remove('is-hidden');
+      } else if (nav === 'config'){
+        hideAllSubViews();
+        configDifficultyEl.value = currentDiffKey;
+        configView.classList.remove('is-hidden');
+      } else if (nav === 'creditos'){
+        hideAllSubViews();
+        creditsView.classList.remove('is-hidden');
+      }
+    });
+  });
 
   trainKickBtn.addEventListener('click', function(){
     ensureAudio();

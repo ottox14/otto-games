@@ -152,10 +152,10 @@
   var overScoreEl = document.getElementById('wcOverScore');
   var overContinueBtn = document.getElementById('wcOverContinueBtn');
   var controlsEl = document.getElementById('wcControls');
-  var stepDirEl = document.getElementById('wcStepDir');
-  var stepHeightEl = document.getElementById('wcStepHeight');
+  var aimHintEl = document.getElementById('wcAimHint');
   var stepPowerEl = document.getElementById('wcStepPower');
   var stepGkDirEl = document.getElementById('wcStepGkDir');
+  var gkReadyBtnEl = document.getElementById('wcGkReadyBtn');
   var powerBarEl = document.getElementById('wcPowerBar');
   var powerNeedleEl = document.getElementById('wcPowerNeedle');
   var trainingHintEl = document.getElementById('wcTrainingHint');
@@ -965,14 +965,20 @@
   });
 
   // ---------- Decision de cada penal ----------
-  // El apuntado es por botones, en tres pasos claros (Direccion, Altura,
-  // Potencia para vos; solo Direccion para atajar), pero cada eleccion se
-  // traduce a un punto continuo (u,v) del arco y se resuelve con el mismo
-  // motor de tiro/atajada de siempre - elegir "izquierda" no garantiza que
-  // la pelota vaya exactamente ahi, la potencia y la precision del equipo
-  // siguen metiendo variacion real.
-  var DIR_U = {left:-0.62, center:0, right:0.62};
-  var HEIGHT_V = {low:0.16, mid:0.5, high:0.82};
+  // Para patear volvimos a la mira libre: mové un punto continuo (u,v) del
+  // arco con mouse/touch/flechas y confirmá cuando quieras (sin apuro), y
+  // despues cargás la potencia. Para atajar elegís una de 4 zonas con
+  // botones (Izquierda/Centro/Derecha/Travesaño) y confirmás con "¡Estoy
+  // listo!" - ninguno de los dos tiene limite de tiempo. Todo esto se
+  // traduce a un punto continuo (u,v) y se resuelve con el mismo motor de
+  // tiro/atajada de siempre.
+  var aimState = {u:0, v:0.5};
+  var GK_DIR_UV = {
+    left:   {u:-0.62, v:0.4},
+    center: {u:0,      v:0.4},
+    right:  {u:0.62,   v:0.4},
+    top:    {u:0,      v:0.85}
+  };
 
   function nextKick(){
     if (matchMode === 'campaign' && shootout.finished){
@@ -994,55 +1000,62 @@
       side: kickerSide, playerKicks: playerKicks, kickerTeam: kickerTeam, defenderTeam: defenderTeam,
       aimU: 0, aimV: 0.5, power: null, gkU: 0, gkV: 0.4, gkReachQuality: 1,
       finalU: null, finalV: null, wide: false, post: false, keeperTimeBonus: 0,
-      outcome: null, phase: playerKicks ? 'dir' : 'gkdir', diveCommitted: false
+      outcome: null, phase: playerKicks ? 'aim' : 'gkdir', diveCommitted: false, pendingGkDir: null
     };
     turnBannerEl.classList.remove('is-hidden');
     turnBannerEl.textContent = playerKicks ? '⚽ Pateás vos' : '🧤 Atajás vos';
-    stepDirEl.classList.add('is-hidden');
-    stepHeightEl.classList.add('is-hidden');
+    aimHintEl.classList.add('is-hidden');
     stepPowerEl.classList.add('is-hidden');
     stepGkDirEl.classList.add('is-hidden');
+    gkReadyBtnEl.classList.add('is-hidden');
+    gkReadyBtnEl.disabled = true;
+    Array.prototype.forEach.call(stepGkDirEl.querySelectorAll('.wc-choice-btn'), function(btn){
+      btn.classList.remove('is-selected');
+    });
     resetScene();
 
-    if (playerKicks) stepDirEl.classList.remove('is-hidden');
-    else stepGkDirEl.classList.remove('is-hidden');
-  }
-
-  function chooseDir(dir){
-    if (!kickState) return;
-    if (kickState.playerKicks && kickState.phase === 'dir'){
-      kickState.aimU = DIR_U[dir];
-      kickState.phase = 'height';
-      beep(500, 0.05, 'square');
-      stepDirEl.classList.add('is-hidden');
-      stepHeightEl.classList.remove('is-hidden');
-    } else if (!kickState.playerKicks && kickState.phase === 'gkdir'){
-      kickState.gkU = DIR_U[dir];
-      kickState.gkV = 0.4;
-      kickState.diveCommitted = true;
-      beep(320, 0.06, 'square');
-      stepGkDirEl.classList.add('is-hidden');
-      beginAIKick();
+    if (playerKicks){
+      aimState.u = 0; aimState.v = 0.5;
+      aimHintEl.classList.remove('is-hidden');
+    } else {
+      stepGkDirEl.classList.remove('is-hidden');
     }
   }
-  function chooseHeight(height){
-    if (!kickState || !kickState.playerKicks || kickState.phase !== 'height') return;
-    kickState.aimV = HEIGHT_V[height];
+
+  function confirmAim(){
+    if (!kickState || !kickState.playerKicks || kickState.phase !== 'aim') return;
     kickState.phase = 'power';
+    kickState.aimU = aimState.u; kickState.aimV = aimState.v;
     beep(500, 0.05, 'square');
-    stepHeightEl.classList.add('is-hidden');
+    aimHintEl.classList.add('is-hidden');
     stepPowerEl.classList.remove('is-hidden');
     startPowerBar();
   }
-  Array.prototype.forEach.call(stepDirEl.querySelectorAll('.wc-choice-btn'), function(btn){
-    btn.addEventListener('click', function(){ chooseDir(btn.getAttribute('data-dir')); });
-  });
-  Array.prototype.forEach.call(stepHeightEl.querySelectorAll('.wc-choice-btn'), function(btn){
-    btn.addEventListener('click', function(){ chooseHeight(btn.getAttribute('data-height')); });
-  });
+
+  function chooseGkDir(dir){
+    if (!kickState || kickState.playerKicks || kickState.phase !== 'gkdir') return;
+    kickState.pendingGkDir = dir;
+    beep(260, 0.04, 'square');
+    Array.prototype.forEach.call(stepGkDirEl.querySelectorAll('.wc-choice-btn'), function(btn){
+      btn.classList.toggle('is-selected', btn.getAttribute('data-dir') === dir);
+    });
+    gkReadyBtnEl.classList.remove('is-hidden');
+    gkReadyBtnEl.disabled = false;
+  }
+  function confirmGkReady(){
+    if (!kickState || kickState.playerKicks || kickState.phase !== 'gkdir' || !kickState.pendingGkDir) return;
+    var uv = GK_DIR_UV[kickState.pendingGkDir];
+    kickState.gkU = uv.u; kickState.gkV = uv.v;
+    kickState.diveCommitted = true;
+    beep(320, 0.06, 'square');
+    stepGkDirEl.classList.add('is-hidden');
+    gkReadyBtnEl.classList.add('is-hidden');
+    beginAIKick();
+  }
   Array.prototype.forEach.call(stepGkDirEl.querySelectorAll('.wc-choice-btn'), function(btn){
-    btn.addEventListener('click', function(){ chooseDir(btn.getAttribute('data-dir')); });
+    btn.addEventListener('click', function(){ chooseGkDir(btn.getAttribute('data-dir')); });
   });
+  gkReadyBtnEl.addEventListener('click', confirmGkReady);
 
   var POWER_PERIOD = 1.3;
   var powerT = 0;
@@ -1190,6 +1203,48 @@
     beginAnimation();
   }
 
+  // ---------- Apuntado libre para patear: mouse, touch y teclado ----------
+  function canvasPointFromEvent(e){
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = CANVAS_W/rect.width, scaleY = CANVAS_H/rect.height;
+    return {x:(e.clientX-rect.left)*scaleX, y:(e.clientY-rect.top)*scaleY};
+  }
+  canvas.addEventListener('pointermove', function(e){
+    if (!kickState || !kickState.playerKicks || kickState.phase !== 'aim') return;
+    var pt = canvasPointFromEvent(e);
+    var uv = kickScreenToUV(pt.x, pt.y);
+    aimState.u = uv.u; aimState.v = uv.v;
+  });
+  canvas.addEventListener('click', function(){
+    if (kickState && kickState.playerKicks && kickState.phase === 'aim') confirmAim();
+  });
+  var heldKeys = {};
+  var AIM_KEY_SPEED = 1.15;
+  window.addEventListener('keydown', function(e){
+    if (!liberActiveMundial()) return;
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','Enter'].indexOf(e.key) !== -1){
+      e.preventDefault();
+    }
+    heldKeys[e.key] = true;
+    if ((e.key === ' ' || e.key === 'Enter') && kickState){
+      if (kickState.playerKicks && kickState.phase === 'aim') confirmAim();
+      else if (kickState.playerKicks && kickState.phase === 'power') lockPower();
+    }
+  });
+  window.addEventListener('keyup', function(e){ heldKeys[e.key] = false; });
+  function liberActiveMundial(){ return matchView && !matchView.classList.contains('is-hidden'); }
+  function applyKeyboardAim(dt){
+    if (!kickState || !kickState.playerKicks || kickState.phase !== 'aim') return;
+    var dx=0, dy=0;
+    if (heldKeys['ArrowLeft']) dx -= 1;
+    if (heldKeys['ArrowRight']) dx += 1;
+    if (heldKeys['ArrowUp']) dy += 1;
+    if (heldKeys['ArrowDown']) dy -= 1;
+    if (!dx && !dy) return;
+    aimState.u = clamp(aimState.u + dx*AIM_KEY_SPEED*dt, -1, 1);
+    aimState.v = clamp(aimState.v + dy*AIM_KEY_SPEED*dt, 0, 1);
+  }
+
   function finishInteractiveShootout(){
     saveStats();
     var youWon = shootout.winner === 'home';
@@ -1210,6 +1265,11 @@
   var SPOT = {x:450, y:378};
   function uvToKickScreen(u,v){
     return {x: GOAL_L+(GOAL_R-GOAL_L)*((u+1)/2), y: GOAL_B-(GOAL_B-GOAL_T)*v};
+  }
+  function kickScreenToUV(x,y){
+    var u = ((x-GOAL_L)/(GOAL_R-GOAL_L))*2-1;
+    var v = (GOAL_B-y)/(GOAL_B-GOAL_T);
+    return {u:clamp(u,-1,1), v:clamp(v,0,1)};
   }
   var GK_FAR = {x:450, y:126};
   var GK_STRIKE = {x:450, y:200};
@@ -1546,6 +1606,22 @@
     c.beginPath(); c.arc(0,0,r*0.32,0,Math.PI*2); c.fill();
     c.restore();
   }
+  function drawCrosshair(pt){
+    var c = ctx;
+    var pulse = 0.5+0.5*Math.sin(scene.idleClock*5);
+    c.save();
+    c.translate(pt.x, pt.y);
+    c.strokeStyle = 'rgba(255,193,7,0.95)';
+    c.lineWidth = 2.2;
+    c.beginPath(); c.arc(0,0,16+pulse*2,0,Math.PI*2); c.stroke();
+    c.beginPath();
+    c.moveTo(-24,0); c.lineTo(-9,0); c.moveTo(9,0); c.lineTo(24,0);
+    c.moveTo(0,-24); c.lineTo(0,-9); c.moveTo(0,9); c.lineTo(0,24);
+    c.stroke();
+    c.fillStyle = 'rgba(255,193,7,0.9)';
+    c.beginPath(); c.arc(0,0,2.6,0,Math.PI*2); c.fill();
+    c.restore();
+  }
   // ---------- Escena: pateas vos (camara detras del pateador) ----------
   function drawKickingScene(){
     drawStadiumBase();
@@ -1584,6 +1660,10 @@
       drawFigure(kx, ky, kickState.kickerTeam.shirt, kickState.kickerTeam.band, null);
     } else if (kickState && (scene.phase === 'shot' || scene.phase === 'reveal')){
       drawFigure(SPOT.x, SPOT.y+35, kickState.kickerTeam.shirt, kickState.kickerTeam.band, null);
+    }
+
+    if (kickState && kickState.playerKicks && kickState.phase === 'aim'){
+      drawCrosshair(uvToKickScreen(aimState.u, aimState.v));
     }
   }
 
@@ -1682,6 +1762,7 @@
       var val = currentPowerValue();
       powerNeedleEl.style.left = val+'%';
     }
+    applyKeyboardAim(dt);
     advanceScene(dt);
     draw();
     requestAnimationFrame(loop);

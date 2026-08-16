@@ -377,7 +377,7 @@
   color:var(--ink-soft);
 }
 .wc-control-label.is-hidden{ display:none; }
-#wcCanvas{ touch-action:none; }
+#wcCanvas{ touch-action:none; cursor:crosshair; }
 
 .wc-choice-row{
   display:flex;
@@ -406,6 +406,14 @@
 }
 .wc-choice-btn:active{ transform:translateY(0); }
 .wc-choice-btn:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+.wc-choice-btn.is-selected{
+  border-color:var(--gold);
+  background:rgba(255,210,63,0.16);
+  box-shadow:0 0 0 2px rgba(255,210,63,0.4), 0 8px 18px rgba(0,0,0,0.3);
+}
+.wc-ready-btn{ margin-top:4px; }
+.wc-ready-btn.is-hidden{ display:none; }
+.wc-ready-btn:disabled{ opacity:0.5; cursor:not-allowed; }
 
 .wc-power-bar{
   position:relative;

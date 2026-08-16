@@ -1324,11 +1324,11 @@
     return {x: GK_FAR.x + u*GK_SPAN, y: GK_LINE_Y - v*150};
   }
   var scene = {
-    phase:'idle', t:0, idleClock:0, runF:0, shotF:0, shotDur:0.4, wideSign:1,
+    phase:'idle', t:0, idleClock:0, diveClock:0, runF:0, shotF:0, shotDur:0.4, wideSign:1,
     gkStretch:0, crowdPulse:0, confetti:[]
   };
   function resetScene(){
-    scene.phase = 'idle'; scene.t = 0;
+    scene.phase = 'idle'; scene.t = 0; scene.diveClock = 0;
     scene.runF = 0; scene.shotF = 0;
     scene.gkStretch = 0;
     scene.crowdPulse = 0;
@@ -1341,7 +1341,7 @@
   }
   function beginAnimation(){
     scene.phase = 'run';
-    scene.t = 0; scene.runF = 0; scene.shotF = 0;
+    scene.t = 0; scene.runF = 0; scene.shotF = 0; scene.diveClock = 0;
     scene.gkStretch = 0;
     scene.shotDur = shotDurationFor(kickState.power||55);
     scene.wideSign = kickState.finalU < -0.9 ? -1 : kickState.finalU > 0.9 ? 1 : (Math.random()<0.5?-1:1);
@@ -1350,10 +1350,15 @@
   function advanceScene(dt){
     scene.idleClock += dt;
     if (scene.phase === 'idle') return;
+    // El reloj de la zambullida NO se reinicia entre 'shot' y 'reveal' (a
+    // diferencia de scene.t) - asi el arquero hace una sola zambullida
+    // continua (flexion -> impulso -> vuelo -> caida) en vez de saltar de
+    // vuelta al centro y "redeslizarse" cuando arranca el reveal.
+    scene.diveClock += dt;
     scene.t += dt;
     if (scene.phase === 'run'){
       scene.runF = clamp(scene.t/RUN_DUR, 0, 1);
-      if (scene.runF >= 1){ scene.phase = 'shot'; scene.t = 0; scene.shotF = 0; beep(180, 0.1, 'triangle'); }
+      if (scene.runF >= 1){ scene.phase = 'shot'; scene.t = 0; scene.shotF = 0; scene.diveClock = 0; beep(180, 0.1, 'triangle'); }
     } else if (scene.phase === 'shot'){
       scene.shotF = clamp(scene.t/scene.shotDur, 0, 1);
       if (scene.shotF >= 1){
@@ -1654,8 +1659,25 @@
       legR = -1.05+t*1.9; legL = -0.15;
       armL = 0.55; armR = -0.25;
     } else if (anim === 'dive'){
-      legL = 0.15; legR = -0.15;
-      armLRaise = 0.9; armRRaise = 0.9;
+      // Zambullida real en 3 tiempos: flexiona las piernas (se prepara),
+      // se impulsa y queda estirado en el aire con los brazos al frente
+      // buscando la pelota, y por ultimo afloja apenas al caer - nunca es
+      // solo un traslado plano.
+      var big = pose && pose.big;
+      var leapEnd = big ? 0.6 : 0.4;
+      if (t < 0.14){
+        var ct = t/0.14;
+        legL = 0.55-ct*0.4; legR = -0.55+ct*0.4;
+        armLRaise = ct*0.25; armRRaise = ct*0.25;
+      } else if (t < leapEnd){
+        var lt = (t-0.14)/(leapEnd-0.14);
+        legL = 0.15+lt*0.55; legR = -0.15-lt*0.4;
+        armLRaise = 0.25+lt*0.85; armRRaise = 0.25+lt*0.85;
+      } else {
+        var ft = clamp((t-leapEnd)/(0.86-leapEnd), 0, 1);
+        legL = 0.7-ft*0.15; legR = -0.55+ft*0.1;
+        armLRaise = 1.1-ft*0.15; armRRaise = 1.1-ft*0.15;
+      }
     } else if (anim === 'celebrate'){
       var bounce = Math.sin(t*Math.PI)*0.12;
       legL = 0.2+bounce; legR = -0.2-bounce;
@@ -1750,25 +1772,56 @@
     if (kickState.outcome === 'goal') return {anim:'celebrate', t:revealT};
     return {anim:'react', t:revealT};
   }
+  // Zambullida real del arquero: flexiona -> se impulsa y vuela estirado
+  // hacia el punto del remate (inclinandose de verdad, no deslizandose por
+  // el piso) -> aterriza y desliza apenas por la inercia. Nunca se
+  // teletransporta: la posicion en pantalla, la rotacion del cuerpo y el
+  // "salto" (offset vertical) avanzan todos juntos por las mismas fases
+  // que la postura de las piernas/brazos en drawFigure. Tiros cerca del
+  // centro usan una reaccion corta (sin vuelo largo), como pidio el
+  // usuario ("al centro puede quedarse parado o reaccionar rapido").
+  function diveMotion(diveT, totalDur, u, v){
+    var t = clamp(diveT/Math.max(totalDur,0.05), 0, 1);
+    var mag = clamp(Math.hypot(u, (v-0.4)*1.15), 0, 1.15);
+    var big = mag > 0.22;
+    var leapEnd = big ? 0.6 : 0.4, landEnd = 0.86;
+    var travel, rotT, hopT;
+    if (t < 0.14){
+      travel = 0; rotT = 0; hopT = 0;
+    } else if (t < leapEnd){
+      var lt = (t-0.14)/(leapEnd-0.14);
+      travel = 1-Math.pow(1-lt,2);
+      rotT = travel; hopT = Math.sin(lt*Math.PI);
+    } else if (t < landEnd){
+      var ft = (t-leapEnd)/(landEnd-leapEnd);
+      travel = 1+ft*0.05;
+      rotT = 1; hopT = Math.max(0,1-ft)*0.18;
+    } else {
+      travel = 1.05; rotT = 1; hopT = 0;
+    }
+    return {travel:travel, rot:rotT, hop:hopT, t:t, big:big};
+  }
   // ---------- Escena: pateas vos (camara detras del pateador) ----------
   function drawKickingScene(){
     drawStadiumBase();
     drawKickGoal();
 
-    var gkPoint, gkRot = 0, gkStretch = 0, gkAnim = 'idle';
+    var gkPoint, gkRot = 0, gkStretch = 0, gkAnim = 'idle', gkT = 0, gkBig = false;
     if (!kickState || scene.phase === 'idle' || scene.phase === 'run'){
       var swayU = Math.sin(scene.idleClock*2.1)*0.16;
       var swayV = 0.4 + Math.sin(scene.idleClock*1.3)*0.05;
       gkPoint = uvToKickScreen(swayU, swayV);
     } else {
-      var fg = clamp(scene.t/currentDifficulty.diveDur, 0, 1);
-      var gU = kickState.gkU*fg, gV = 0.4+(kickState.gkV-0.4)*fg;
+      var dm = diveMotion(scene.diveClock, currentDifficulty.diveDur, kickState.gkU, kickState.gkV);
+      var gU = kickState.gkU*dm.travel, gV = 0.4+(kickState.gkV-0.4)*dm.travel;
       gkPoint = uvToKickScreen(gU, gV);
-      gkRot = clamp(gkPoint.x-450,-140,140)/140*0.95;
-      gkStretch = (scene.phase==='reveal' && kickState.outcome==='save') ? scene.gkStretch : 0;
-      gkAnim = 'dive';
+      var hopPx = dm.hop*(10+Math.min(Math.abs(kickState.gkU),1)*18+Math.max(kickState.gkV-0.6,0)*16);
+      gkPoint.y -= hopPx;
+      gkRot = clamp(kickState.gkU,-1,1)*(dm.big ? (0.5+dm.rot*0.8) : dm.rot*0.3);
+      gkStretch = dm.rot*0.45+((scene.phase==='reveal' && kickState.outcome==='save') ? scene.gkStretch*0.35 : 0);
+      gkAnim = 'dive'; gkT = dm.t; gkBig = dm.big;
     }
-    drawFigure(gkPoint.x, gkPoint.y, kickState?kickState.defenderTeam.shirt:awayTeamData.shirt, '#0a0a0a', {rot:gkRot, stretch:gkStretch, anim:gkAnim});
+    drawFigure(gkPoint.x, gkPoint.y, kickState?kickState.defenderTeam.shirt:awayTeamData.shirt, '#0a0a0a', {rot:gkRot, stretch:gkStretch, anim:gkAnim, t:gkT, big:gkBig});
 
     var ballPoint = {x:SPOT.x, y:SPOT.y};
     if (kickState && (scene.phase === 'shot' || scene.phase === 'reveal')){
@@ -1830,18 +1883,25 @@
     }
     drawBall(ballPoint.x, ballPoint.y, ballScale, false);
 
-    var gU, gV, grot = 0, gstretch = 0, gAnim = 'idle';
+    var gU, gV, grot = 0, gstretch = 0, gAnim = 'idle', gT = 0, gBig = false, gHopPx = 0;
     if (scene.phase === 'idle' || scene.phase === 'run'){
       gU = Math.sin(scene.idleClock*2.1)*0.14; gV = 0.4;
     } else {
-      var fg = clamp(scene.t/currentDifficulty.diveDur, 0, 1);
-      gU = kickState.gkU*fg; gV = 0.4+(kickState.gkV-0.4)*fg;
-      grot = clamp(gU,-1,1)*0.55;
-      gstretch = (scene.phase==='reveal' && kickState.outcome==='save') ? scene.gkStretch : 0;
-      gAnim = 'dive';
+      var dmy = diveMotion(scene.diveClock, currentDifficulty.diveDur, kickState.gkU, kickState.gkV);
+      gU = kickState.gkU*dmy.travel; gV = 0.4+(kickState.gkV-0.4)*dmy.travel;
+      grot = clamp(gU,-1,1)*(dmy.big ? (0.5+dmy.rot*0.8) : dmy.rot*0.3);
+      gstretch = dmy.rot*0.45+((scene.phase==='reveal' && kickState.outcome==='save') ? scene.gkStretch*0.35 : 0);
+      gHopPx = dmy.hop*(10+Math.min(Math.abs(kickState.gkU),1)*18+Math.max(kickState.gkV-0.6,0)*16);
+      gAnim = 'dive'; gT = dmy.t; gBig = dmy.big;
     }
     var gp = gkLinePoint(gU, gV);
-    drawFigure(gp.x, gp.y, homeTeamData.shirt, homeTeamData.band, {rot:grot, stretch:gstretch, scale:1.2, anim:gAnim});
+    gp.y -= gHopPx;
+    drawFigure(gp.x, gp.y, homeTeamData.shirt, homeTeamData.band, {rot:grot, stretch:gstretch, scale:1.2, anim:gAnim, t:gT, big:gBig});
+
+    if (kickState && kickState.phase === 'gkdir' && kickState.pendingGkDir && !kickState.diveCommitted){
+      var previewUv = GK_DIR_UV[kickState.pendingGkDir];
+      drawCrosshair(gkLinePoint(previewUv.u, previewUv.v));
+    }
   }
 
   var RESULT_COLORS = {goal:'#ffd23f', save:'#5cc9ff', wide:'#ff5c7a', post:'#ff9f4d'};

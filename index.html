@@ -1087,22 +1087,7 @@
         </div>
 
         <div class="wc-controls" id="wcControls">
-          <div class="wc-control-step is-hidden" id="wcStepDir">
-            <p class="wc-control-label">Dirección</p>
-            <div class="wc-choice-row">
-              <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
-              <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
-              <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
-            </div>
-          </div>
-          <div class="wc-control-step is-hidden" id="wcStepHeight">
-            <p class="wc-control-label">Altura</p>
-            <div class="wc-choice-row">
-              <button class="wc-choice-btn" data-height="low">⬇️ Bajo</button>
-              <button class="wc-choice-btn" data-height="mid">➡️ Medio</button>
-              <button class="wc-choice-btn" data-height="high">⬆️ Alto</button>
-            </div>
-          </div>
+          <p class="wc-control-label" id="wcAimHint">Movete con el mouse, el dedo o las flechas · Tocá, hacé clic o presioná Espacio para confirmar la dirección</p>
           <div class="wc-control-step is-hidden" id="wcStepPower">
             <p class="wc-control-label">Potencia — hacé clic para fijarla</p>
             <button class="wc-power-bar" id="wcPowerBar" aria-label="Fijar potencia">
@@ -1116,7 +1101,9 @@
               <button class="wc-choice-btn" data-dir="left">⬅️ Izquierda</button>
               <button class="wc-choice-btn" data-dir="center">⬆️ Centro</button>
               <button class="wc-choice-btn" data-dir="right">➡️ Derecha</button>
+              <button class="wc-choice-btn" data-dir="top">🥅 Travesaño</button>
             </div>
+            <button class="big-btn wc-ready-btn is-hidden" id="wcGkReadyBtn" disabled>¡Estoy listo!</button>
           </div>
           <p class="wc-training-hint is-hidden" id="wcTrainingHint">Modo entrenamiento — <button class="text-btn" id="wcTrainingExitBtn">salir</button></p>
         </div>

@@ -93,6 +93,13 @@
   var detailColorsEl = document.getElementById('wcDetailColors');
   var detailDescEl = document.getElementById('wcDetailDesc');
   var detailContinueBtn = document.getElementById('wcDetailContinueBtn');
+  var infoDifficultyEl = document.getElementById('wcInfoDifficulty');
+
+  var rankingView = document.getElementById('wcRankingView');
+  var rankingBackBtn = document.getElementById('wcRankingBackBtn');
+  var rankingGridEl = document.getElementById('wcRankingGrid');
+  var creditsView = document.getElementById('wcCreditsView');
+  var creditsBackBtn = document.getElementById('wcCreditsBackBtn');
 
   var difficultyView = document.getElementById('wcDifficultyView');
   var diffBackBtn = document.getElementById('wcDiffBackBtn');
@@ -261,6 +268,20 @@
       statsGridEl.appendChild(d);
     });
   }
+  function renderRanking(){
+    rankingGridEl.innerHTML = '';
+    var tiles = [
+      [stats.bestResult || 'Sin datos', 'Mejor resultado'],
+      [stats.won, 'Mundiales ganados'],
+      [stats.played, 'Mundiales jugados']
+    ];
+    tiles.forEach(function(t){
+      var d = document.createElement('div');
+      d.className = 'wc-stat-tile';
+      d.innerHTML = '<span class="wc-stat-value">'+t[0]+'</span><span class="wc-stat-label">'+t[1]+'</span>';
+      rankingGridEl.appendChild(d);
+    });
+  }
 
   // ---------- Crest (escudo propio, sin licencia oficial) ----------
   function teamInitials(name){
@@ -314,7 +335,7 @@
       btn.className = 'team-pick-btn';
       btn.innerHTML = '<span class="team-pick-check">✓</span>'+
         '<span class="team-crest">'+crestSVG(team)+'</span>'+
-        '<span class="team-pick-name">'+team.name+'</span>'+
+        '<span class="team-pick-name">'+team.flag+' '+team.name+'</span>'+
         '<span class="team-pick-country">'+team.confed+'</span>'+
         '<span class="team-pick-stars">'+starsFor(team)+'</span>';
       btn.addEventListener('click', function(){
@@ -672,6 +693,8 @@
     trainingSelectView.classList.add('is-hidden');
     configView.classList.add('is-hidden');
     statsView.classList.add('is-hidden');
+    rankingView.classList.add('is-hidden');
+    creditsView.classList.add('is-hidden');
   }
   function showHubScreen(){
     hideAllSubViews();
@@ -1774,10 +1797,14 @@
     hideAllSubViews();
     menuView.classList.remove('is-hidden');
   }
+  function openTeamSelect(){
+    hideAllSubViews();
+    infoDifficultyEl.textContent = (DIFFICULTIES[currentDiffKey] || DIFFICULTIES.normal).label;
+    teamSelectView.classList.remove('is-hidden');
+  }
   document.getElementById('wcMenuPlayBtn').addEventListener('click', function(){
     ensureAudio();
-    hideAllSubViews();
-    teamSelectView.classList.remove('is-hidden');
+    openTeamSelect();
   });
   document.getElementById('wcMenuTrainBtn').addEventListener('click', function(){
     ensureAudio();
@@ -1797,6 +1824,39 @@
   trainingBackBtn.addEventListener('click', showMenu);
   configBackBtn.addEventListener('click', showMenu);
   statsBackBtn.addEventListener('click', showMenu);
+  rankingBackBtn.addEventListener('click', showMenu);
+  creditsBackBtn.addEventListener('click', showMenu);
+
+  // ---------- Barra lateral de Selecciones ----------
+  Array.prototype.forEach.call(document.querySelectorAll('#wcSideNav .wc-side-btn'), function(btn){
+    btn.addEventListener('click', function(){
+      ensureAudio();
+      var nav = btn.getAttribute('data-nav');
+      if (nav === 'jugar'){
+        if (!pendingTeamId) selectTeam(TEAMS[0].id, teamGridEl.querySelector('.team-pick-btn'));
+        detailContinueBtn.click();
+      } else if (nav === 'torneo'){
+        if (campaign && campaign.group && campaign.group.length) showHubScreen();
+      } else if (nav === 'selecciones'){
+        openTeamSelect();
+      } else if (nav === 'estadisticas'){
+        hideAllSubViews();
+        renderStats();
+        statsView.classList.remove('is-hidden');
+      } else if (nav === 'ranking'){
+        hideAllSubViews();
+        renderRanking();
+        rankingView.classList.remove('is-hidden');
+      } else if (nav === 'config'){
+        hideAllSubViews();
+        configDifficultyEl.value = currentDiffKey;
+        configView.classList.remove('is-hidden');
+      } else if (nav === 'creditos'){
+        hideAllSubViews();
+        creditsView.classList.remove('is-hidden');
+      }
+    });
+  });
 
   trainKickBtn.addEventListener('click', function(){
     ensureAudio();
